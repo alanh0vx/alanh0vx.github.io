@@ -1,0 +1,285 @@
+
+<html>
+  <head>
+    <title>Tic Tac Toe</title>
+  </head>
+  <body>
+    <h1>Tic Tac Toe</h1>
+    <div id="board">
+      <div class="row">
+        <div class="cell" id="cell-0-0"></div>
+        <div class="cell" id="cell-0-1"></div>
+        <div class="cell" id="cell-0-2"></div>
+      </div>
+      <div class="row">
+          <div class="cell" id="cell-1-0"></div>
+          <div class="cell" id="cell-1-1"></div>
+          <div class="cell" id="cell-1-2"></div>
+      </div>
+      <div class="row">
+          <div class="cell" id="cell-2-0"></div>
+          <div class="cell" id="cell-2-1"></div>
+          <div class="cell" id="cell-2-2"></div>
+      </div>
+    </div>
+    <button id="reset-button">Reset Game</button>
+  </body>
+  </html>
+  
+  <!-- CSS -->
+  <style>
+    #board {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    .row {
+      display: flex;
+    }
+  
+    .cell {
+      width: 80px;
+      height: 80px;
+      border: 2px solid black;
+      font-size: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .winning-cell {
+      background-color: yellow;
+    }
+
+  </style>
+  
+  <!-- JavaScript -->
+  <script>
+  // Constants
+  const BOARD_SIZE = 3;
+  const X_SYMBOL = 'X';
+  const O_SYMBOL = 'O';
+  const EMPTY_SYMBOL = ' ';
+  
+  // Variables
+  let board = [];
+  let currentPlayer = X_SYMBOL;
+  let gameOver = false;
+  let winner = null;
+  
+  // DOM elements
+  const boardEl = document.getElementById('board');
+  const resetButton = document.getElementById('reset-button');
+  
+  // Functions
+  function initializeBoard() {
+    for (let i = 0; i < BOARD_SIZE; i++) {
+      board[i] = [];
+      for (let j = 0; j < BOARD_SIZE; j++) {
+        board[i][j] = EMPTY_SYMBOL;
+      }
+    }
+  }
+  
+  function renderBoard() {
+    board.forEach((row, i) => {
+      row.forEach((cell, j) => {
+        const cellEl = document.getElementById(`cell-${i}-${j}`);
+        cellEl.textContent = cell;
+      });
+    });
+  }
+  
+function makeMove(row, col) {
+  if (!gameOver && board[row][col] === EMPTY_SYMBOL) {
+    board[row][col] = currentPlayer;
+    renderBoard();
+    if (checkForWin(currentPlayer, board)) {
+      gameOver = true;
+      winner = currentPlayer;
+      endGame();
+    } else if (!board.flat().includes(EMPTY_SYMBOL)) {
+      gameOver = true;
+      winner = null;
+      endGame();
+    } else {
+      switchPlayers();
+      if (currentPlayer === O_SYMBOL) {
+        setTimeout(makeComputerMove, 500);
+      }
+    }
+  }
+}
+
+
+  
+function switchPlayers() {
+    if (currentPlayer === X_SYMBOL) {
+      currentPlayer = O_SYMBOL;
+    } else {
+      currentPlayer = X_SYMBOL;
+    }
+  }
+  
+function makeComputerMove() {
+  const availableCells = [];
+  const availableWins = [];
+  const availableBlocks = [];
+  const opponentSymbol = currentPlayer === X_SYMBOL ? O_SYMBOL : X_SYMBOL;
+
+  board.forEach((row, i) => {
+    row.forEach((cell, j) => {
+      if (cell === EMPTY_SYMBOL) {
+        const tempBoard = JSON.parse(JSON.stringify(board));
+        tempBoard[i][j] = currentPlayer;
+        if (checkForWin(currentPlayer, tempBoard)) {
+          availableWins.push([i, j]);
+        }
+        tempBoard[i][j] = opponentSymbol;
+        if (checkForWin(opponentSymbol, tempBoard)) {
+          availableBlocks.push([i, j]);
+        }
+        availableCells.push([i, j]);
+      }
+    });
+  });
+
+  if (availableWins.length > 0) {
+    const [row, col] = availableWins[0];
+    makeMove(row, col);
+  } else if (availableBlocks.length > 0) {
+    const [row, col] = availableBlocks[0];
+    makeMove(row, col);
+  } else {
+    const [row, col] = availableCells[Math.floor(Math.random() * availableCells.length)];
+    makeMove(row, col);
+  }
+}
+
+
+function checkForWin(player, board) {
+  const winConditions = [                
+    [0,1,2],
+    [3,4,5],
+    [6,7,8],
+    [0,3,6],
+    [1,4,7],
+    [2,5,8],
+    [0,4,8],
+    [2,4,6]
+  ];
+
+  // Check rows for a win
+  for (let i = 0; i < 3; i++) {
+    if (board[i][0] === player && board[i][1] === player && board[i][2] === player) {
+      return true;
+    }
+  }
+
+  // Check columns for a win
+  for (let j = 0; j < 3; j++) {
+    if (board[0][j] === player && board[1][j] === player && board[2][j] === player) {
+      return true;
+    }
+  }
+
+  // Check diagonals for a win
+  if ((board[0][0] === player && board[1][1] === player && board[2][2] === player) ||
+      (board[0][2] === player && board[1][1] === player && board[2][0] === player)) {
+    return true;
+  }
+
+  return false;
+}
+
+function endGame() {
+  if (winner) {
+    const winningCombination = getWinningCombination(currentPlayer, board);
+    highlightWinningCombination(winningCombination);
+    setTimeout(() => {
+      resetGame();
+    }, 2000);
+    alert(`Player ${winner} wins!`);
+  } else {
+    resetGame();
+    alert("It's a tie!");
+  }
+}
+
+function highlightWinningCombination(winningCombination) {
+  winningCombination.forEach(([row, col]) => {
+    const cell = document.getElementById(`cell-${row}-${col}`);
+    cell.classList.add("winning-cell");
+  });
+}
+
+function removeHighlightFromWinningCombination() {
+  const cells = document.querySelectorAll('.cell');
+  cells.forEach(cell => {
+    cell.classList.remove('winning-cell');
+  });
+}
+
+function getWinningCombination(symbol, board) {
+  // Check horizontal lines
+  for (let i = 0; i < BOARD_SIZE; i++) {
+    if (board[i][0] === symbol && board[i][1] === symbol && board[i][2] === symbol) {
+      return [[i, 0], [i, 1], [i, 2]];
+    }
+  }
+
+  // Check vertical lines
+  for (let j = 0; j < BOARD_SIZE; j++) {
+    if (board[0][j] === symbol && board[1][j] === symbol && board[2][j] === symbol) {
+      return [[0, j], [1, j], [2, j]];
+    }
+  }
+
+  // Check diagonal lines
+  if (board[0][0] === symbol && board[1][1] === symbol && board[2][2] === symbol) {
+    return [[0, 0], [1, 1], [2, 2]];
+  }
+  if (board[0][2] === symbol && board[1][1] === symbol && board[2][0] === symbol) {
+    return [[0, 2], [1, 1], [2, 0]];
+  }
+
+  return null;
+}
+
+  
+function resetGame() {
+  board = [    [EMPTY_SYMBOL, EMPTY_SYMBOL, EMPTY_SYMBOL],
+    [EMPTY_SYMBOL, EMPTY_SYMBOL, EMPTY_SYMBOL],
+    [EMPTY_SYMBOL, EMPTY_SYMBOL, EMPTY_SYMBOL]
+  ];
+  gameOver = false;
+  currentPlayer = X_SYMBOL;
+  removeHighlightFromWinningCombination();
+  renderBoard();
+}
+
+  
+  
+  // Initialization
+  initializeBoard();
+  renderBoard();
+  
+  // Event listeners
+  boardEl.addEventListener('click', (event) => {
+    if (event.target.classList.contains('cell')) {
+      const [row, col] = event.target.id.split('-').slice(1).map(Number);
+      makeMove(row, col);
+    }
+  });
+  
+  resetButton.addEventListener('click', () => {
+    initializeBoard();
+    renderBoard();
+    currentPlayer = X_SYMBOL;
+    gameOver = false;
+    winner = null;
+  });
+  
+  </script>
