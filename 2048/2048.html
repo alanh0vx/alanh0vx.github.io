@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="en">
+
+
+<!-- Author: Austin Steeno -->
+<!-- Email: austin.steeno@gmail.com -->
+<!-- Twitter: @EndainGaming -->
+
+
+<head>
+
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>2048 Game</title>
+
+    <!-- Script includes -->
+    <!-- [ None for this page ] -->
+
+    <!-- Style includes -->
+    <!-- [ None for this page ] -->
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Roboto+Condensed:400,700);
+        html {
+            font-family: 'Roboto Condensed', sans-serif;
+        }
+        
+        .game-container {
+            width: 400px;
+            height: 400px;
+            margin: 20px;
+            background-color: #f6f4f4;
+            position: relative;
+            border: 10px solid #cdcccc;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .game-over {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            cursor: default;
+            background-color: rgba(220, 220, 220, 0.75);
+            opacity: 0;
+            transition: opacity 1.25s ease .3s;
+        }
+        
+        .game-over.show {
+            opacity: 1;
+        }
+        
+        .game-over > .message {
+            display: inline-block;
+            width: 100%;
+            margin: 16.5% auto;
+            font-size: 48px;
+            cursor: default;
+        }
+        
+        .game-over > .reset {
+            display: inline-block;
+            padding: 15px;
+            margin: auto;
+            font-size: 24px;
+            cursor: pointer;
+            background-color: #f74040;
+            color: #fff;
+            border-radius: 5px;
+        }
+        
+        .tile {
+            position: absolute;
+            background-color: #eee;
+            border: 7px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            overflow: hidden;
+            transition: left 0.2s ease, top 0.2s ease;
+            z-index: 1;
+        }
+        
+        .tile > .score {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 32px;
+            font-weight: bold;
+            transform: translate(-50%, -50%);
+        }
+        
+        .cell {
+            position: absolute;
+            box-sizing: border-box;
+            background-color: #f1eeee;
+            border-radius: 5px;
+        }
+        
+        .tile.spawn {
+            animation: spawn .35s cubic-bezier(.175, 1.5, .3, 1);
+        }
+        
+        .tile.update {
+            animation: update .2s ease-in-out;
+        }
+        
+        @keyframes spawn {
+            0% {
+                transform: scale(0);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes update {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+    <!-- Game container element -->
+    <div id="game" class="game-container"></div>
+
+
+    <!-- 2048 game scripts -->
+    <script>
+        var Simple2048 = (function() {
+    // ============================================================================
+    // Misc utilities
+    function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function lightenColor(color, amount) {
+        // Get the raw color string (format must be #123456)
+        color = color.slice(1);
+
+        // Get the numeric hex value
+        var numeric = parseInt(color, 16);
+
+        // Get and modify individual components
+        var r = (numeric >> 16) + amount;
+        var b = ((numeric >> 8) & 0x00FF) + amount;
+        var g = (numeric & 0x0000FF) + amount;
+
+        // Clamp all the values
+        r = Math.min(Math.max(r, 0), 255);
+        g = Math.min(Math.max(g, 0), 255);
+        b = Math.min(Math.max(b, 0), 255);
+
+        // Rebuild the color string
+        return '#' + (g | (b << 8) | (r << 16)).toString(16);
+    }
+    // ============================================================================
+
+    // ============================================================================
+    // DOM manip utilities
+    function hasClass(element, className) {
+        return !!element.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
+    }
+
+    function addClass(element, className) {
+        if (!hasClass(element, className)) element.className += " " + className;
+    }
+
+    function removeClass(element, className) {
+        if (hasClass(element, className)) {
+            var reg = new RegExp('(\\s|^)' + className + '(\\s|$)');
+            element.className = element.className.replace(reg, ' ');
+        }
+    }
+
+    function drain(element) {
+        while (element && element.lastChild)
+        element.removeChild(element.lastChild);
+    }
+
+    function removeChildrenWithClass(element, className) {
+        var children = element.getElementsByClassName(className);
+        for (var i = 0; i < children.length; i++)
+        element.removeChild(children[i]);
+    }
+    // ============================================================================
+
+    // ============================================================================
+    // Implementation of a 2048 Game class
+    function Game(target) {
+        this.init(target);
+    };
+
+    // ----------------------------------------------------------------------------
+    // Define methods for Game class
+
+    // Function to initialize result set with interneal buffer of given size
+    Game.prototype.init = function(target) {
+        // Get the render target for this game
+        this.target = target;
+
+        // Set some game configuration settings
+        this.cx = 4;
+        this.cy = 4;
+        this.padding = 2.0;
+        this.colors = {
+            '2': '#f1eeee',
+            '4': '#f2e1d2',
+            '8': '#f3d4b6',
+            '16': '#f4c79a',
+            '32': '#f5ba7e',
+            '64': '#f7ad63',
+            '128': '#f69b5e',
+            '256': '#f68a59',
+            '512': '#f57955',
+            '1024': '#f56850',
+            '2048': '#f5574c'
+        };
+
+        // Prepare the game canvas
+        this.setup();
+
+        // Reset game state
+        this.reset();
+
+        // Bind event listeners
+        document.addEventListener('keydown', this.handleInput.bind(this));
+    }
+
+    // Function to clear the game canvas and reset it to the default state
+    Game.prototype.setup = function() {
+        // Remove all child elements in the game target canvas
+        drain(this.target);
+
+        // Add the background tile inset elements
+        var size = this.size();
+        for (var x = 0; x < this.cx; x++) {
+            for (var y = 0; y < this.cy; y++) {
+                var inset = document.createElement('div');
+                var coords = this.coords(x, y);
+
+                inset.style.left = coords.x + '%';
+                inset.style.top = coords.y + '%';
+                inset.style.width = size.w + '%';
+                inset.style.height = size.h + '%';
+
+                addClass(inset, 'cell');
+
+                this.target.appendChild(inset);
+            }
+        }
+    }
+
+    // Function to totally reset the game state
+    Game.prototype.reset = function() {
+        // Clear the game tiles
+        removeChildrenWithClass(this.target, 'tile');
+        this.grid = this.blankGrid(this.cx, this.cy);
+
+        // Reset game state variables
+        this.queue = [];
+        this.score = 0;
+        this.state = 0;
+
+        // Spawn the first tile
+        this.spawnNewTile();
+    }
+
+    // Function to get coordinates in the game canvas for a given x/y cell
+    Game.prototype.coords = function(x, y) {
+        // Return an object with x/y (left/top) coordinates
+        return {
+            'x': this.padding + (((100 - this.padding) / this.cx) * x),
+            'y': this.padding + (((100 - this.padding) / this.cy) * y)
+        };
+    }
+
+    // Function to get the cell size for a tile in the current game
+    Game.prototype.size = function() {
+        // Return an object with x/y (left/top) coordinates
+        return {
+            'w': (100 - (this.padding * (this.cx + 1))) / this.cx,
+            'h': (100 - (this.padding * (this.cy + 1))) / this.cy
+        };
+    }
+
+    // Function to return an empty grid of the given width/height
+    Game.prototype.blankGrid = function(w, h) {
+        var grid = new Array(w);
+        for (var x = 0; x < grid.length; x++) {
+            grid[x] = new Array(h);
+            for (var y = 0; y < grid[x].length; y++) {
+                // Create new tile for the game grid
+                grid[x][y] = null;
+            }
+        }
+
+        return grid;
+    }
+
+    // Function to spawn a new tile
+    Game.prototype.spawnNewTile = function() {
+        // Calculate a list of open tiles spots
+        var open = [];
+        for (var x = 0; x < this.grid.length; x++) {
+            for (var y = 0; y < this.grid[x].length; y++) {
+                if (!this.grid[x][y]) {
+                    open.push({
+                        'x': x,
+                        'y': y
+                    });
+                }
+            }
+        }
+
+        // Pick a new tile location from the list of open spots
+        var index = randomInt(0, open.length - 1);
+        var spot = open[index];
+        var tile = new Tile(this, spot.x, spot.y);
+
+        // Initialize the tile
+        tile.spawn();
+
+        // Add it to the grid
+        this.grid[spot.x][spot.y] = tile;
+
+        // Check if there are any moves left now
+        if (this.noMovesLeft()) {
+            // TODO
+            this.gameOver();
+            console.log('no moves left!');
+        }
+    }
+
+    // Function to handle keyboard input
+    Game.prototype.handleInput = function(event) {
+        // Do not process if in game over state
+        if (this.state === 1) return;
+
+        if (event.keyCode == '38') {
+            this.moveUp();
+        } else if (event.keyCode == '40') {
+            this.moveDown();
+        } else if (event.keyCode == '37') {
+            this.moveLeft();
+        } else if (event.keyCode == '39') {
+            this.moveRight();
+        }
+
+    }
+
+    // Function to clear the merged state on all existing tiles
+    Game.prototype.clearMergedFlags = function() {
+        // Iterate over columns
+        for (var x = 0; x < this.cx; x++) {
+            // Iterate over rows
+            for (var y = 0; y < this.cy; y++) {
+                // Clear the flag if there is a tile
+                if (this.grid[x][y]) this.grid[x][y].unmarkMerged();
+            }
+        }
+    }
+
+    // Function to handle an up move
+    Game.prototype.moveUp = function() {
+        // Flag to indicate if any move happened at all
+        var changed = false;
+
+        // Iterate over columns
+        for (var x = 0; x < this.cx; x++) {
+            // Get an in-order list of tiles in this column
+            var entries = [];
+
+            // Walk each column from top to bottom finding tiles
+            for (var y = 0; y < this.cy; y++) {
+                if (this.grid[x][y]) entries.push(this.grid[x][y]);
+            }
+
+            // Walk the list of tiles and move/merge
+            for (var i = 0; i < entries.length; i++) {
+                // Get the tile to process
+                var tile = entries[i];
+
+                // Skip if this tile is at the top already
+                if (tile.y === 0) continue;
+
+                // Walk upwards until we find something to do
+                var ty = tile.y - 1;
+                while (ty >= 0) {
+                    // Check if there was an element or not
+                    if (this.grid[x][ty]) {
+                        // If this tile has the same value, merge if possible, otherwise move
+                        if (this.grid[x][ty].getValue() === tile.getValue() && !this.grid[x][ty].wasMerged()) {
+                            this.mergeTiles(tile.x, tile.y, this.grid[x][ty].x, this.grid[x][ty].y);
+                            changed = true;
+                            break;
+                        } else {
+                            // If not moved at all, do nothing
+                            if (ty + 1 !== tile.y) {
+                                this.moveTile(tile.x, tile.y, x, ty + 1);
+                                changed = true;
+                            }
+
+                            break;
+                        }
+                    } else {
+                        // If we reached the top, move the tile
+                        if (ty === 0) {
+                            this.moveTile(tile.x, tile.y, x, 0);
+                            changed = true;
+                            break;
+                        }
+                    }
+
+                    // Move to the next tile
+                    ty--;
+                }
+            }
+        }
+
+        // If there were any changed, spawn a new tile
+        if (changed) this.spawnNewTile();
+
+        // Unmark any merged tiles
+        this.clearMergedFlags();
+    }
+
+    // Function to handle a down move
+    Game.prototype.moveDown = function() {
+        // Flag to indicate if any move happened at all
+        var changed = false;
+
+        // Iterate over columns
+        for (var x = 0; x < this.cx; x++) {
+            // Get an in-order list of tiles in this column
+            var entries = [];
+
+            // Walk each column from bottom to top finding tiles
+            for (var y = this.cy - 1; y >= 0; y--) {
+                if (this.grid[x][y]) entries.push(this.grid[x][y]);
+            }
+
+            // Walk the list of tiles and move/merge
+            for (var i = 0; i < entries.length; i++) {
+                // Get the tile to process
+                var tile = entries[i];
+
+                // Skip if this tile is at the bottom already
+                if (tile.y === this.cy - 1) continue;
+
+                // Walk downwards until we find something to do
+                var ty = tile.y + 1;
+                while (ty < this.cy) {
+                    // Check if there was an element or not
+                    if (this.grid[x][ty]) {
+                        // If this tile has the same value, merge if possible, otherwise move
+                        if (this.grid[x][ty].getValue() === tile.getValue() && !this.grid[x][ty].wasMerged()) {
+                            this.mergeTiles(tile.x, tile.y, this.grid[x][ty].x, this.grid[x][ty].y);
+                            changed = true;
+                            break;
+                        } else {
+                            // If not moved at all, do nothing
+                            if (ty - 1 !== tile.y) {
+                                this.moveTile(tile.x, tile.y, x, ty - 1);
+                                changed = true;
+                            }
+
+                            break;
+                        }
+                    } else {
+                        // If we reached the bottom, move the tile
+                        if (ty === this.cy - 1) {
+                            this.moveTile(tile.x, tile.y, x, this.cy - 1);
+                            changed = true;
+                            break;
+                        }
+                    }
+
+                    // Move to the next tile
+                    ty++;
+                }
+            }
+        }
+
+        // If there were any changed, spawn a new tile
+        if (changed) this.spawnNewTile();
+
+        // Unmark any merged tiles
+        this.clearMergedFlags();
+    }
+
+    // Function to handle a left move
+    Game.prototype.moveLeft = function() {
+        // Flag to indicate if any move happened at all
+        var changed = false;
+
+        // Iterate over rows
+        for (var y = 0; y < this.cy; y++) {
+            // Get an in-order list of tiles in this row
+            var entries = [];
+
+            // Walk each row from left to right finding tiles
+            for (var x = 0; x < this.cx; x++) {
+                if (this.grid[x][y]) entries.push(this.grid[x][y]);
+            }
+
+            // Walk the list of tiles and move/merge
+            for (var i = 0; i < entries.length; i++) {
+                // Get the tile to process
+                var tile = entries[i];
+
+                // Skip if this tile is at the left edge already
+                if (tile.x === 0) continue;
+
+                // Walk left until we find something to do
+                var tx = tile.x - 1;
+                while (tx >= 0) {
+                    // Check if there was an element or not
+                    if (this.grid[tx][y]) {
+                        // If this tile has the same value, merge if possible, otherwise move
+                        if (this.grid[tx][y].getValue() === tile.getValue() && !this.grid[tx][y].wasMerged()) {
+                            this.mergeTiles(tile.x, tile.y, this.grid[tx][y].x, this.grid[tx][y].y);
+                            changed = true;
+                            break;
+                        } else {
+                            // If not moved at all, do nothing
+                            if (tx + 1 !== tile.x) {
+                                this.moveTile(tile.x, tile.y, tx + 1, y);
+                                changed = true;
+                            }
+
+                            break;
+                        }
+                    } else {
+                        // If we reached the left edge, move the tile
+                        if (tx === 0) {
+                            this.moveTile(tile.x, tile.y, 0, y);
+                            changed = true;
+                            break;
+                        }
+                    }
+
+                    // Move to the next tile
+                    tx--;
+                }
+            }
+        }
+
+        // If there were any changed, spawn a new tile
+        if (changed) this.spawnNewTile();
+
+        // Unmark any merged tiles
+        this.clearMergedFlags();
+    }
+
+    // Function to handle a right move
+    Game.prototype.moveRight = function() {
+        // Flag to indicate if any move happened at all
+        var changed = false;
+
+        // Iterate over rows
+        for (var y = 0; y < this.cy; y++) {
+            // Get an in-order list of tiles in this row
+            var entries = [];
+
+            // Walk each row from right to left finding tiles
+            for (var x = this.cx - 1; x >= 0; x--) {
+                if (this.grid[x][y]) entries.push(this.grid[x][y]);
+            }
+
+            // Walk the list of tiles and move/merge
+            for (var i = 0; i < entries.length; i++) {
+                // Get the tile to process
+                var tile = entries[i];
+
+                // Skip if this tile is at the right edge already
+                if (tile.x === this.cx - 1) continue;
+
+                // Walk right until we find something to do
+                var tx = tile.x + 1;
+                while (tx < this.cx) {
+                    // Check if there was an element or not
+                    if (this.grid[tx][y]) {
+                        // If this tile has the same value, merge if possible, otherwise move
+                        if (this.grid[tx][y].getValue() === tile.getValue() && !this.grid[tx][y].wasMerged()) {
+                            this.mergeTiles(tile.x, tile.y, this.grid[tx][y].x, this.grid[tx][y].y);
+                            changed = true;
+                            break;
+                        } else {
+                            // If not moved at all, do nothing
+                            if (tx - 1 !== tile.x) {
+                                this.moveTile(tile.x, tile.y, tx - 1, y);
+                                changed = true;
+                            }
+
+                            break;
+                        }
+                    } else {
+                        // If we reached the left edge, move the tile
+                        if (tx === this.cx - 1) {
+                            this.moveTile(tile.x, tile.y, this.cx - 1, y);
+                            changed = true;
+                            break;
+                        }
+                    }
+
+                    // Move to the next tile
+                    tx++;
+                }
+            }
+        }
+
+        // If there were any changed, spawn a new tile
+        if (changed) this.spawnNewTile();
+
+        // Unmark any merged tiles
+        this.clearMergedFlags();
+    }
+
+    // Function to move a tile
+    Game.prototype.moveTile = function(fromX, fromY, toX, toY) {
+        // Get the tile object we will move
+        var tile = this.grid[fromX][fromY];
+
+        // Move to the new grid location
+        this.grid[fromX][fromY] = null;
+        this.grid[toX][toY] = tile;
+
+        // Update the Tile
+        tile.moveTo(toX, toY, false);
+    }
+
+    // Function to merge two tiles
+    Game.prototype.mergeTiles = function(fromX, fromY, toX, toY) {
+        // Get the tile objects we merge from and to
+        var from = this.grid[fromX][fromY];
+        var to = this.grid[toX][toY];
+
+        // Clear the from spot
+        this.grid[fromX][fromY] = null;
+
+        // Add up the tiles and sum on the 'to' tile
+        to.setValue(to.getValue() + from.getValue());
+
+        // Mark as just merged
+        to.markMerged();
+
+        // Update the to Tile, move/remove the from tile
+        from.moveTo(toX, toY, true);
+        to.updateValue();
+    }
+
+    // Function to check if there are no moves left in the game
+    Game.prototype.noMovesLeft = function() {
+        // Start scanning the grid left-right for 2 similar values next to each other
+        for (var y = 0; y < this.cy; y++) {
+            for (var x = 1; x < this.cx; x++) {
+                if (!this.grid[x - 1][y] || !this.grid[x][y]) return false;
+                if (this.grid[x - 1][y].getValue() === this.grid[x][y].getValue()) return false;
+            }
+        }
+
+        // Now scan the grid to-bottom for 2 similar values next to each other
+        for (var x = 0; x < this.cx; x++) {
+            for (var y = 1; y < this.cy; y++) {
+                if (!this.grid[x][y - 1] || !this.grid[x][y]) return false;
+                if (this.grid[x][y - 1].getValue() === this.grid[x][y].getValue()) return false;
+            }
+        }
+
+        // No pairs found, no moves left
+        return true;
+    }
+
+    // Function to trigger a game over state
+    Game.prototype.gameOver = function() {
+        // Set game state
+        this.state = 1;
+
+        // Create a cover element and game over text and reset button
+        var cover = document.createElement('div');
+        addClass(cover, 'game-over');
+        cover.style.zIndex = 500;
+
+        var message = document.createElement('div');
+        addClass(message, 'message');
+        message.innerHTML = 'GAME OVER';
+
+        var reset = document.createElement('div');
+        addClass(reset, 'reset');
+        reset.innerHTML = 'Play Again?'
+        reset.addEventListener('click', (function() {
+            // Reset and restart the game
+            this.setup();
+            this.reset();
+        }).bind(this));
+
+        cover.appendChild(message);
+        cover.appendChild(reset);
+
+        this.target.appendChild(cover);
+
+        requestAnimationFrame(function() {
+            addClass(cover, 'show');
+        });
+    }
+    // ============================================================================
+
+    // ============================================================================
+    // Implementation of a 2048 Game Tile class
+    function Tile(game, x, y) {
+        this.init(game, x, y);
+    };
+
+    // ----------------------------------------------------------------------------
+    // Define methods for Tile class
+
+    // Function to initialize a tile
+    Tile.prototype.init = function(game, x, y) {
+        // Save the associated game
+        this.game = game;
+
+        // Intialize tile state
+        this.x = x;
+        this.y = y;
+        this.element = null;
+        this.value = NaN;
+        this.merged = false;
+
+        // Set delete flag
+        this.delete = false;
+
+        // Keep a list of animations
+        this.animations = [];
+    }
+
+    // Function to attatch a new element to the tile
+    Tile.prototype.setElement = function(element) {
+        // Store the element
+        this.element = element;
+
+        // Attach an event listener for automatically clearing animation classes
+        this.element.addEventListener('animationend', (function(event) {
+            // Remove the class once the animation is done
+            removeClass(element, event.animationName);
+        }).bind(this));
+
+        // Attach an event listener checking when a move ends
+        this.element.addEventListener('transitionend', (function(event) {
+            // Check if this was a movement event
+            if (event.propertyName === 'left' || event.propertyName === 'top') {
+                // If delete flag is set, remove this element
+                if (this.delete) this.game.target.removeChild(this.element);
+            }
+        }).bind(this));
+    }
+
+    // Function to mark a tile as merged
+    Tile.prototype.markMerged = function() {
+        this.merged = true;
+    }
+
+    // Function to unmark a tile as merged
+    Tile.prototype.unmarkMerged = function() {
+        this.merged = false;
+    }
+
+    // Function to check is a tile was merged
+    Tile.prototype.wasMerged = function() {
+        return this.merged;
+    }
+
+    // Function set the current value of the tile
+    Tile.prototype.setValue = function(value) {
+        // Set the score value
+        this.value = value;
+    }
+
+    // Function to get the current element
+    Tile.prototype.getElement = function() {
+        return this.element;
+    }
+
+    // Function to get the current value
+    Tile.prototype.getValue = function() {
+        return this.value;
+    }
+
+    // Function to play an animation on the tile
+    Tile.prototype.playAnimation = function(animation) {
+        addClass(this.element, animation);
+    }
+
+    // Function to update the tile value for the player
+    Tile.prototype.updateValue = function(noAnimation) {
+        // Set the score text
+        this.element.innerHTML = '<div class="score">' + this.value + '</div>';
+
+        // Update z-index
+        this.element.style.zIndex = 200;
+
+        // Update tile color
+        this.updateColor();
+
+        // Play the update animation
+        if (!noAnimation) this.playAnimation('update');
+    }
+
+    // Function to update the color of a tile based on current value
+    Tile.prototype.updateColor = function() {
+        // Get the current value as a string key
+        var key = this.getValue() + '';
+
+        // Get a base color and a darker color
+        var color = this.game.colors[key];
+        var darker = lightenColor(color, - 7);
+
+        // Apply the new colors
+        this.element.style.backgroundColor = color;
+        this.element.style.borderColor = darker;
+    }
+
+    // Function to spawn this tile
+    Tile.prototype.spawn = function() {
+        // Initialize the tile
+        this.setValue(2);
+
+        // Create a new element for the tile and spawn it in
+        var element = document.createElement('div');
+        var size = this.game.size();
+        var coords = this.game.coords(this.x, this.y);
+
+        element.style.left = coords.x + '%';
+        element.style.top = coords.y + '%';
+        element.style.width = size.w + '%';
+        element.style.height = size.h + '%';
+
+        addClass(element, 'tile');
+
+        this.setElement(element);
+        this.game.target.appendChild(element);
+
+        // Update the value
+        this.updateValue(true);
+
+        // Play the spawn animation
+        this.playAnimation('spawn');
+    }
+
+    // Function to move a tile to a new location
+    Tile.prototype.moveTo = function(x, y, deleteWhenDone) {
+        // Set delete flag if needed
+        if (deleteWhenDone) this.delete = true;
+
+        // Update the x/y
+        this.x = x;
+        this.y = y;
+
+        // Update the element styles
+        var coords = this.game.coords(this.x, this.y);
+
+        this.element.style.zIndex = 100;
+        this.element.style.left = coords.x + '%';
+        this.element.style.top = coords.y + '%';
+    }
+    // ============================================================================
+
+    // ============================================================================
+    // Export and expose the Game class
+    return Game;
+})();
+
+// ============================================================================
+// Game logic
+// ============================================================================
+var canvas = document.getElementById('game');
+
+var game = new Simple2048(canvas);
+
+//console.log(lightenColor('#56a477', 5));
+    </script>
+
+</body>
+
+
+</html>
