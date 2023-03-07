@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Greedy Snake Game</title>
+	<style>
+		canvas {
+			border: 1px solid black;
+		}
+	</style>
+</head>
+<body>
+	<h1>Greedy Snake Game</h1>
+	<canvas id="canvas" width="400" height="400"></canvas>
+    <script>
+      // Set up the canvas and context
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// Define the snake object
+let snake = {
+  x: 10,
+  y: 10,
+  dx: 10,
+  dy: 0,
+  cells: []
+};
+
+// Define the food object
+let food = {
+  x: 0,
+  y: 0
+};
+
+// Define the game loop
+function loop() {
+  // Move the snake
+  snake.x += snake.dx;
+  snake.y += snake.dy;
+  
+  // Check for collision with walls
+  if (snake.x < 0 || snake.x > canvas.width - 10 || snake.y < 0 || snake.y > canvas.height - 10) {
+    // Game over
+    alert('Game over!');
+    clearInterval(intervalId);
+  }
+  
+  // Check for collision with food
+  if (snake.x === food.x && snake.y === food.y) {
+    // Grow the snake
+    snake.cells.push({ x: snake.x, y: snake.y });
+    
+    // Move the food to a random location
+    food.x = Math.floor(Math.random() * canvas.width / 10) * 10;
+    food.y = Math.floor(Math.random() * canvas.height / 10) * 10;
+  }
+  
+  // Update the snake's cells
+  snake.cells.unshift({ x: snake.x, y: snake.y });
+  if (snake.cells.length > 5) {
+    snake.cells.pop();
+  }
+  
+  // Draw the game board
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'red';
+  ctx.fillRect(food.x, food.y, 10, 10);
+  ctx.fillStyle = 'green';
+  snake.cells.forEach(function(cell, index) {
+    ctx.fillRect(cell.x, cell.y, 10, 10);
+  });
+}
+
+// Set up the keyboard controls
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'ArrowLeft' && snake.dx === 0) {
+    snake.dx = -10;
+    snake.dy = 0;
+  } else if (event.key === 'ArrowRight' && snake.dx === 0) {
+    snake.dx = 10;
+    snake.dy = 0;
+  } else if (event.key === 'ArrowUp' && snake.dy === 0) {
+    snake.dx = 0;
+    snake.dy = -10;
+  } else if (event.key === 'ArrowDown' && snake.dy === 0) {
+    snake.dx = 0;
+    snake.dy = 10;
+  }
+});
+
+// Set up the game loop
+let intervalId = setInterval(loop, 100);
+    </script>
+  </body>
+</html>
