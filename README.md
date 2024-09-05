@@ -1,3 +1,3 @@
 # programs by chatgpt / claude
 
-[Greedy Snake Game](/snake/snake.html)
+[Greedy Snake Game](https://alanh0vx.github.io/snake/snake.html))
