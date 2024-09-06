@@ -5,98 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Horse Racing Betting Simulation</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="horses.css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
-  <style>
-    body {
-      padding-top: 60px;
-    }
-    .track {
-      font-size: 20px;
-      position: relative;
-      width: 100%;
-      height: 200px;
-      border: 1px solid #dee2e6;
-      overflow: hidden;
-    }
-    .track-row {
-      height: 50px;
-      border-bottom: 1px solid #dee2e6;
-      position: relative;
-    }
-    .horse {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      transition: left 0.1s linear;
-      z-index: 10;
-    }
-    .finish-line {
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 30px;
-      background-color: #ffc107;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 5;
-    }
-    .side-menu {
-      position: fixed;
-      left: -300px;
-      top: 0;
-      width: 300px;
-      height: 100%;
-      background-color: #f8f9fa;
-      transition: 0.3s;
-      padding: 20px;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      z-index: 1000;
-    }
-    .side-menu.active {
-      left: 0;
-    }
-    .menu-toggle {
-      position: fixed;
-      left: 10px;
-      top: 10px;
-      z-index: 1001;
-    }
-    #commentary-box {
-      min-height: 50px;
-      padding: 10px;
-      display: flex;
-      align-items: center;
-    }
-    #add-money {
-      margin-top:2px;
-      margin-bottom:2px;
-    }
-  </style>
 </head>
 <body>
   <button class="btn btn-primary menu-toggle" id="menuToggle">☰</button>
   
   <div class="side-menu" id="sideMenu">
-    <h2 class="mt-5">User Authentication</h2>
-    <div id="login-form">
-      <h3>Login</h3>
-      <input type="text" id="login-username" placeholder="Username" class="form-control mb-2">
-      <input type="password" id="login-password" placeholder="Password" class="form-control mb-2">
-      <button id="login-button" class="btn btn-primary">Login</button>
+    <div id="user-menu-info">
+      <h2 class="mt-5">Welcome, <span id="menu-player-name"></span>!</h2>
+      <h3>Your balance: $<span id="menu-player-balance"></span></h3>
+      <button id="menu-logout" class="btn btn-danger">Logout</button>
     </div>
-    <div id="register-form" style="display: none;">
-      <h3>Register</h3>
-      <input type="text" id="register-username" placeholder="Username" class="form-control mb-2">
-      <input type="password" id="register-password" placeholder="Password" class="form-control mb-2">
-      <button id="register-button" class="btn btn-primary">Register</button>
+    <div id="auth-forms">
+      <h2 class="mt-5">User Authentication</h2>
+      <div id="login-form">
+        <h3>Login</h3>
+        <input type="text" id="login-username" placeholder="Username" class="form-control mb-2">
+        <input type="password" id="login-password" placeholder="Password" class="form-control mb-2">
+        <button id="login-button" class="btn btn-primary">Login</button>
+      </div>
+      <div id="register-form" style="display: none;">
+        <h3>Register</h3>
+        <input type="text" id="register-username" placeholder="Username" class="form-control mb-2">
+        <input type="password" id="register-password" placeholder="Password" class="form-control mb-2">
+        <button id="register-button" class="btn btn-primary">Register</button>
+      </div>
+      <hr>
+      <button id="toggle-auth" class="btn btn-link">Switch to Register</button>
     </div>
     <hr>
-    <button id="toggle-auth" class="btn btn-link">Switch to Register</button>
+    <div id="horse-info">
+      <h3>Horse Information</h3>
+      <!-- Horse info will be dynamically added here -->
+    </div>
     <hr>
     <button id="reset-all" class="btn btn-warning">Reset All Game Data</button>
   </div>
@@ -133,239 +77,6 @@
     </div>
   </div>
 
-  <script>
-    $(document).ready(function() {
-      let currentPlayer = null;
-      const horseEmojis = ["🐎", "🐴", "🏇", "🦄"];
-      const trackLength = 40;
-      const cellWidth = 30;  // Width of each cell in pixels
-
-      $("#menuToggle").click(function() {
-        $("#sideMenu").toggleClass("active");
-      });
-
-      function generateHorseName() {
-        const adjectives = ["Speedy", "Fiery", "Swift", "Wild", "Graceful", "Furious", "Brave"];
-        const nouns = ["Thunder", "Whirlwind", "Lightning", "Blaze", "Comet", "Storm", "Wind"];
-        return adjectives[Math.floor(Math.random() * adjectives.length)] + " " + nouns[Math.floor(Math.random() * nouns.length)];
-      }
-
-      function generateRandomOdds() {
-        return (Math.random() * 5 + 1).toFixed(2);
-      }
-
-      function generateTrack() {
-          let track = "";
-          let options = "";
-          for (let i = 0; i < horseEmojis.length; i++) {
-              const horseName = generateHorseName();
-              const odds = generateRandomOdds();
-              track += `<div class="track-row">
-                          <div class="horse" data-horse-name="${horseName}" data-odds="${odds}" title="${horseName}">${horseEmojis[i]}</div>
-                          <div class="finish-line">🏁</div>
-                        </div>`;
-              options += `<option value="${i}">${horseEmojis[i]} ${horseName} (${odds})</option>`;
-          }
-          return { track: track, options: options };
-      }
-
-      function moveHorse(horseIndex, distance) {
-          let horse = $('.track-row').eq(horseIndex).find('.horse');
-          let maxWidth = $('.track').width() - horse.width() - $('.finish-line').width();
-          let position = Math.min(distance * cellWidth, maxWidth);
-          horse.css('left', `${position}px`);
-          return distance;
-      }
-
-      function addCommentary(message) {
-        $("#commentary-box").text(message);
-      }
-
-      function startRace() {
-        if (!currentPlayer) {
-          alert("Please login to start the race.");
-          return;
-        }
-        let betAmount = parseInt($("#bet-amount").val());
-        if (betAmount > currentPlayer.balance) {
-          alert("You don't have enough money for this bet. Please lower your bet amount.");
-          return;
-        }
-        $("#commentary-box").empty();
-        addCommentary("And they're off!");
-        let positions = new Array(horseEmojis.length).fill(0);
-        let winner = -1;
-        let commentaryInterval;
-        let raceInterval = setInterval(() => {
-          horseEmojis.forEach((_, index) => {
-            if (positions[index] < trackLength) {
-              positions[index] += Math.random() * 0.5;  // Smoother, smaller steps
-              moveHorse(index, positions[index]);
-              
-              if (positions[index] >= trackLength && winner === -1) {
-                winner = index;
-                clearInterval(raceInterval);
-                clearInterval(commentaryInterval);
-                let winningHorse = $('.track-row').eq(winner).find('.horse').data('horse-name');
-                addCommentary(`${winningHorse} has won the race!`);
-                setTimeout(() => {
-                  alert(`${winningHorse} has won the race!`);
-                  let betHorseIndex = parseInt($("#bet-horse").val());
-                  if (winner === betHorseIndex) {
-                    let odds = parseFloat($('.track-row').eq(winner).find('.horse').data('odds'));
-                    let payout = betAmount * odds;
-                    currentPlayer.balance += payout;
-                    alert(`Congratulations! You won $${payout.toFixed(2)} from your bet.`);
-                  } else {
-                    currentPlayer.balance -= betAmount;
-                    alert("Sorry, you lost your bet.");
-                  }
-                  updatePlayerInfo();
-                  checkGameStatus();
-                }, 500);
-              }
-            }
-          });
-        }, 50);
-
-        commentaryInterval = setInterval(() => {
-          let leadingHorse = positions.indexOf(Math.max(...positions));
-          let leadingHorseName = $('.track-row').eq(leadingHorse).find('.horse').data('horse-name');
-          addCommentary(`${leadingHorseName} is in the lead!`);
-        }, 1000);
-      }
-
-      function restartGame() {
-        let { track, options } = generateTrack();
-        $('.track').html(track);
-        $('#bet-horse').html(options);
-        $("#commentary-box").empty();
-      }
-
-      function updatePlayerInfo() {
-        if (currentPlayer) {
-          $("#player-name-display").text(currentPlayer.username);
-          $("#player-balance").text(currentPlayer.balance.toFixed(2));
-          localStorage.setItem(currentPlayer.username, JSON.stringify(currentPlayer));
-          if (currentPlayer.balance <= 1) {
-            $("#add-money").show();
-            $("#betting-area").hide();
-          } else {
-            $("#add-money").hide();
-            $("#betting-area").show();
-          }
-          $("#bet-amount").attr("max", currentPlayer.balance);
-        }
-      }
-
-      function checkGameStatus() {
-        if (currentPlayer.balance >= 100) {
-          alert("Congratulations! You've won the game by reaching $100!");
-          resetGame();
-        } else if (currentPlayer.balance <= 1) {
-          alert("Game over! Your balance is $0. You can add $5 to continue playing.");
-          updatePlayerInfo();
-        }
-      }
-
-      function resetGame() {
-        currentPlayer.balance = 10;
-        updatePlayerInfo();
-        restartGame();
-      }
-
-      function addMoney() {
-        currentPlayer.balance += 5;
-        updatePlayerInfo();
-        alert("$5 has been added to your balance. Good luck!");
-      }
-
-      function registerUser() {
-        const username = $("#register-username").val().trim();
-        const password = $("#register-password").val();
-        if (username && password) {
-          if (localStorage.getItem(username)) {
-            alert("Username already exists. Please choose another.");
-          } else {
-            const newPlayer = {
-              username: username,
-              password: btoa(password),  // Base64 encode the password
-              balance: 10
-            };
-            localStorage.setItem(username, JSON.stringify(newPlayer));
-            alert("Registration successful. Please login.");
-            toggleAuthForm();
-          }
-        } else {
-          alert("Please enter both username and password.");
-        }
-      }
-
-      function loginUser() {
-        const username = $("#login-username").val().trim();
-        const password = $("#login-password").val();
-        const storedPlayer = localStorage.getItem(username);
-        if (storedPlayer) {
-          const player = JSON.parse(storedPlayer);
-          if (btoa(password) === player.password) {
-            currentPlayer = player;
-            $("#sideMenu").removeClass("active");
-            $("#user-info").show();
-            $("#login-prompt").hide();
-            updatePlayerInfo();
-            restartGame();
-          } else {
-            alert("Incorrect password.");
-          }
-        } else {
-          alert("User not found.");
-        }
-      }
-
-      function logoutUser() {
-        currentPlayer = null;
-        $("#user-info").hide();
-        $("#betting-area").hide();
-        $("#add-money").hide();
-        $("#login-prompt").show();
-        $("#sideMenu").addClass("active");
-        $("#login-username").val("");
-        $("#login-password").val("");
-      }
-
-      function toggleAuthForm() {
-        $("#login-form, #register-form").toggle();
-        const buttonText = $("#toggle-auth").text() === "Switch to Register" ? "Switch to Login" : "Switch to Register";
-        $("#toggle-auth").text(buttonText);
-      }
-
-      function resetAllData() {
-        if (confirm("Are you sure you want to reset all game data? This will delete all player accounts and cannot be undone.")) {
-          localStorage.clear();
-          location.reload();
-        }
-      }
-
-      $("#register-button").click(registerUser);
-      $("#login-button").click(loginUser);
-      $("#logout").click(logoutUser);
-      $("#start").click(startRace);
-      $("#restart").click(restartGame);
-      $("#toggle-auth").click(toggleAuthForm);
-      $("#reset-all").click(resetAllData);
-      $("#add-money").click(addMoney);
-
-      $("#bet-amount").on('input', function() {
-        let value = parseInt($(this).val());
-        let max = currentPlayer ? currentPlayer.balance : 10;
-        if (value < 1) $(this).val(1);
-        if (value > max) $(this).val(max);
-      });
-
-      // Initialize the game
-      restartGame();
-      $("#login-prompt").show();
-    });
-  </script>
+  <script src="horses.js"></script>
 </body>
 </html>
