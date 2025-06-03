@@ -1,4 +1,12 @@
-# programs by chatgpt / claude
+# Programs by chatgpt / claude
+
+## Homepage
+
+[https://alanh0vx.github.io/](https://alanh0vx.github.io/)
+
+---
+
+## Games
 
 [Greedy Snake Game](https://alanh0vx.github.io/snake/snake.html)
 
