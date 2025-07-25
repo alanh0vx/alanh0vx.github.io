@@ -1,29 +1,168 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Greedy Snake Game</title>
+	<title>🐍 Greedy Snake Game</title>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 	<style>
+		body {
+			font-family: 'Poppins', sans-serif;
+			background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 50%, #ff6b35 100%);
+			color: white;
+			text-align: center;
+			margin: 0;
+			padding: 20px;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+
+		h1 {
+			font-size: 2.5rem;
+			margin-bottom: 20px;
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+			background: linear-gradient(135deg, #ff6b35, #ff8c42);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+		}
+
+		.game-container {
+			background: rgba(0, 0, 0, 0.3);
+			padding: 30px;
+			border-radius: 20px;
+			box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+			border: 2px solid #ff6b35;
+		}
+
 		canvas {
-			border: 1px solid black;
+			border: 3px solid #ff6b35;
+			border-radius: 10px;
+			background: #2a2a2a;
+			box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+		}
+
+		.score {
+			font-size: 1.5rem;
+			margin: 20px 0;
+			color: #ff6b35;
+			font-weight: 600;
+		}
+
+		.controls {
+			margin-top: 20px;
+			color: #b0b0b0;
+			font-size: 1rem;
+		}
+
+		.controls p {
+			margin: 5px 0;
+		}
+
+		.game-over {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+			color: white;
+			padding: 30px;
+			border-radius: 15px;
+			border: 2px solid #ff6b35;
+			text-align: center;
+			box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+			display: none;
+		}
+
+		.restart-btn {
+			background: linear-gradient(135deg, #ff6b35, #ff8c42);
+			border: none;
+			padding: 12px 25px;
+			border-radius: 25px;
+			color: white;
+			font-weight: 600;
+			cursor: pointer;
+			margin-top: 15px;
+			font-size: 1rem;
+			transition: all 0.3s ease;
+		}
+
+		.restart-btn:hover {
+			background: linear-gradient(135deg, #ff8c42, #ff6b35);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+		}
+
+		.back-btn {
+			position: fixed;
+			top: 20px;
+			left: 20px;
+			background: linear-gradient(135deg, #ff6b35, #ff8c42);
+			border: none;
+			padding: 10px 20px;
+			border-radius: 20px;
+			color: white;
+			text-decoration: none;
+			font-weight: 500;
+			transition: all 0.3s ease;
+		}
+
+		.back-btn:hover {
+			background: linear-gradient(135deg, #ff8c42, #ff6b35);
+			transform: translateY(-2px);
+			color: white;
+			text-decoration: none;
 		}
 	</style>
 </head>
-<body>
-	<h1>Greedy Snake Game</h1>
-	<canvas id="canvas" width="400" height="400"></canvas>
+<<body>
+	<a href="../index.html" class="back-btn">← Back to GameHub</a>
+	
+	<h1>🐍 Greedy Snake Game</h1>
+	
+	<div class="game-container">
+		<div class="score">Score: <span id="score">0</span></div>
+		<canvas id="canvas" width="400" height="400"></canvas>
+		<div class="controls">
+			<p>🎮 Use arrow keys to control the snake</p>
+			<p>📈 Eat red food to grow and increase your score</p>
+			<p>⚠️ Don't hit the walls or yourself!</p>
+		</div>
+	</div>
+
+	<div id="gameOver" class="game-over">
+		<h2 style="color: #ff6b35; margin-bottom: 15px;">Game Over!</h2>
+		<p>Your Score: <span id="finalScore">0</span></p>
+		<button class="restart-btn" onclick="restartGame()">🔄 Play Again</button>
+	</div>
+
     <script>
       // Set up the canvas and context
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const scoreElement = document.getElementById('score');
+const gameOverDiv = document.getElementById('gameOver');
+const finalScoreElement = document.getElementById('finalScore');
+
+let score = 0;
+let gameRunning = true;
 
 // Define the snake object
 let snake = {
-  x: 10,
-  y: 10,
+  x: 200,
+  y: 200,
   dx: 10,
   dy: 0,
   cells: []
 };
+
+// Initialize snake with 3 segments
+snake.cells = [
+  { x: 200, y: 200 },
+  { x: 190, y: 200 },
+  { x: 180, y: 200 }
+];
 
 // Define the food object
 let food = {
@@ -31,47 +170,121 @@ let food = {
   y: 0
 };
 
+// Generate initial food position
+generateFood();
+
+function generateFood() {
+  food.x = Math.floor(Math.random() * (canvas.width / 10)) * 10;
+  food.y = Math.floor(Math.random() * (canvas.height / 10)) * 10;
+  
+  // Make sure food doesn't spawn on snake
+  for (let cell of snake.cells) {
+    if (cell.x === food.x && cell.y === food.y) {
+      generateFood();
+      break;
+    }
+  }
+}
+
 // Define the game loop
 function loop() {
+  if (!gameRunning) return;
+  
   // Move the snake
   snake.x += snake.dx;
   snake.y += snake.dy;
   
   // Check for collision with walls
-  if (snake.x < 0 || snake.x > canvas.width - 10 || snake.y < 0 || snake.y > canvas.height - 10) {
-    // Game over
-    alert('Game over!');
-    clearInterval(intervalId);
+  if (snake.x < 0 || snake.x >= canvas.width || snake.y < 0 || snake.y >= canvas.height) {
+    gameOver();
+    return;
   }
   
-  // Check for collision with food
-  if (snake.x === food.x && snake.y === food.y) {
-    // Grow the snake
-    snake.cells.push({ x: snake.x, y: snake.y });
-    
-    // Move the food to a random location
-    food.x = Math.floor(Math.random() * canvas.width / 10) * 10;
-    food.y = Math.floor(Math.random() * canvas.height / 10) * 10;
+  // Check for collision with self
+  for (let cell of snake.cells) {
+    if (cell.x === snake.x && cell.y === snake.y) {
+      gameOver();
+      return;
+    }
   }
   
   // Update the snake's cells
   snake.cells.unshift({ x: snake.x, y: snake.y });
-  if (snake.cells.length > 5) {
+  
+  // Check for collision with food
+  if (snake.x === food.x && snake.y === food.y) {
+    // Grow the snake (don't remove tail)
+    score += 10;
+    scoreElement.textContent = score;
+    generateFood();
+  } else {
+    // Remove tail (normal movement)
     snake.cells.pop();
   }
   
   // Draw the game board
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = 'red';
+  
+  // Draw food with glow effect
+  ctx.shadowColor = '#ff6b35';
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = '#ff6b35';
   ctx.fillRect(food.x, food.y, 10, 10);
-  ctx.fillStyle = 'green';
+  
+  // Reset shadow for snake
+  ctx.shadowBlur = 0;
+  
+  // Draw snake with gradient effect
   snake.cells.forEach(function(cell, index) {
+    const opacity = 1 - (index * 0.1);
+    if (index === 0) {
+      // Head
+      ctx.fillStyle = '#4CAF50';
+    } else {
+      // Body
+      ctx.fillStyle = `rgba(76, 175, 80, ${Math.max(opacity, 0.3)})`;
+    }
     ctx.fillRect(cell.x, cell.y, 10, 10);
+    
+    // Add border to segments
+    ctx.strokeStyle = '#2E7D32';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cell.x, cell.y, 10, 10);
   });
+}
+
+function gameOver() {
+  gameRunning = false;
+  finalScoreElement.textContent = score;
+  gameOverDiv.style.display = 'block';
+}
+
+function restartGame() {
+  // Reset game state
+  score = 0;
+  gameRunning = true;
+  scoreElement.textContent = score;
+  gameOverDiv.style.display = 'none';
+  
+  // Reset snake
+  snake.x = 200;
+  snake.y = 200;
+  snake.dx = 10;
+  snake.dy = 0;
+  snake.cells = [
+    { x: 200, y: 200 },
+    { x: 190, y: 200 },
+    { x: 180, y: 200 }
+  ];
+  
+  // Generate new food
+  generateFood();
 }
 
 // Set up the keyboard controls
 document.addEventListener('keydown', function(event) {
+  if (!gameRunning) return;
+  
   if (event.key === 'ArrowLeft' && snake.dx === 0) {
     snake.dx = -10;
     snake.dy = 0;
@@ -88,7 +301,7 @@ document.addEventListener('keydown', function(event) {
 });
 
 // Set up the game loop
-let intervalId = setInterval(loop, 100);
+let intervalId = setInterval(loop, 120);
     </script>
   </body>
 </html>
