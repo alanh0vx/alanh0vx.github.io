@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  mariadb:
+    image: bitnami/mariadb:latest
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=changeme-root
+      - MARIADB_DATABASE=moodle
+      - MARIADB_USER=moodle
+      - MARIADB_PASSWORD=changeme-db
+    volumes:
+      - db_data:/bitnami/mariadb
+
+  moodle:
+    image: bitnami/moodle:latest
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    ports:
+      - "127.0.0.1:9000:8080"   # Moodle HTTP → localhost:9000
+      # - "127.0.0.1:9443:8443" # (optional) Moodle HTTPS if you want it
+    environment:
+      - MARIADB_HOST=mariadb
+      - MARIADB_PORT_NUMBER=3306
+      - MOODLE_DATABASE_TYPE=mysqli
+      - MOODLE_DATABASE_HOST=mariadb
+      - MOODLE_DATABASE_PORT_NUMBER=3306
+      - MOODLE_DATABASE_NAME=moodle
+      - MOODLE_DATABASE_USER=moodle
+      - MOODLE_DATABASE_PASSWORD=changeme-db
+
+      - MOODLE_USERNAME=admin
+      - MOODLE_PASSWORD=changeme-admin
+      - MOODLE_EMAIL=admin@example.com
+
+      - MOODLE_SITE_NAME=Temporary Moodle Site
+      - MOODLE_SKIP_BOOTSTRAP=no
+      # later, when you front it with nginx + real domain:
+      # - MOODLE_URL=https://quiz.yourdomain.com
+
+    volumes:
+      - moodle_data:/bitnami/moodle
+      - moodle_moodledata:/bitnami/moodledata
+
+volumes:
+  db_data:
+  moodle_data:
+  moodle_moodledata:
