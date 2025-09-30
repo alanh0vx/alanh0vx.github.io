@@ -98,6 +98,24 @@
             display: none;
             border: 1px solid #4CAF50;
         }
+
+        #disclaimer {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #aaa;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 12px;
+            z-index: 100;
+            max-width: 300px;
+            border: 1px solid #555;
+        }
+
+        #disclaimer strong {
+            color: #ff9800;
+        }
     </style>
 </head>
 <body>
@@ -106,9 +124,9 @@
         <p>🖱️ Left Click + Drag: Rotate view</p>
         <p>🖱️ Right Click + Drag: Pan view</p>
         <p>🖱️ Scroll: Zoom in/out</p>
-        <p>🖱️ Double-Click Planet: Focus on it</p>
+        <p>🖱️ Double-Click: Focus on planet/star</p>
         <p>📱 Touch: Pinch to zoom, drag to rotate</p>
-        <p>📱 Quick Tap Planet: Focus on it</p>
+        <p><a href="/index.html" style="color: #4CAF50; text-decoration: none;">← Back to Home</a></p>
     </div>
 
     <div id="focused-planet">
@@ -119,6 +137,10 @@
     <button id="earth-button">🌍 Focus Earth</button>
 
     <div id="tooltip"></div>
+
+    <div id="disclaimer">
+        <strong>⚠️ Disclaimer:</strong> This visualization is for visual effect only. Planet sizes, distances, star positions, and zodiac placements are not to scale and do not represent actual astronomical configurations.
+    </div>
 
     <div id="canvas-container"></div>
 
@@ -260,6 +282,313 @@
 
         createStarField();
 
+        // Add famous visible stars with realistic colors and positions
+        function createFamousStars() {
+            const famousStars = [
+                { name: 'Sirius', color: 0x9db4ff, size: 3, position: [500, -300, 800], brightness: 2.0 },
+                { name: 'Betelgeuse', color: 0xff8c69, size: 4, position: [-800, 200, 600], brightness: 1.8 },
+                { name: 'Rigel', color: 0xaabbff, size: 3.5, position: [-600, -400, 900], brightness: 1.9 },
+                { name: 'Vega', color: 0xccddff, size: 2.8, position: [700, 800, 500], brightness: 1.7 },
+                { name: 'Arcturus', color: 0xffcc99, size: 3.2, position: [400, 600, -700], brightness: 1.8 },
+                { name: 'Capella', color: 0xffffaa, size: 2.9, position: [300, 900, 400], brightness: 1.6 },
+                { name: 'Polaris (North Star)', color: 0xffffee, size: 2.5, position: [0, 1200, 200], brightness: 1.5 },
+                { name: 'Aldebaran', color: 0xff9966, size: 3.0, position: [-500, 100, 800], brightness: 1.7 },
+                { name: 'Antares', color: 0xff6347, size: 3.8, position: [600, -500, -700], brightness: 1.8 },
+                { name: 'Spica', color: 0xaaccff, size: 2.7, position: [500, 300, -800], brightness: 1.6 },
+                { name: 'Deneb', color: 0xccddff, size: 3.3, position: [900, 700, 300], brightness: 1.7 },
+                { name: 'Altair', color: 0xeeeeff, size: 2.6, position: [800, 500, 600], brightness: 1.6 },
+                { name: 'Procyon', color: 0xffffdd, size: 2.5, position: [400, -200, 700], brightness: 1.5 }
+            ];
+
+            famousStars.forEach(star => {
+                // Create star sphere
+                const starGeometry = new THREE.SphereGeometry(star.size, 16, 16);
+                const starMaterial = new THREE.MeshBasicMaterial({
+                    color: star.color,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+                starMesh.position.set(...star.position);
+                starMesh.userData = { name: star.name, isClickable: true, type: 'star' };
+                scene.add(starMesh);
+                allClickableObjects.push(starMesh);
+
+                // Add glow effect
+                const glowGeometry = new THREE.SphereGeometry(star.size * 2, 16, 16);
+                const glowMaterial = new THREE.MeshBasicMaterial({
+                    color: star.color,
+                    transparent: true,
+                    opacity: 0.3,
+                    side: THREE.BackSide
+                });
+                const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                starMesh.add(glow);
+
+                // Add point light for brightness
+                const starLight = new THREE.PointLight(star.color, star.brightness, 100);
+                starMesh.add(starLight);
+            });
+        }
+
+        // Add zodiac constellations with connecting lines
+        function createZodiacConstellations() {
+            // Zodiac constellations arranged in a circle around the solar system
+            // Distance from center and angle for each constellation
+            const radius = 1200; // Distance from sun
+            const constellations = [
+                {
+                    name: 'Aries',
+                    symbol: '♈',
+                    angle: 0,
+                    stars: [
+                        { pos: [0, 40, 0], name: 'Hamal' },
+                        { pos: [25, 50, 0], name: 'Sheratan' },
+                        { pos: [50, 42, 0], name: 'Mesarthim' },
+                        { pos: [40, 20, 0], name: '41 Arietis' }
+                    ]
+                },
+                {
+                    name: 'Taurus',
+                    symbol: '♉',
+                    angle: 30,
+                    stars: [
+                        { pos: [-20, 20, 0], name: 'Aldebaran' },
+                        { pos: [-30, 35, 0], name: 'Elnath' },
+                        { pos: [-50, 30, 0], name: 'Alcyone' },
+                        { pos: [-45, 10, 0], name: 'Atlas' },
+                        { pos: [-25, 5, 0], name: 'Pleione' }
+                    ]
+                },
+                {
+                    name: 'Gemini',
+                    symbol: '♊',
+                    angle: 60,
+                    stars: [
+                        { pos: [-10, 30, 0], name: 'Castor' },
+                        { pos: [0, 40, 0], name: 'Pollux' },
+                        { pos: [0, 20, 0], name: 'Alhena' },
+                        { pos: [10, 30, 0], name: 'Wasat' },
+                        { pos: [10, 10, 0], name: 'Mebsuta' },
+                        { pos: [20, 20, 0], name: 'Tejat' }
+                    ]
+                },
+                {
+                    name: 'Cancer',
+                    symbol: '♋',
+                    angle: 90,
+                    stars: [
+                        { pos: [-20, 10, 0], name: 'Acubens' },
+                        { pos: [0, 15, 0], name: 'Praesepe' },
+                        { pos: [20, 10, 0], name: 'Asellus Borealis' },
+                        { pos: [0, -10, 0], name: 'Asellus Australis' }
+                    ]
+                },
+                {
+                    name: 'Leo',
+                    symbol: '♌',
+                    angle: 120,
+                    stars: [
+                        { pos: [-30, 30, 0], name: 'Regulus' },
+                        { pos: [-40, 40, 0], name: 'Denebola' },
+                        { pos: [-50, 35, 0], name: 'Algieba' },
+                        { pos: [-55, 20, 0], name: 'Zosma' },
+                        { pos: [-45, 15, 0], name: 'Chertan' },
+                        { pos: [-30, 20, 0], name: 'Al Minliar' }
+                    ]
+                },
+                {
+                    name: 'Virgo',
+                    symbol: '♍',
+                    angle: 150,
+                    stars: [
+                        { pos: [-10, 20, 0], name: 'Spica' },
+                        { pos: [0, 30, 0], name: 'Porrima' },
+                        { pos: [10, 25, 0], name: 'Vindemiatrix' },
+                        { pos: [5, 5, 0], name: 'Heze' },
+                        { pos: [-5, 0, 0], name: 'Zaniah' }
+                    ]
+                },
+                {
+                    name: 'Libra',
+                    symbol: '♎',
+                    angle: 180,
+                    stars: [
+                        { pos: [-25, 10, 0], name: 'Zubeneschamali' },
+                        { pos: [-15, 15, 0], name: 'Zubenelgenubi' },
+                        { pos: [0, 10, 0], name: 'Brachium' },
+                        { pos: [-15, -5, 0], name: 'Zuben Elakribi' }
+                    ]
+                },
+                {
+                    name: 'Scorpio',
+                    symbol: '♏',
+                    angle: 210,
+                    stars: [
+                        { pos: [-15, 30, 0], name: 'Antares' },
+                        { pos: [0, 25, 0], name: 'Shaula' },
+                        { pos: [10, 15, 0], name: 'Sargas' },
+                        { pos: [5, 0, 0], name: 'Dschubba' },
+                        { pos: [-5, -10, 0], name: 'Lesath' },
+                        { pos: [-15, -5, 0], name: 'Acrab' }
+                    ]
+                },
+                {
+                    name: 'Sagittarius',
+                    symbol: '♐',
+                    angle: 240,
+                    stars: [
+                        { pos: [-30, 10, 0], name: 'Kaus Australis' },
+                        { pos: [-20, 20, 0], name: 'Nunki' },
+                        { pos: [-10, 10, 0], name: 'Ascella' },
+                        { pos: [-15, -10, 0], name: 'Kaus Media' },
+                        { pos: [-25, -20, 0], name: 'Kaus Borealis' }
+                    ]
+                },
+                {
+                    name: 'Capricorn',
+                    symbol: '♑',
+                    angle: 270,
+                    stars: [
+                        { pos: [-20, 0, 0], name: 'Deneb Algedi' },
+                        { pos: [-10, 10, 0], name: 'Dabih' },
+                        { pos: [0, 0, 0], name: 'Nashira' },
+                        { pos: [-5, -20, 0], name: 'Algedi' }
+                    ]
+                },
+                {
+                    name: 'Aquarius',
+                    symbol: '♒',
+                    angle: 300,
+                    stars: [
+                        { pos: [-25, -10, 0], name: 'Sadalsuud' },
+                        { pos: [-15, 0, 0], name: 'Sadalmelik' },
+                        { pos: [-5, -10, 0], name: 'Sadachbia' },
+                        { pos: [-10, -30, 0], name: 'Skat' },
+                        { pos: [-20, -25, 0], name: 'Albali' }
+                    ]
+                },
+                {
+                    name: 'Pisces',
+                    symbol: '♓',
+                    angle: 330,
+                    stars: [
+                        { pos: [-30, 20, 0], name: 'Alrescha' },
+                        { pos: [-20, 25, 0], name: 'Fum al Samakah' },
+                        { pos: [-10, 20, 0], name: 'Van Maanen' },
+                        { pos: [-10, 10, 0], name: 'Revati' },
+                        { pos: [-20, 5, 0], name: 'Torcular' },
+                        { pos: [-30, 10, 0], name: 'Gamma Piscium' }
+                    ]
+                }
+            ];
+
+            constellations.forEach(constellation => {
+                const constellationGroup = new THREE.Group();
+                constellationGroup.userData = { name: constellation.name, isClickable: true, type: 'constellation' };
+
+                // Calculate position on circle around solar system
+                const angleRad = (constellation.angle * Math.PI) / 180;
+                const centerX = Math.cos(angleRad) * radius;
+                const centerZ = Math.sin(angleRad) * radius;
+
+                // Create stars in constellation (relative to constellation center)
+                constellation.stars.forEach((starData, index) => {
+                    const relativePos = starData.pos;
+                    const starName = starData.name;
+
+                    const starGeometry = new THREE.SphereGeometry(2, 12, 12);
+                    const starMaterial = new THREE.MeshBasicMaterial({
+                        color: 0xffffaa,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    const star = new THREE.Mesh(starGeometry, starMaterial);
+                    star.position.set(relativePos[0], relativePos[1], relativePos[2]);
+                    star.userData = { name: starName, isClickable: true, type: 'constellationStar', wikipediaName: starName };
+                    constellationGroup.add(star);
+                    allClickableObjects.push(star);
+
+                    // Add label with star name
+                    const starCanvas = document.createElement('canvas');
+                    const starContext = starCanvas.getContext('2d');
+                    starCanvas.width = 256;
+                    starCanvas.height = 64;
+
+                    starContext.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                    starContext.fillRect(0, 0, starCanvas.width, starCanvas.height);
+
+                    starContext.font = '20px Arial';
+                    starContext.fillStyle = '#ffff88';
+                    starContext.textAlign = 'center';
+                    starContext.textBaseline = 'middle';
+                    starContext.fillText(starName, 128, 32);
+
+                    const starTexture = new THREE.CanvasTexture(starCanvas);
+                    const starSpriteMaterial = new THREE.SpriteMaterial({
+                        map: starTexture,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    const starSprite = new THREE.Sprite(starSpriteMaterial);
+                    starSprite.scale.set(30, 8, 1);
+                    starSprite.position.set(relativePos[0], relativePos[1] + 10, relativePos[2]);
+                    constellationGroup.add(starSprite);
+
+                    // Connect stars with lines
+                    if (index > 0) {
+                        const points = [
+                            new THREE.Vector3(...constellation.stars[index - 1].pos),
+                            new THREE.Vector3(...relativePos)
+                        ];
+                        const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+                        const lineMaterial = new THREE.LineBasicMaterial({
+                            color: 0x88aaff,
+                            transparent: true,
+                            opacity: 0.5
+                        });
+                        const line = new THREE.Line(lineGeometry, lineMaterial);
+                        constellationGroup.add(line);
+                    }
+                });
+
+                // Add text label using canvas texture
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 256;
+                canvas.height = 128;
+
+                context.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+
+                context.font = 'Bold 32px Arial';
+                context.fillStyle = '#ffffff';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(constellation.symbol, 64, 64);
+
+                context.font = '24px Arial';
+                context.fillText(constellation.name, 160, 64);
+
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMaterial = new THREE.SpriteMaterial({
+                    map: texture,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                const sprite = new THREE.Sprite(spriteMaterial);
+                sprite.scale.set(60, 30, 1);
+                sprite.position.set(0, -50, 0); // Position label below constellation
+                constellationGroup.add(sprite);
+
+                // Position the entire constellation group
+                constellationGroup.position.set(centerX, 0, centerZ);
+
+                scene.add(constellationGroup);
+                allClickableObjects.push(constellationGroup);
+            });
+        }
+
         const textureLoader = new THREE.TextureLoader();
 
         // Create Sun at center with texture
@@ -396,6 +725,10 @@
         const allClickableObjects = [sun]; // Array to store clickable objects
         let earth = null; // Reference to Earth for default focus
 
+        // Call functions to add stars and constellations
+        createFamousStars();
+        createZodiacConstellations();
+
         // Create planets with detailed textures and colors
         planetsData.forEach((data, index) => {
             const geometry = new THREE.SphereGeometry(data.radius, 128, 128);
@@ -531,6 +864,14 @@
         // Set initial focus to Earth after all planets are created
         if (earth) {
             focusedObject = earth;
+            // Position camera to focus on Earth at start
+            const distance = earth.geometry.parameters.radius * 3;
+            camera.position.set(
+                earth.position.x,
+                earth.position.y + distance * 0.5,
+                earth.position.z + distance
+            );
+            controls.target.copy(earth.position);
         }
 
         // Tooltip element
@@ -551,7 +892,7 @@
             if (intersects.length > 0) {
                 let intersectedObject = intersects[0].object;
 
-                // If it's a child (like atmosphere or clouds), get the parent
+                // If it's a child (like atmosphere, clouds, or constellation star), get the parent
                 while (intersectedObject.parent && !intersectedObject.userData.isClickable) {
                     intersectedObject = intersectedObject.parent;
                 }
@@ -560,11 +901,21 @@
                     document.body.style.cursor = 'pointer';
                     hoveredObject = intersectedObject;
 
-                    // Show tooltip with planet name
+                    // Show tooltip with object name
                     tooltip.style.display = 'block';
                     tooltip.style.left = event.clientX + 15 + 'px';
                     tooltip.style.top = event.clientY + 15 + 'px';
-                    tooltip.textContent = intersectedObject.userData.name;
+
+                    // Add emoji prefix based on type
+                    let prefix = '';
+                    if (intersectedObject.userData.type === 'star') {
+                        prefix = '⭐ ';
+                    } else if (intersectedObject.userData.type === 'constellation') {
+                        prefix = '♈ ';
+                    } else if (intersectedObject.userData.type === 'constellationStar') {
+                        prefix = '⭐ ';
+                    }
+                    tooltip.textContent = prefix + intersectedObject.userData.name;
                 } else {
                     hoveredObject = null;
                 }
@@ -633,16 +984,32 @@
             startPosition.copy(camera.position);
             startTarget.copy(controls.target);
 
-            // Calculate target position (camera looks at planet from a distance)
-            const distance = planet.geometry.parameters.radius * 3;
+            // Calculate target position based on object type
+            let distance;
+            let targetPos = new THREE.Vector3();
+
+            if (planet.userData.type === 'star') {
+                distance = planet.geometry.parameters.radius * 5;
+                targetPos.copy(planet.position);
+            } else if (planet.userData.type === 'constellation') {
+                // For constellations, focus on the center of the group
+                const box = new THREE.Box3().setFromObject(planet);
+                box.getCenter(targetPos);
+                distance = 150;
+            } else {
+                // Planets
+                distance = planet.geometry.parameters.radius * 3;
+                targetPos.copy(planet.position);
+            }
+
             targetPosition.set(
-                planet.position.x,
-                planet.position.y + distance * 0.5,
-                planet.position.z + distance
+                targetPos.x,
+                targetPos.y + distance * 0.5,
+                targetPos.z + distance
             );
 
             // Set new orbit target
-            targetTarget.copy(planet.position);
+            targetTarget.copy(targetPos);
 
             // Update focused planet display
             updateFocusedPlanetDisplay(planet.userData.name);
