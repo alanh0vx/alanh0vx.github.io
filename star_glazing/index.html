@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Glazing - Interactive Cosmos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            overflow: hidden;
+            font-family: 'Courier New', 'Courier', monospace;
+            background: #000;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            max-width: 300px;
+        }
+        #info h2 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        .control-item {
+            margin: 5px 0;
+        }
+        #zodiac-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+        }
+        .zodiac-btn {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            background: rgba(100, 100, 255, 0.3);
+            border: 1px solid rgba(100, 100, 255, 0.5);
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .zodiac-btn:hover {
+            background: rgba(100, 100, 255, 0.6);
+        }
+        .zodiac-btn.active {
+            background: rgba(100, 100, 255, 0.8);
+            border-color: rgba(100, 100, 255, 1);
+        }
+        #back-home {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 107, 53, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 107, 53, 1);
+        }
+        #back-home:hover {
+            background: rgba(255, 107, 53, 1);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.5);
+            transform: translateX(-50%) translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" id="back-home">← Back to Home</a>
+
+    <div id="canvas-container"></div>
+
+    <div id="info">
+        <h2>Star Glazing</h2>
+        <p>Interactive Cosmos Visualization</p>
+        <p id="constellation-info"></p>
+    </div>
+
+    <div id="controls">
+        <div class="control-item"><strong>Controls:</strong></div>
+        <div class="control-item">• Drag: Rotate view</div>
+        <div class="control-item">• Scroll: Zoom in/out</div>
+        <div class="control-item">• Click constellation buttons to highlight</div>
+    </div>
+
+    <div id="zodiac-selector">
+        <h3 style="margin-bottom: 10px;">Zodiac Signs</h3>
+        <button class="zodiac-btn" data-zodiac="aries">♈ Aries</button>
+        <button class="zodiac-btn" data-zodiac="taurus">♉ Taurus</button>
+        <button class="zodiac-btn" data-zodiac="gemini">♊ Gemini</button>
+        <button class="zodiac-btn" data-zodiac="cancer">♋ Cancer</button>
+        <button class="zodiac-btn" data-zodiac="leo">♌ Leo</button>
+        <button class="zodiac-btn" data-zodiac="virgo">♍ Virgo</button>
+        <button class="zodiac-btn" data-zodiac="libra">♎ Libra</button>
+        <button class="zodiac-btn" data-zodiac="scorpio">♏ Scorpio</button>
+        <button class="zodiac-btn" data-zodiac="sagittarius">♐ Sagittarius</button>
+        <button class="zodiac-btn" data-zodiac="capricorn">♑ Capricorn</button>
+        <button class="zodiac-btn" data-zodiac="aquarius">♒ Aquarius</button>
+        <button class="zodiac-btn" data-zodiac="pisces">♓ Pisces</button>
+        <button class="zodiac-btn" data-zodiac="all">Show All</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
