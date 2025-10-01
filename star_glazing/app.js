@@ -356,11 +356,12 @@ Object.keys(zodiacData).forEach(key => {
     constellations[key] = createConstellation(key, zodiacData[key]);
 });
 
-// Mouse interaction
+// Mouse and Touch interaction
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 let rotation = { x: 0, y: 0 };
 
+// Mouse events
 renderer.domElement.addEventListener('mousedown', (e) => {
     isDragging = true;
     previousMousePosition = { x: e.clientX, y: e.clientY };
@@ -381,6 +382,60 @@ renderer.domElement.addEventListener('mousemove', (e) => {
 renderer.domElement.addEventListener('mouseup', () => {
     isDragging = false;
 });
+
+// Touch events for mobile
+renderer.domElement.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        isDragging = true;
+        previousMousePosition = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY
+        };
+    }
+}, { passive: true });
+
+renderer.domElement.addEventListener('touchmove', (e) => {
+    if (isDragging && e.touches.length === 1) {
+        const deltaX = e.touches[0].clientX - previousMousePosition.x;
+        const deltaY = e.touches[0].clientY - previousMousePosition.y;
+
+        rotation.y += deltaX * 0.005;
+        rotation.x += deltaY * 0.005;
+
+        previousMousePosition = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY
+        };
+    }
+}, { passive: true });
+
+renderer.domElement.addEventListener('touchend', () => {
+    isDragging = false;
+});
+
+// Pinch to zoom for mobile
+let initialPinchDistance = 0;
+renderer.domElement.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
+    }
+}, { passive: true });
+
+renderer.domElement.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        const delta = initialPinchDistance - distance;
+        camera.position.z += delta * 0.05;
+        camera.position.z = Math.max(20, Math.min(100, camera.position.z));
+
+        initialPinchDistance = distance;
+    }
+}, { passive: true });
 
 // Zoom with mouse wheel
 renderer.domElement.addEventListener('wheel', (e) => {
@@ -483,3 +538,20 @@ animate();
 const zodiacKeys = Object.keys(zodiacData);
 const randomZodiac = zodiacKeys[Math.floor(Math.random() * zodiacKeys.length)];
 document.querySelector(`[data-zodiac="${randomZodiac}"]`).click();
+
+// Mobile detection and UI toggle
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+if (isMobile) {
+    document.body.classList.add('mobile');
+}
+
+// Toggle UI button functionality
+const toggleUIButton = document.getElementById('toggle-ui');
+toggleUIButton.addEventListener('click', () => {
+    if (isMobile) {
+        document.body.classList.toggle('ui-visible');
+    } else {
+        document.body.classList.toggle('ui-hidden');
+    }
+});
