@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleOS</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="disclaimer-banner" style="position: fixed; top: 0; left: 0; width: 100%; background: #ff6b35; color: white; text-align: center; padding: 8px; font-size: 14px; z-index: 10000; border-bottom: 2px solid #ff8c42;">
+        ⚠️ <strong>Development Notice:</strong> SimpleOS is still in development. Some applications may not work properly or may be incomplete.
+    </div>
+    <div id="desktop" style="margin-top: 40px;">
+        <div id="icons-container"></div>
+    </div>
+
+    <div id="taskbar">
+        <div id="start-button">Start</div>
+        <div id="taskbar-apps"></div>
+        <div id="taskbar-time"></div>
+    </div>
+
+    <div id="start-menu" class="hidden">
+        <div class="start-menu-header">Applications</div>
+        <div id="start-menu-apps"></div>
+    </div>
+
+    <script src="os-core.js"></script>
+    <script src="apps/file-manager.js"></script>
+    <script src="apps/notepad.js"></script>
+    <script src="apps/calculator.js"></script>
+    <script src="apps/minesweeper.js"></script>
+    <script src="apps/snake.js"></script>
+    <script src="apps/tictactoe.js"></script>
+    <script src="apps/memory.js"></script>
+    <script src="apps/browser.js"></script>
+    <script src="apps/terminal.js"></script>
+    <script src="apps/settings.js"></script>
+    <script src="apps/clock.js"></script>
+    <script src="apps/paint.js"></script>
+    <script src="apps/music.js"></script>
+    <script src="apps/help.js"></script>
+    <script src="apps/ai-chat.js"></script>
+</body>
+</html>
