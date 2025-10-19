@@ -5,7 +5,15 @@ class SimpleOS {
         this.apps = {};
         this.zIndexCounter = 100;
         this.fileSystem = this.initFileSystem();
+        this.isMobile = this.detectMobile();
         this.init();
+    }
+
+    detectMobile() {
+        // Check if device is mobile based on screen width and touch capability
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isSmallScreen = window.innerWidth <= 768;
+        return isTouchDevice && isSmallScreen;
     }
 
     init() {
@@ -15,8 +23,11 @@ class SimpleOS {
         this.updateTime();
         setInterval(() => this.updateTime(), 1000);
 
-        // Auto-open category folders after all apps are registered
-        setTimeout(() => this.autoOpenCategoryFolders(), 500);
+        // Mobile mode: Show app grid
+        if (this.isMobile) {
+            setTimeout(() => this.setupMobileLayout(), 500);
+        }
+        // Desktop mode: Category folders are on desktop, user can double-click to open
     }
 
     initFileSystem() {
@@ -101,7 +112,9 @@ class SimpleOS {
             'entertainment': '🎬 Entertainment',
             'productivity': '📝 Productivity',
             'system': '⚙️ System',
-            'ai': '🤖 AI'
+            'ai': '🤖 AI',
+            'external': '🚀 External Apps',
+            'custom': '⚡ Custom Apps'
         };
         return labels[category] || '📂 Other';
     }
@@ -113,7 +126,9 @@ class SimpleOS {
             'entertainment': '🎬',
             'productivity': '📝',
             'system': '⚙️',
-            'ai': '🤖'
+            'ai': '🤖',
+            'external': '🚀',
+            'custom': '⚡'
         };
         return icons[category] || '📂';
     }
@@ -130,7 +145,12 @@ class SimpleOS {
         }
         this.categoryApps[app.category].push(app);
 
-        // Create folder icon for category (only once per category)
+        // Mobile: Don't show folder icons, they'll be in the app grid
+        if (this.isMobile) {
+            return;
+        }
+
+        // Desktop: Create folder icon for category (only once per category)
         const folderId = `desktop-folder-${app.category}`;
         if (!document.getElementById(folderId)) {
             const folderIcon = document.createElement('div');
@@ -341,6 +361,124 @@ class SimpleOS {
         });
     }
 
+    setupMobileLayout() {
+        if (!this.categoryApps) return;
+
+        const iconsContainer = document.getElementById('icons-container');
+        iconsContainer.innerHTML = ''; // Clear desktop
+        iconsContainer.className = 'mobile-app-grid';
+
+        // Create scrollable pages container
+        const pagesContainer = document.createElement('div');
+        pagesContainer.className = 'mobile-pages-container';
+        pagesContainer.id = 'mobile-pages';
+
+        // Get all apps sorted by category
+        const allApps = [];
+        Object.keys(this.categoryApps).forEach(category => {
+            this.categoryApps[category].forEach(app => {
+                allApps.push(app);
+            });
+        });
+
+        // Calculate apps per page (4x5 grid = 20 apps per page)
+        const appsPerPage = 20;
+        const numPages = Math.ceil(allApps.length / appsPerPage);
+
+        // Create pages
+        for (let pageIndex = 0; pageIndex < numPages; pageIndex++) {
+            const page = document.createElement('div');
+            page.className = 'mobile-page';
+
+            const startIndex = pageIndex * appsPerPage;
+            const endIndex = Math.min(startIndex + appsPerPage, allApps.length);
+
+            for (let i = startIndex; i < endIndex; i++) {
+                const app = allApps[i];
+                const appIcon = document.createElement('div');
+                appIcon.className = 'mobile-app-icon';
+                appIcon.innerHTML = `
+                    <div class="mobile-app-icon-image">${app.icon}</div>
+                    <div class="mobile-app-icon-label">${app.name}</div>
+                `;
+                appIcon.onclick = () => this.launchApp(app.id);
+                page.appendChild(appIcon);
+            }
+
+            pagesContainer.appendChild(page);
+        }
+
+        iconsContainer.appendChild(pagesContainer);
+
+        // Add page indicator dots
+        if (numPages > 1) {
+            const pageIndicator = document.createElement('div');
+            pageIndicator.className = 'mobile-page-indicator';
+            pageIndicator.id = 'page-indicator';
+
+            for (let i = 0; i < numPages; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'page-dot' + (i === 0 ? ' active' : '');
+                pageIndicator.appendChild(dot);
+            }
+
+            iconsContainer.appendChild(pageIndicator);
+
+            // Setup swipe functionality
+            this.setupMobileSwipe(pagesContainer, numPages);
+        }
+    }
+
+    setupMobileSwipe(pagesContainer, numPages) {
+        let currentPage = 0;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        const updatePage = (page) => {
+            currentPage = Math.max(0, Math.min(page, numPages - 1));
+            pagesContainer.style.transform = `translateX(-${currentPage * 100}%)`;
+
+            // Update dots
+            const dots = document.querySelectorAll('.page-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentPage);
+            });
+        };
+
+        pagesContainer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            pagesContainer.style.transition = 'none';
+        });
+
+        pagesContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+            const diff = currentX - startX;
+            const currentOffset = -currentPage * 100;
+            const dragPercent = (diff / window.innerWidth) * 100;
+            pagesContainer.style.transform = `translateX(${currentOffset + dragPercent}%)`;
+        });
+
+        pagesContainer.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            pagesContainer.style.transition = 'transform 0.3s ease';
+
+            const diff = currentX - startX;
+            const threshold = window.innerWidth * 0.2; // 20% swipe threshold
+
+            if (diff > threshold) {
+                updatePage(currentPage - 1);
+            } else if (diff < -threshold) {
+                updatePage(currentPage + 1);
+            } else {
+                updatePage(currentPage);
+            }
+        });
+    }
+
     updateTime() {
         const timeElement = document.getElementById('taskbar-time');
         const now = new Date();
@@ -401,16 +539,21 @@ class SimpleOS {
         windowEl.id = windowId;
         windowEl.style.zIndex = this.zIndexCounter++;
 
-        // Set window size based on app preferences
-        const windowSize = this.getWindowSize(app);
-        windowEl.style.width = windowSize.width;
-        windowEl.style.height = windowSize.height;
+        // Mobile: Open apps fullscreen
+        if (this.isMobile) {
+            windowEl.classList.add('maximized');
+        } else {
+            // Desktop: Set window size based on app preferences
+            const windowSize = this.getWindowSize(app);
+            windowEl.style.width = windowSize.width;
+            windowEl.style.height = windowSize.height;
 
-        // Center window on screen
-        const centerX = (window.innerWidth - parseInt(windowSize.width)) / 2;
-        const centerY = (window.innerHeight - parseInt(windowSize.height) - 40) / 2; // 40 for taskbar
-        windowEl.style.left = Math.max(20, centerX) + 'px';
-        windowEl.style.top = Math.max(20, centerY) + 'px';
+            // Center window on screen
+            const centerX = (window.innerWidth - parseInt(windowSize.width)) / 2;
+            const centerY = (window.innerHeight - parseInt(windowSize.height) - 40) / 2; // 40 for taskbar
+            windowEl.style.left = Math.max(20, centerX) + 'px';
+            windowEl.style.top = Math.max(20, centerY) + 'px';
+        }
 
         windowEl.innerHTML = `
             <div class="window-titlebar">

@@ -3,402 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GameHub - HTML5 Games Collection</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <!-- Custom CSS -->
+    <title>SimpleOS</title>
+    <link rel="stylesheet" href="simple-os/styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 50%, #ff6b35 100%);
-            min-height: 100vh;
-            color: #e0e0e0;
-        }
-
-        .hero-section {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 50%, #ff6b35 100%);
-            color: white;
-            min-height: 100vh;
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            z-index: 99999;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .splash-content {
             text-align: center;
-            position: relative;
-            overflow: hidden;
+            color: white;
         }
 
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="a"><stop offset="0" stop-color="%23fff" stop-opacity=".1"/><stop offset="1" stop-color="%23fff" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="50" fill="url(%23a)"/></svg>') center/cover;
-            opacity: 0.1;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .hero-content {
-            z-index: 2;
-            position: relative;
-        }
-
-        .hero-section h1 {
+        .splash-content h1 {
             font-size: 4rem;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             margin-bottom: 1rem;
-            animation: slideInDown 1s ease-out;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.8s ease-out;
         }
 
-        .hero-section .subtitle {
-            font-size: 1.3rem;
-            font-weight: 300;
+        .splash-content p {
+            font-size: 1.5rem;
             margin-bottom: 2rem;
             opacity: 0.9;
-            animation: slideInUp 1s ease-out 0.3s both;
+            animation: slideIn 0.8s ease-out 0.2s both;
         }
 
-        @keyframes slideInDown {
+        @keyframes slideIn {
             from {
+                transform: translateY(-20px);
                 opacity: 0;
-                transform: translateY(-30px);
             }
             to {
-                opacity: 1;
                 transform: translateY(0);
-            }
-        }
-
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
                 opacity: 1;
-                transform: translateY(0);
             }
         }
 
-        .games-section {
-            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
-            padding: 80px 0;
-            position: relative;
+        .splash-timer {
+            font-size: 1.2rem;
+            margin: 20px 0;
+            opacity: 0.8;
         }
 
-        .section-title {
-            text-align: center;
-            margin-bottom: 4rem;
-            color: #e0e0e0;
-        }
-
-        .section-title h2 {
-            font-size: 2.8rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #ff6b35;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .section-title p {
-            font-size: 1.1rem;
-            color: #b0b0b0;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .game-card {
-            margin-bottom: 2rem;
-            perspective: 1000px;
-        }
-
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            transition: all 0.4s ease;
-            background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
-            overflow: hidden;
-            position: relative;
-            border: 1px solid #333;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #ff6b35, #ff8c42);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(255, 107, 53, 0.2);
-        }
-
-        .card-body {
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .game-icon {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #ff6b35, #ff8c42);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #ffffff;
-        }
-
-        .card-text {
-            color: #b0b0b0;
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .btn-game {
-            background: linear-gradient(135deg, #ff6b35, #ff8c42);
-            border: none;
+        .splash-skip-btn {
             padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
             border-radius: 25px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
-            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
         }
 
-        .btn-game:hover {
-            background: linear-gradient(135deg, #ff8c42, #ff6b35);
-            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
-            transform: translateY(-2px);
-            color: white;
+        .splash-skip-btn:hover {
+            background: white;
+            color: #667eea;
         }
 
-        .scroll-indicator {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateX(-50%) translateY(0);
-            }
-            40% {
-                transform: translateX(-50%) translateY(-10px);
-            }
-            60% {
-                transform: translateX(-50%) translateY(-5px);
-            }
-        }
-
-        .footer {
-            background: #2c3e50;
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-        }
-
-        @media (max-width: 768px) {
-            .hero-section h1 {
-                font-size: 2.5rem;
-            }
-            
-            .hero-section .subtitle {
-                font-size: 1.1rem;
-            }
-            
-            .section-title h2 {
-                font-size: 2.2rem;
-            }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
     </style>
 </head>
 <body>
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1>🎮 GameHub</h1>
-            <p class="subtitle">Discover amazing HTML5 games crafted with passion and creativity</p>
-            <div class="scroll-indicator">
-                <i class="fas fa-chevron-down fa-2x"></i>
-            </div>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <h1>💻 Welcome to Alan's OS</h1>
+            <p>Your personal web-based operating system</p>
+            <div class="splash-timer">Starting in <span id="timer">5</span> seconds...</div>
+            <button class="splash-skip-btn" onclick="closeSplash()">Skip & Start Now ▶️</button>
         </div>
-    </section>
+    </div>
 
-    <!-- Games Section -->
-    <section class="games-section">
-        <div class="container">
-            <div class="section-title">
-                <h2>Featured Games</h2>
-                <p>Explore our collection of exciting browser-based games. Each game is carefully crafted to provide an engaging gaming experience right in your browser!</p>
-            </div>
-            
-            <div class="row">
-                <!-- Snake Game -->
-                <div class="col-lg-6 col-md-6 game-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="game-icon">
-                                <i class="fas fa-gamepad"></i>
-                            </div>
-                            <h5 class="card-title">🐍 Greedy Snake</h5>
-                            <p class="card-text">Classic snake game with a modern twist. Guide your snake to eat food and grow longer while avoiding collisions. Can you beat your high score?</p>
-                            <a href="snake/snake.html" class="btn btn-primary btn-game" target="_blank">
-                                <i class="fas fa-play"></i> Play Now
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <div id="disclaimer-banner" style="position: fixed; top: 0; left: 0; width: 100%; background: #ff6b35; color: white; text-align: center; padding: 8px; font-size: 14px; z-index: 10000; border-bottom: 2px solid #ff8c42; display: flex; justify-content: center; align-items: center;">
+        <span style="flex: 1;">⚠️ <strong>Development Notice:</strong> SimpleOS is still in development. Some applications may not work properly or may be incomplete.</span>
+        <button onclick="this.parentElement.style.display='none'; document.getElementById('desktop').style.marginTop='0';" style="background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 4px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; margin-right: 8px;">✕ Close</button>
+    </div>
+    <div id="desktop" style="margin-top: 40px;">
+        <div id="icons-container"></div>
+    </div>
 
-                <!-- Tic Tac Toe Game -->
-                <div class="col-lg-6 col-md-6 game-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="game-icon">
-                                <i class="fas fa-th"></i>
-                            </div>
-                            <h5 class="card-title">⭕ Tic Tac Toe</h5>
-                            <p class="card-text">The timeless strategy game! Challenge yourself against the AI or play with a friend. Three in a row wins - sounds easy, but can you master it?</p>
-                            <a href="tic/tic3.html" class="btn btn-primary btn-game" target="_blank">
-                                <i class="fas fa-play"></i> Play Now
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <div id="taskbar">
+        <div id="start-button">Start</div>
+        <div id="taskbar-apps"></div>
+        <button id="clear-data-btn" onclick="clearAllData()" style="background: rgba(255, 107, 53, 0.2); border: 1px solid #ff6b35; color: white; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 10px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 107, 53, 0.4)'" onmouseout="this.style.background='rgba(255, 107, 53, 0.2)'">
+            🗑️ Clear Data
+        </button>
+        <div id="taskbar-time"></div>
+    </div>
 
-                <!-- Horse Racing Game -->
-                <div class="col-lg-6 col-md-6 game-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="game-icon">
-                                <i class="fas fa-horse"></i>
-                            </div>
-                            <h5 class="card-title">🏇 Horse Racing</h5>
-                            <p class="card-text">Experience the thrill of the oval racetrack! Study detailed horse profiles, analyze weather conditions, and place strategic bets. Watch horses race around a realistic oval track with dynamic weather effects!</p>
-                            <a href="horses/horses.html" class="btn btn-primary btn-game" target="_blank">
-                                <i class="fas fa-play"></i> Play Now
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <div id="start-menu" class="hidden">
+        <div class="start-menu-header">Applications</div>
+        <div id="start-menu-apps"></div>
+    </div>
 
-                <!-- Tetris Game -->
-                <div class="col-lg-6 col-md-6 game-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="game-icon">
-                                <i class="fas fa-cubes"></i>
-                            </div>
-                            <h5 class="card-title">🧩 Tetris</h5>
-                            <p class="card-text">The legendary puzzle game that never gets old! Stack falling blocks to create complete lines. Simple to learn, impossible to master!</p>
-                            <a href="tetris/tetris.html" class="btn btn-primary btn-game" target="_blank">
-                                <i class="fas fa-play"></i> Play Now
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <script src="simple-os/os-core.js"></script>
+    <script src="simple-os/apps/file-manager.js"></script>
+    <script src="simple-os/apps/notepad.js"></script>
+    <script src="simple-os/apps/calculator.js"></script>
+    <script src="simple-os/apps/minesweeper.js"></script>
+    <script src="simple-os/apps/snake.js"></script>
+    <script src="simple-os/apps/tictactoe.js"></script>
+    <script src="simple-os/apps/memory.js"></script>
+    <script src="simple-os/apps/browser.js"></script>
+    <script src="simple-os/apps/terminal.js"></script>
+    <script src="simple-os/apps/settings.js"></script>
+    <script src="simple-os/apps/clock.js"></script>
+    <script src="simple-os/apps/paint.js"></script>
+    <script src="simple-os/apps/music.js"></script>
+    <script src="simple-os/apps/help.js"></script>
+    <script src="simple-os/apps/ai-chat.js"></script>
+    <script src="simple-os/apps/custom-app-internal.js"></script>
+    <script src="simple-os/apps/custom-app-external.js"></script>
 
-                <!-- Solar System Explorer -->
-                <div class="col-lg-6 col-md-6 game-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="game-icon">
-                                <i class="fas fa-globe"></i>
-                            </div>
-                            <h5 class="card-title">🌍 Solar System Explorer</h5>
-                            <p class="card-text">Explore our solar system in 3D! Navigate through planets, discover famous stars, and learn about zodiac constellations. Click stars to learn more on Wikipedia!</p>
-                            <a href="solar_system/index.html" class="btn btn-primary btn-game" target="_blank">
-                                <i class="fas fa-play"></i> Explore Now
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <!-- Splash Screen & Utility Functions -->
+    <script>
+        // Splash screen timer
+        let countdown = 5;
+        let timerInterval = setInterval(() => {
+            countdown--;
+            const timerEl = document.getElementById('timer');
+            if (timerEl) {
+                timerEl.textContent = countdown;
+            }
+            if (countdown <= 0) {
+                closeSplash();
+            }
+        }, 1000);
 
-                <!-- Star Glazing -->
-                <div class="col-lg-6 col-md-6 game-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="game-icon">
-                                <i class="fas fa-star"></i>
-                            </div>
-                            <h5 class="card-title">⭐ Star Glazing</h5>
-                            <p class="card-text">Immerse yourself in an interactive cosmos visualization! Explore all 12 zodiac constellations with realistic stars, constellation lines, and labels. Drag to rotate, scroll to zoom!</p>
-                            <a href="star_glazing/index.html" class="btn btn-primary btn-game" target="_blank">
-                                <i class="fas fa-play"></i> Explore Now
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        function closeSplash() {
+            clearInterval(timerInterval);
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                splash.style.animation = 'fadeOut 0.5s';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 500);
+            }
+        }
 
-                <!-- Simple OS -->
-                <div class="col-lg-6 col-md-6 game-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="game-icon">
-                                <i class="fas fa-desktop"></i>
-                            </div>
-                            <h5 class="card-title">💻 Simple OS</h5>
-                            <p class="card-text">Experience a fully functional operating system simulation in your browser! Complete with apps like Calculator, Paint, Terminal, File Manager, and many more. A virtual desktop experience!</p>
-                            <a href="simple-os/index.html" class="btn btn-primary btn-game" target="_blank">
-                                <i class="fas fa-play"></i> Launch OS
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        // Clear all data function
+        function clearAllData() {
+            if (confirm('⚠️ WARNING: This will clear ALL cookies and localStorage data, including:\n\n• Custom apps\n• AI chat settings\n• File system data\n• Settings and preferences\n\nThis action cannot be undone. Continue?')) {
+                // Clear localStorage
+                localStorage.clear();
 
-            </div>
-        </div>
-    </section>
+                // Clear cookies
+                document.cookie.split(";").forEach(cookie => {
+                    const name = cookie.split("=")[0].trim();
+                    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                });
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2025 GameHub - HTML5 Games Collection | Crafted with ❤️ and AI assistance</p>
-        </div>
-    </footer>
+                alert('✅ All data cleared successfully! The page will now reload.');
+                location.reload();
+            }
+        }
+    </script>
 
-    <!-- Bootstrap JS and Popper.js -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- External Apps -->
+    <script>
+        // Register external apps that open in new tabs
+        os.registerApp({
+            id: 'greedy-snake',
+            name: 'Greedy Snake',
+            icon: '🐍',
+            category: 'external',
+            isExternal: true,
+            url: 'snake/snake.html',
+            onLaunch(windowId) {
+                window.open(this.url, '_blank');
+                // Close the window immediately since we opened a new tab
+                setTimeout(() => os.closeWindow(windowId), 100);
+            }
+        });
+
+        os.registerApp({
+            id: 'horse-racing',
+            name: 'Horse Racing',
+            icon: '🏇',
+            category: 'external',
+            isExternal: true,
+            url: 'horses/horses.html',
+            onLaunch(windowId) {
+                window.open(this.url, '_blank');
+                setTimeout(() => os.closeWindow(windowId), 100);
+            }
+        });
+
+        os.registerApp({
+            id: 'star-glazing',
+            name: 'Star Glazing',
+            icon: '⭐',
+            category: 'external',
+            isExternal: true,
+            url: 'star_glazing/index.html',
+            onLaunch(windowId) {
+                window.open(this.url, '_blank');
+                setTimeout(() => os.closeWindow(windowId), 100);
+            }
+        });
+
+        os.registerApp({
+            id: 'tetris',
+            name: 'Tetris',
+            icon: '🧩',
+            category: 'external',
+            isExternal: true,
+            url: 'tetris/tetris.html',
+            onLaunch(windowId) {
+                window.open(this.url, '_blank');
+                setTimeout(() => os.closeWindow(windowId), 100);
+            }
+        });
+
+        os.registerApp({
+            id: 'solar-system',
+            name: 'Solar System',
+            icon: '🌍',
+            category: 'external',
+            isExternal: true,
+            url: 'solar_system/index.html',
+            onLaunch(windowId) {
+                window.open(this.url, '_blank');
+                setTimeout(() => os.closeWindow(windowId), 100);
+            }
+        });
+
+        os.registerApp({
+            id: 'tictactoe-classic',
+            name: 'Tic Tac Toe',
+            icon: '⭕',
+            category: 'external',
+            isExternal: true,
+            url: 'tic/tic3.html',
+            onLaunch(windowId) {
+                window.open(this.url, '_blank');
+                setTimeout(() => os.closeWindow(windowId), 100);
+            }
+        });
+    </script>
 </body>
 </html>
