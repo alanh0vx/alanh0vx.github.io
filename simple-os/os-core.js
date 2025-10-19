@@ -448,6 +448,7 @@ class SimpleOS {
 
         pagesContainer.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
+            currentX = startX; // Initialize currentX to startX
             isDragging = true;
             pagesContainer.style.transition = 'none';
         });
@@ -463,11 +464,12 @@ class SimpleOS {
 
         pagesContainer.addEventListener('touchend', (e) => {
             if (!isDragging) return;
-            isDragging = false;
-            pagesContainer.style.transition = 'transform 0.3s ease';
 
             const diff = currentX - startX;
             const threshold = window.innerWidth * 0.2; // 20% swipe threshold
+
+            isDragging = false;
+            pagesContainer.style.transition = 'transform 0.3s ease';
 
             if (diff > threshold) {
                 updatePage(currentPage - 1);
@@ -476,6 +478,9 @@ class SimpleOS {
             } else {
                 updatePage(currentPage);
             }
+
+            // Reset currentX after handling the swipe
+            currentX = 0;
         });
     }
 
