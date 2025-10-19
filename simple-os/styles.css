@@ -2514,6 +2514,39 @@ code {
     border-radius: 4px;
 }
 
+.mobile-nav-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: white;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s;
+    user-select: none;
+}
+
+.mobile-nav-arrow:active {
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateY(-50%) scale(0.9);
+}
+
+.mobile-nav-left {
+    left: 10px;
+}
+
+.mobile-nav-right {
+    right: 10px;
+}
+
 /* Mobile specific adjustments */
 @media (max-width: 480px) {
     .mobile-page {

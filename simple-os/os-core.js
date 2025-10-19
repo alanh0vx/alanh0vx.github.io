@@ -410,7 +410,7 @@ class SimpleOS {
 
         iconsContainer.appendChild(pagesContainer);
 
-        // Add page indicator dots
+        // Add page indicator dots and navigation arrows
         if (numPages > 1) {
             const pageIndicator = document.createElement('div');
             pageIndicator.className = 'mobile-page-indicator';
@@ -424,6 +424,20 @@ class SimpleOS {
 
             iconsContainer.appendChild(pageIndicator);
 
+            // Add navigation arrows
+            const leftArrow = document.createElement('div');
+            leftArrow.className = 'mobile-nav-arrow mobile-nav-left';
+            leftArrow.id = 'mobile-nav-left';
+            leftArrow.innerHTML = '‹';
+            leftArrow.style.display = 'none'; // Hidden on first page
+            iconsContainer.appendChild(leftArrow);
+
+            const rightArrow = document.createElement('div');
+            rightArrow.className = 'mobile-nav-arrow mobile-nav-right';
+            rightArrow.id = 'mobile-nav-right';
+            rightArrow.innerHTML = '›';
+            iconsContainer.appendChild(rightArrow);
+
             // Setup swipe functionality
             this.setupMobileSwipe(pagesContainer, numPages);
         }
@@ -435,6 +449,9 @@ class SimpleOS {
         let currentX = 0;
         let isDragging = false;
 
+        const leftArrow = document.getElementById('mobile-nav-left');
+        const rightArrow = document.getElementById('mobile-nav-right');
+
         const updatePage = (page) => {
             currentPage = Math.max(0, Math.min(page, numPages - 1));
             pagesContainer.style.transform = `translateX(-${currentPage * 100}%)`;
@@ -444,6 +461,12 @@ class SimpleOS {
             dots.forEach((dot, index) => {
                 dot.classList.toggle('active', index === currentPage);
             });
+
+            // Update arrow visibility
+            if (leftArrow && rightArrow) {
+                leftArrow.style.display = currentPage === 0 ? 'none' : 'flex';
+                rightArrow.style.display = currentPage === numPages - 1 ? 'none' : 'flex';
+            }
         };
 
         pagesContainer.addEventListener('touchstart', (e) => {
@@ -482,6 +505,19 @@ class SimpleOS {
             // Reset currentX after handling the swipe
             currentX = 0;
         });
+
+        // Arrow click handlers
+        if (leftArrow) {
+            leftArrow.addEventListener('click', () => {
+                updatePage(currentPage - 1);
+            });
+        }
+
+        if (rightArrow) {
+            rightArrow.addEventListener('click', () => {
+                updatePage(currentPage + 1);
+            });
+        }
     }
 
     updateTime() {
