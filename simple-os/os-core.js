@@ -523,7 +523,32 @@ class SimpleOS {
     updateTime() {
         const timeElement = document.getElementById('taskbar-time');
         const now = new Date();
-        timeElement.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        // Format time in 24-hour format with seconds
+        const timeOptions = {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+        
+        // Format date
+        const dateOptions = {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        };
+        
+        const timeStr = now.toLocaleTimeString([], timeOptions);
+        const dateStr = now.toLocaleDateString([], dateOptions);
+        
+        timeElement.innerHTML = `
+            <div class="taskbar-time-display">
+                <div class="taskbar-time-time">${timeStr}</div>
+                <div class="taskbar-time-date">${dateStr}</div>
+            </div>
+        `;
     }
 
     launchApp(appId) {
