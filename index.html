@@ -289,6 +289,19 @@
                 setTimeout(() => os.closeWindow(windowId), 100);
             }
         });
+
+        os.registerApp({
+            id: 'villian-hitting',
+            name: 'Villian Hitting',
+            icon: '👵',
+            category: 'external',
+            isExternal: true,
+            url: 'villianhitting',
+            onLaunch(windowId) {
+                window.open(this.url, '_blank');
+                setTimeout(() => os.closeWindow(windowId), 100);
+            }
+        });
     </script>
 </body>
 </html>
