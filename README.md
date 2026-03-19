@@ -27,6 +27,7 @@ The desktop OS includes the following built-in applications:
 - [Tetris](https://alanh0vx.github.io/tetris/tetris.html)
 - [Solar System](https://alanh0vx.github.io/solar_system/)
 - [Star Gazing](https://alanh0vx.github.io/star_glazing/)
+- [Villian Hitting](https://alanh0vx.github.io/villianhitting/)
 
 ## Development
 
