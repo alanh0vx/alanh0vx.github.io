@@ -57,7 +57,7 @@ These are self-contained HTML games hosted alongside SimpleOS, also accessible f
 | Tetris | [Play](https://alanh0vx.github.io/tetris/tetris.html) |
 | Solar System | [Play](https://alanh0vx.github.io/solar_system/) |
 | Star Gazing | [Play](https://alanh0vx.github.io/star_glazing/) |
-| Villian Hitting | [Play](https://alanh0vx.github.io/villianhitting/) |
+| Villain Hitting | [Play](https://alanh0vx.github.io/villainhitting/) |
 
 ## Architecture
 
@@ -79,7 +79,7 @@ These are self-contained HTML games hosted alongside SimpleOS, also accessible f
 ├── tic/
 ├── solar_system/
 ├── star_glazing/
-└── villianhitting/         # Expo-based mobile game (web export)
+└── villainhitting/         # Expo-based mobile game (web export)
 ```
 
 ### App Registration Pattern
