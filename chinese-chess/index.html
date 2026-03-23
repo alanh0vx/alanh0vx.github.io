@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>象棋 — 中國象棋</title>
+  <meta property="og:title" content="象棋 — 中國象棋 - Alan's OS">
+  <meta property="og:description" content="Chinese Chess (Xiangqi) game built with vanilla JavaScript. Part of Alan's OS - a web-based operating system.">
+  <meta property="og:image" content="https://alanh0vx.github.io/chinese-chess/title.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://alanh0vx.github.io/chinese-chess/">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ==================== LOBBY ==================== -->
+  <div id="screen-lobby" class="screen active">
+    <div class="lobby-title">
+      <h1>象&nbsp;棋</h1>
+      <div class="subtitle">中國象棋</div>
+    </div>
+
+    <div id="lobbyProfile" class="lobby-profile">
+      <span class="lobby-avatar-placeholder">棋</span>
+      <div class="lobby-profile-info">
+        <span class="lobby-nickname">棋友</span>
+        <span class="lobby-stats">點擊設定檔案</span>
+      </div>
+    </div>
+
+    <div class="lobby-menu">
+      <button id="btnStartGame" class="btn btn-primary">開始對弈</button>
+      <button id="btnLoadGame" class="btn">讀取棋局</button>
+      <button id="btnPuzzles" class="btn" style="display:none">殘局挑戰</button>
+      <button id="btnTutorial" class="btn">新手教學</button>
+      <button id="btnSettings" class="btn btn-secondary">設定</button>
+    </div>
+  </div>
+
+  <!-- ==================== PRE-GAME SETTINGS ==================== -->
+  <div id="screen-pregame" class="screen">
+    <div class="pregame-panel">
+      <h2>開局設定</h2>
+
+      <div class="form-group">
+        <label>難度</label>
+        <div class="radio-group" id="difficultyGroup">
+          <label class="selected" onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.classList.remove('selected'));this.classList.add('selected')">
+            <input type="radio" name="difficulty" value="easy" checked>
+            <span>初級</span>
+          </label>
+          <label onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.classList.remove('selected'));this.classList.add('selected')">
+            <input type="radio" name="difficulty" value="medium">
+            <span>中級</span>
+          </label>
+          <label onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.classList.remove('selected'));this.classList.add('selected')">
+            <input type="radio" name="difficulty" value="hard">
+            <span>高級</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>執棋</label>
+        <div class="radio-group" id="sideGroup">
+          <label class="selected" onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.classList.remove('selected'));this.classList.add('selected')">
+            <input type="radio" name="playSide" value="red" checked>
+            <span>紅方（先手）</span>
+          </label>
+          <label onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.classList.remove('selected'));this.classList.add('selected')">
+            <input type="radio" name="playSide" value="black">
+            <span>黑方</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="toggle-group">
+          <label>允許悔棋（最多3次）</label>
+          <label class="switch">
+            <input type="checkbox" id="allowUndo" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="toggle-group">
+          <label>允許提示（最多3次）</label>
+          <label class="switch">
+            <input type="checkbox" id="allowHint" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="pregame-actions">
+        <button id="btnBackToLobby" class="btn btn-secondary">返回</button>
+        <button id="btnStartPlay" class="btn btn-primary">開始</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GAME ==================== -->
+  <div id="screen-game" class="screen">
+    <div class="game-board-area">
+      <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div class="game-sidebar">
+      <div class="sidebar-header">
+        <button id="btnBackMenu" class="btn btn-small btn-secondary back-btn">← 返回</button>
+        <span id="difficultyDisplay" style="font-size:13px;color:var(--text-dim)"></span>
+      </div>
+
+      <div id="turnIndicator" class="turn-indicator">準備開始</div>
+
+      <div class="history-container">
+        <div id="historyPanel"></div>
+      </div>
+
+      <div class="history-nav">
+        <button id="btnHistFirst" class="btn btn-small">⏮</button>
+        <button id="btnHistPrev" class="btn btn-small">◀</button>
+        <button id="btnHistNext" class="btn btn-small">▶</button>
+        <button id="btnHistLast" class="btn btn-small">⏭</button>
+      </div>
+
+      <div id="gameActions">
+        <button id="btnHint" class="btn btn-small">提示 3/3</button>
+        <button id="btnUndo" class="btn btn-small game-only">悔棋 3/3</button>
+        <button id="btnAutoPlay" class="btn btn-small game-only">託管</button>
+        <button id="btnResign" class="btn btn-small btn-secondary game-only">認輸</button>
+        <button id="btnDraw" class="btn btn-small btn-secondary game-only">求和</button>
+        <button id="btnSave" class="btn btn-small game-only">存檔</button>
+      </div>
+
+      <div id="tutorialBar"></div>
+    </div>
+  </div>
+
+  <!-- ==================== PUZZLES ==================== -->
+  <div id="screen-puzzles" class="screen">
+    <div class="screen-header">
+      <button id="btnBackFromPuzzles" class="btn btn-small btn-secondary">← 返回</button>
+      <h2>殘局挑戰</h2>
+    </div>
+    <div id="puzzleList"></div>
+  </div>
+
+  <!-- ==================== TUTORIAL ==================== -->
+  <div id="screen-tutorial" class="screen">
+    <div class="screen-header">
+      <button id="btnBackFromTutorial" class="btn btn-small btn-secondary">← 返回</button>
+      <h2>新手教學</h2>
+    </div>
+    <div id="tutorialList"></div>
+  </div>
+
+  <!-- ==================== SETTINGS ==================== -->
+  <div id="screen-settings" class="screen">
+    <div class="screen-header">
+      <button id="btnBackFromSettings" class="btn btn-small btn-secondary">← 返回</button>
+      <h2>設定</h2>
+    </div>
+
+    <div class="settings-section">
+      <h3>一般</h3>
+      <div class="setting-row">
+        <span class="setting-label">音效</span>
+        <label class="switch">
+          <input type="checkbox" id="settingSound" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">編輯玩家檔案</span>
+        <button id="btnEditProfile" class="btn btn-small">編輯</button>
+      </div>
+    </div>
+
+    <div class="settings-section danger-zone">
+      <h3>危險區域</h3>
+      <div class="setting-row">
+        <span class="setting-label">清除所有資料</span>
+        <button id="btnClearData" class="btn btn-small btn-danger">清除</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-dim);margin-top:8px;">
+        此操作將刪除所有遊戲存檔、玩家檔案及設定，且無法復原。
+      </p>
+    </div>
+  </div>
+
+  <!-- Scripts (load order matters) -->
+  <script src="js/game.js"></script>
+  <script src="js/rules.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/notation.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/endgame.js"></script>
+  <script src="js/tutorial.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

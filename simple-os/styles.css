@@ -192,6 +192,32 @@ body {
     font-size: 20px;
 }
 
+.app-icon-img {
+    border-radius: 6px;
+    vertical-align: middle;
+    object-fit: cover;
+}
+
+.app-icon .app-icon-img,
+.window-title .app-icon-img,
+.taskbar-item .app-icon-img {
+    width: 20px;
+    height: 20px;
+}
+
+.folder-icon-image .app-icon-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+}
+
+.mobile-app-icon-image .app-icon-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
 /* Windows */
 .window {
     position: absolute;

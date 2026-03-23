@@ -86,16 +86,16 @@ os.registerApp({
             'gpt-3.5-turbo': 4096,
             
             // Anthropic models
+            'claude-sonnet-4-6-20250514': 200000,
+            'claude-opus-4-6-20250514': 200000,
+            'claude-haiku-4-5-20251001': 200000,
             'claude-3-5-sonnet-20241022': 200000,
-            'claude-3-opus-20240229': 200000,
-            'claude-3-sonnet-20240229': 200000,
-            'claude-3-haiku-20240307': 200000,
-            
+
             // Google models
-            'gemini-2.0-flash': 32000,
-            'gemini-1.5-pro': 128000,
-            'gemini-1.5-flash': 32000,
-            'gemini-pro': 32000
+            'gemini-2.5-pro': 1000000,
+            'gemini-2.5-flash': 1000000,
+            'gemini-2.0-flash': 1000000,
+            'gemini-2.0-flash-lite': 1000000
         };
         return limits[this.model] || 4096; // Default fallback
     },
@@ -149,7 +149,8 @@ os.registerApp({
         const defaultUrls = {
             'openai': 'https://api.openai.com/v1/chat/completions',
             'anthropic': 'https://api.anthropic.com/v1/messages',
-            'google': 'https://generativelanguage.googleapis.com/v1beta/models'
+            'google': 'https://generativelanguage.googleapis.com/v1beta/models',
+            'openrouter': 'https://openrouter.ai/api/v1/chat/completions'
         };
         return defaultUrls[provider] || defaultUrls.openai;
     },
@@ -184,12 +185,19 @@ os.registerApp({
                             <option value="openai" ${this.apiProvider === 'openai' ? 'selected' : ''}>OpenAI</option>
                             <option value="anthropic" ${this.apiProvider === 'anthropic' ? 'selected' : ''}>Anthropic (Claude)</option>
                             <option value="google" ${this.apiProvider === 'google' ? 'selected' : ''}>Google (Gemini)</option>
+                            <option value="openrouter" ${this.apiProvider === 'openrouter' ? 'selected' : ''}>OpenRouter</option>
                         </select>
 
                         <label>Model:</label>
                         <select id="ai-model">
                             ${this.getModelOptions()}
                         </select>
+
+                        <div id="ai-custom-model-group" style="display: ${this.apiProvider === 'openrouter' ? 'block' : 'none'};">
+                            <label>Custom Model ID (optional):</label>
+                            <input type="text" id="ai-custom-model" placeholder="e.g. mistralai/mistral-large" value="">
+                            <small style="color: #666;">Enter any OpenRouter model ID, or leave empty to use the selected model above</small>
+                        </div>
 
                         <label>API Endpoint (optional):</label>
                         <input type="text" id="ai-base-url" placeholder="${this.getDefaultBaseUrl(this.apiProvider)}" value="${this.baseUrl}">
@@ -207,20 +215,26 @@ os.registerApp({
                             <li><strong>OpenAI:</strong> <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a></li>
                             <li><strong>Anthropic:</strong> <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com/settings/keys</a></li>
                             <li><strong>Google:</strong> <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a></li>
+                            <li><strong>OpenRouter:</strong> <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a></li>
                         </ul>
-                        <p class="ai-privacy-note">🔒 Your API key is stored locally in your browser and never sent to our servers.</p>
+                        <p class="ai-privacy-note">🔒 Your API key is stored in your browser's localStorage only. There is no server-side interaction — all API calls are made directly from your browser to the provider.</p>
                     </div>
                 </div>
             </div>
         `;
     },
 
-    getModelOptions() {
-        const models = {
-            'openai': ['gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-            'anthropic': ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'],
-            'google': ['gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-pro']
+    getProviderModels() {
+        return {
+            'openai': ['gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o', 'gpt-4o-mini'],
+            'anthropic': ['claude-sonnet-4-6-20250514', 'claude-opus-4-6-20250514', 'claude-haiku-4-5-20251001', 'claude-3-5-sonnet-20241022'],
+            'google': ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'],
+            'openrouter': ['anthropic/claude-sonnet-4-6', 'anthropic/claude-haiku-4-5', 'google/gemini-2.5-pro', 'google/gemini-2.5-flash', 'openai/gpt-5', 'openai/gpt-4.1', 'meta-llama/llama-4-maverick', 'deepseek/deepseek-r1']
         };
+    },
+
+    getModelOptions() {
+        const models = this.getProviderModels();
 
         const providerModels = models[this.apiProvider] || models.openai;
         return providerModels.map(model =>
@@ -233,14 +247,15 @@ os.registerApp({
         this.apiProvider = provider;
         const modelSelect = document.getElementById('ai-model');
         const baseUrlInput = document.getElementById('ai-base-url');
+        const customModelGroup = document.getElementById('ai-custom-model-group');
 
-        const models = {
-            'openai': ['gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o', 'gpt-4o-mini', 'gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-            'anthropic': ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'],
-            'google': ['gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-pro']
-        };
-
+        const models = this.getProviderModels();
         const providerModels = models[provider] || models.openai;
+
+        // Show/hide custom model input for OpenRouter
+        if (customModelGroup) {
+            customModelGroup.style.display = provider === 'openrouter' ? 'block' : 'none';
+        }
         modelSelect.innerHTML = providerModels.map(model =>
             `<option value="${model}">${model}</option>`
         ).join('');
@@ -254,12 +269,18 @@ os.registerApp({
     saveConfig() {
         const apiKey = document.getElementById('ai-api-key').value.trim();
         const provider = document.getElementById('ai-provider').value;
-        const model = document.getElementById('ai-model').value;
+        let model = document.getElementById('ai-model').value;
         const baseUrl = document.getElementById('ai-base-url').value.trim();
+        const customModel = document.getElementById('ai-custom-model')?.value.trim();
 
         if (!apiKey) {
             alert('Please enter an API key');
             return;
+        }
+
+        // Use custom model if provided (for OpenRouter)
+        if (customModel) {
+            model = customModel;
         }
 
         this.saveApiKey(apiKey);
@@ -426,6 +447,8 @@ os.registerApp({
             return await this.callAnthropic(message);
         } else if (this.apiProvider === 'google') {
             return await this.callGoogle(message);
+        } else if (this.apiProvider === 'openrouter') {
+            return await this.callOpenRouter(message);
         }
     },
 
@@ -484,6 +507,35 @@ os.registerApp({
 
         const data = await response.json();
         return data.content[0].text;
+    },
+
+    async callOpenRouter(message) {
+        const url = this.getEffectiveBaseUrl();
+        const maxTokens = this.getModelTokenLimit();
+        const conversationHistory = this.trimConversationHistory(maxTokens);
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.apiKey}`
+            },
+            body: JSON.stringify({
+                model: this.model,
+                messages: [
+                    { role: 'system', content: 'You are a helpful assistant.' },
+                    ...conversationHistory.map(m => ({ role: m.role, content: m.content }))
+                ]
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error?.message || 'API request failed');
+        }
+
+        const data = await response.json();
+        return data.choices[0].message.content;
     },
 
     async callGoogle(message) {
