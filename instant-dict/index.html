@@ -1,0 +1,3996 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>萬能通 OMNI-DICT OD-2026</title>
+<style>
+  :root {
+    --body: #2a2a2c;
+    --body-edge: #131314;
+    --body-hi: #3b3b3e;
+    --legend: #d8d8d8;
+    --legend-dim: #8c8c8c;
+    --bopomofo: #d44a3c;
+    --cangjie:  #56a35a;
+    --orange:   #e66a16;
+    --power:    #c0271e;
+    --rose:     #b04657;
+
+    --lcd-bg:    #9aa861;
+    --lcd-bg-2:  #8a995a;
+    --lcd-ink:   #131806;
+    --lcd-ghost: rgba(19, 24, 6, 0.18);
+    --lcd-frame: #1a1a1a;
+
+    --felt: #8a1816;
+
+    --col: 42px;
+    --gap: 4px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue",
+                 "Noto Sans CJK TC", "PingFang TC", "Microsoft JhengHei",
+                 system-ui, sans-serif;
+    color: #eee;
+    background-image:
+      radial-gradient(ellipse at center, #b22221 0%, #6c0e0d 70%, #3a0707 100%),
+      repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0 2px, transparent 2px 4px),
+      repeating-linear-gradient(-45deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 4px);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  /* Device */
+  /* Responsive wrapper: keeps the device pixel-perfect at 720px and scales
+     it down via CSS transform on narrower viewports. JS hook below sets
+     --device-scale + the wrapper's height so the body doesn't end up with
+     dead scroll space below the visually shrunken device. */
+  .device-fit {
+    width: 720px;
+    max-width: 100%;
+    margin: 0 auto;
+    transform-origin: top left;
+  }
+  .device-fit > .device { transform-origin: top left; }
+  .device {
+    background: linear-gradient(160deg, var(--body-hi) 0%, var(--body) 30%, #1f1f21 100%);
+    border-radius: 18px;
+    padding: 16px 18px 20px;
+    box-shadow:
+      0 28px 60px rgba(0,0,0,0.6),
+      0 4px 0 var(--body-edge),
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      inset 0 -2px 0 rgba(0,0,0,0.4);
+    /* fixed width so long LCD content can't grow the device frame */
+    width: 720px;
+    margin: 0 auto;
+  }
+  @media (max-width: 740px) {
+    body { padding: 8px; align-items: flex-start; }
+  }
+
+  /* Lid */
+  .lid {
+    position: relative;
+    background: linear-gradient(180deg, #34343a 0%, #1f1f23 100%);
+    border-radius: 12px;
+    padding: 12px 16px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "brand   speaker"
+      "screen  speaker"
+      "tag     speaker";
+    gap: 6px 14px;
+  }
+  .brand {
+    grid-area: brand;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    color: var(--legend);
+  }
+  .brand .cn { font-size: 20px; font-weight: 700; }
+  .brand .en {
+    font-size: 12px; font-weight: 600;
+    color: #c8c8c8;
+    letter-spacing: 0.32em;
+  }
+  .brand .en .dot { color: #6b6b6b; padding: 0 2px; }
+  .lid .model {
+    position: absolute; right: 100px; top: 14px;
+    color: #cfcfcf; font-size: 11px; letter-spacing: 0.08em;
+  }
+  .lid .tag {
+    grid-area: tag;
+    color: #b8b8b8; font-size: 11px; letter-spacing: 0.04em;
+  }
+
+  .speaker {
+    grid-area: speaker;
+    width: 84px;
+    background:
+      radial-gradient(circle at 2px 2px, #555 1.2px, transparent 1.6px) 0 0/8px 8px,
+      linear-gradient(180deg, #2a2a2c, #18181a);
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    align-self: stretch;
+    position: relative;
+  }
+  /* speaker grille is decoration only — no fake feature labels. */
+
+  /* LCD */
+  .screen-wrap {
+    grid-area: screen;
+    background: var(--lcd-frame);
+    border-radius: 4px;
+    padding: 6px;
+    box-shadow:
+      inset 0 2px 5px rgba(0,0,0,0.7),
+      0 1px 0 rgba(255,255,255,0.05);
+  }
+  #screen {
+    background: linear-gradient(180deg, var(--lcd-bg) 0%, var(--lcd-bg-2) 100%);
+    border-radius: 2px;
+    padding: 10px 14px;
+    min-height: 240px;
+    color: var(--lcd-ink);
+    font-family: "Menlo", "Consolas", "DejaVu Sans Mono", monospace;
+    font-size: 14px;
+    line-height: 1.45;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 18px rgba(0,0,0,0.18);
+  }
+  #screen::before {
+    content: "";
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(19,24,6,0.05) 0 1px, transparent 1px 2px),
+      repeating-linear-gradient(90deg, rgba(19,24,6,0.05) 0 1px, transparent 1px 2px);
+    mix-blend-mode: multiply;
+  }
+  #screen.is-off { background: #2c3122; }
+  #screen.is-off > * { visibility: hidden; }
+  #screen.is-off::before { display: none; }
+
+  .lcd-status {
+    display: flex; justify-content: space-between;
+    border-bottom: 1px dashed var(--lcd-ghost);
+    padding-bottom: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+  .status-mid { opacity: 0.85; }
+
+  .lcd-input {
+    margin: 6px 0 4px;
+    font-size: 16px;
+    font-family: "Menlo", monospace;
+    font-weight: 700;
+    border-bottom: 1px solid var(--lcd-ghost);
+    padding-bottom: 4px;
+    min-height: 24px;
+    word-break: break-all;
+  }
+  .lcd-input.right { text-align: right; }
+  /* Modes that don't use the search-style input row hide the caret bar entirely. */
+  .is-game-mode .lcd-input,
+  .is-menu-mode .lcd-input,
+  .is-welcome-mode .lcd-input,
+  .is-cndict-mode .lcd-input,
+  .is-poem-mode .lcd-input,
+  .is-calc-mode .lcd-input { display: none; }
+
+  /* Chinese IME bar (中辭 / 唐詩) */
+  .ime-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px;
+    margin: 4px 0 6px;
+    border: 1px dashed var(--lcd-ghost);
+    border-radius: 3px;
+    font-size: 11px;
+    line-height: 1.4;
+    flex-wrap: wrap;
+    /* Span both columns when nested inside the lcd-body grid (poem mode). */
+    grid-column: 1 / -1;
+  }
+  .ime-tag {
+    display: inline-block;
+    background: var(--lcd-ink); color: var(--lcd-bg);
+    padding: 1px 6px; border-radius: 2px;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+    font-weight: 700; font-size: 10px;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+  }
+  .ime-buf {
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    min-width: 24px;
+  }
+  .ime-cands { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+  .ime-cand {
+    cursor: pointer;
+    font-family: "Noto Serif CJK TC","Songti TC",serif;
+    font-weight: 600;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  .ime-cand:hover { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .ime-tip, .ime-tip-inline { opacity: 0.55; font-size: 10px; letter-spacing: 0.06em; }
+
+  /* IME key on the keyboard — two-line label (mode + current method) */
+  .key--ime { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; line-height: 1.05; }
+  .key--ime .ime-key-l1 { font-size: 11px; }
+  .key--ime .ime-key-l2 { font-size: 10px; opacity: 0.7; letter-spacing: 0.04em; }
+  .key--ime.is-on { background: linear-gradient(180deg, #4a7a4a, #355a35); color: #e8ffe8; }
+  .key--ime.is-on .ime-key-l2 { opacity: 0.9; }
+  .lcd-input .caret {
+    display: inline-block; width: 8px;
+    background: var(--lcd-ink); color: var(--lcd-bg);
+    animation: blink 1s steps(2, start) infinite;
+  }
+  @keyframes blink { to { opacity: 0; } }
+
+  .lcd-body {
+    display: grid;
+    grid-template-columns: 36% 1fr;
+    gap: 8px;
+    height: 158px;
+    min-width: 0;
+  }
+  .lcd-body.single { grid-template-columns: 1fr; }
+  .lcd-list, .lcd-detail { min-width: 0; }   /* allow shrinking inside grid */
+  .lcd-list { overflow-y: auto; border-right: 1px dashed var(--lcd-ghost); padding-right: 4px; }
+  .lcd-body.single .lcd-list { border-right: none; }
+  .lcd-detail { overflow-y: auto; overflow-wrap: anywhere; word-break: break-word; }
+  .lcd-list ol { list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.5; }
+  .lcd-list li {
+    padding: 0 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .lcd-list li.is-sel  { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .lcd-list li.is-exact { font-weight: 700; }
+  .lcd-list .empty { opacity: 0.55; padding: 4px; }
+
+  .lcd-detail { padding: 0 2px; overflow-y: auto; }
+  .lcd-detail .head {
+    font-size: 16px; font-weight: 700;
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  }
+  .lcd-detail .pos {
+    font-size: 10px; opacity: 0.75;
+    border: 1px solid var(--lcd-ink); border-radius: 2px; padding: 0 4px;
+  }
+  .lcd-detail .py { font-size: 11px; opacity: 0.7; }
+  .lcd-detail .ipa {
+    font-family: "Charis SIL","Doulos SIL","Lucida Sans Unicode","DejaVu Sans",serif;
+    font-size: 13px;
+    opacity: 0.85;
+    padding: 0 2px;
+  }
+  .lcd-detail .ipa-line {
+    font-size: 11px;
+    margin-top: 1px;
+    opacity: 0.85;
+  }
+  .lcd-detail .gloss {
+    font-size: 14px; margin-top: 2px;
+    font-family: "Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  }
+  .lcd-detail .ex {
+    margin-top: 4px; font-size: 11px;
+    border-top: 1px dashed var(--lcd-ghost); padding-top: 4px;
+    line-height: 1.45;
+  }
+  .lcd-detail .ex .zh {
+    font-family: "Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  }
+  .lcd-detail .variants {
+    margin-top: 4px;
+    font-size: 11px;
+    opacity: 0.65;
+    font-family: "Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  }
+  .lcd-detail .panel-title {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin-top: 4px; border-bottom: 1px dashed var(--lcd-ghost); padding-bottom: 2px;
+  }
+  .lcd-detail .suggest { margin-top: 6px; line-height: 1.7; }
+  .lcd-detail .sugg {
+    display: inline-block;
+    border: 1px solid var(--lcd-ink);
+    padding: 1px 6px;
+    margin: 0 4px 2px 0;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: "Menlo", monospace;
+    font-size: 12px;
+  }
+  .lcd-detail .sugg:hover { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .lcd-detail .cn-def {
+    font-size: 13px; line-height: 1.55; margin-top: 4px;
+    font-family: "Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  }
+
+  /* Boot splash + main menu */
+  .boot-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2px 0;
+    font-family: "Menlo","Courier New",monospace;
+  }
+  .boot-zh {
+    font-family: "Noto Serif CJK TC","Songti TC","Source Han Serif TC",serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--lcd-ink);
+    margin-bottom: 1px;
+  }
+  .boot-frame {
+    border: 1px dashed var(--lcd-ink);
+    border-radius: 2px;
+    padding: 4px 14px 5px;
+    margin: 0;
+    color: var(--lcd-ink);
+    opacity: 0.92;
+    text-align: center;
+    min-width: 280px;
+  }
+  .boot-row { line-height: 1.35; }
+  .boot-row-mono {
+    font-family: "Menlo","Courier New",monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+  .boot-row-sub { opacity: 0.75; }
+  .boot-row-zh {
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+  .boot-tag {
+    margin-top: 4px;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+    font-size: 9px;
+    opacity: 0.7;
+    letter-spacing: 0.06em;
+  }
+  .boot-status {
+    margin-top: 4px;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    opacity: 0.7;
+  }
+  .boot-cursor {
+    display: inline-block;
+    animation: blink 0.6s steps(2) infinite;
+  }
+  @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } }
+
+  .menu-screen {
+    height: 100%;
+    padding: 0 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+  }
+  .menu-tabs {
+    display: flex;
+    gap: 3px;
+    border-bottom: 1px solid var(--lcd-ink);
+    padding-bottom: 1px;
+  }
+  .menu-tab {
+    border: 1px solid var(--lcd-ink);
+    padding: 0 7px;
+    border-radius: 3px 3px 0 0;
+    border-bottom: none;
+    cursor: pointer;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    background: rgba(0,0,0,0.04);
+    transition: background 0.1s;
+  }
+  .menu-tab:hover { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .menu-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: 1fr;
+    gap: 0 5px;
+  }
+  .menu-row {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1px;
+    padding: 4px 2px;
+    border-radius: 3px;
+    border: 1px solid var(--lcd-ghost);
+    cursor: pointer;
+    transition: background 0.08s, color 0.08s, border-color 0.08s;
+    text-align: center;
+    overflow: hidden;
+  }
+  .menu-row:hover { background: var(--lcd-ink); color: var(--lcd-bg); border-color: var(--lcd-ink); }
+  .menu-row.is-sel { background: var(--lcd-ink); color: var(--lcd-bg); border-color: var(--lcd-ink); }
+  .menu-row-n { font-family: "Menlo", monospace; font-size: 9px; opacity: 0.55; }
+  .menu-row.is-sel .menu-row-n { opacity: 1; }
+  .menu-row-zh { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; line-height: 1.05; }
+  .menu-row-sub { font-size: 8px; opacity: 0.55; line-height: 1.1; }
+  .menu-row.is-sel .menu-row-sub { opacity: 1; }
+  .menu-tip {
+    margin-top: 4px;
+    text-align: center;
+    font-size: 9px;
+    opacity: 0.55;
+    letter-spacing: 0.1em;
+  }
+
+  /* 百科 — Wikipedia summary mode */
+  .wiki-menu {
+    padding: 6px 4px;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+    overflow-y: auto;
+    height: 100%;
+  }
+  .wiki-menu-title {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    opacity: 0.7;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .wiki-cat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px 6px;
+  }
+  .wiki-cat {
+    border: 1px solid var(--lcd-ghost);
+    border-radius: 3px;
+    padding: 5px 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+  }
+  .wiki-cat:hover { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .wiki-cat-label { font-size: 11px; letter-spacing: 0.04em; }
+  .wiki-cat-count { font-size: 9px; opacity: 0.6; margin-top: 1px; }
+  .wiki-menu-tip {
+    margin-top: 6px;
+    text-align: center;
+    font-size: 9px;
+    opacity: 0.5;
+    letter-spacing: 0.1em;
+  }
+  .wiki-list-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px dashed var(--lcd-ghost);
+    padding-bottom: 2px;
+    margin-bottom: 3px;
+    font-size: 10px;
+  }
+  .wiki-back { cursor: pointer; opacity: 0.7; letter-spacing: 0.06em; }
+  .wiki-back:hover { opacity: 1; }
+  .wiki-cat-chip {
+    border: 1px solid var(--lcd-ghost);
+    padding: 0 4px;
+    border-radius: 2px;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+  }
+
+  .wiki-body {
+    font-family: "Noto Sans CJK TC","PingFang TC","Helvetica Neue",sans-serif;
+    overflow-y: auto;
+  }
+  .wiki-body .head {
+    font-size: 14px;
+    border-bottom: 1px dashed var(--lcd-ghost);
+    padding-bottom: 3px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .wiki-zh-title { font-size: 13px; opacity: 0.85; }
+  .wiki-tab {
+    font-size: 10px;
+    border: 1px solid var(--lcd-ghost);
+    border-radius: 2px;
+    padding: 0 3px;
+    margin-left: 2px;
+    cursor: pointer;
+    opacity: 0.6;
+  }
+  .wiki-tab:hover { opacity: 1; }
+  .wiki-tab.is-on {
+    background: var(--lcd-ink);
+    color: var(--lcd-bg);
+    opacity: 1;
+  }
+  .wiki-desc { font-size: 10px; opacity: 0.7; margin-bottom: 3px; letter-spacing: 0.04em; }
+  .wiki-section { margin-top: 4px; }
+  .wiki-section .panel-sub {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    opacity: 0.6;
+    margin-bottom: 1px;
+  }
+  .wiki-ext { font-size: 11px; line-height: 1.55; }
+  .wiki-source {
+    margin-top: 6px;
+    font-size: 9px;
+    opacity: 0.45;
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* 遊戲 — mini word games */
+  .game-screen {
+    height: 100%;
+    padding: 0 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+  }
+  .game-title {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    opacity: 0.8;
+    text-align: center;
+    border-bottom: 1px dashed var(--lcd-ghost);
+    padding-bottom: 2px;
+    margin-bottom: 3px;
+  }
+  .game-cards {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+  .game-card {
+    border: 1px solid var(--lcd-ink);
+    border-radius: 3px;
+    padding: 6px 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+  }
+  .game-card:hover { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .game-card-zh { font-size: 17px; font-weight: 700; letter-spacing: 0.12em; }
+  .game-card-en { font-size: 9px; opacity: 0.6; letter-spacing: 0.06em; }
+
+  .game-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    border-bottom: 1px dashed var(--lcd-ghost);
+    padding-bottom: 2px;
+  }
+  .game-bar .game-back, .game-bar .game-new {
+    cursor: pointer;
+    opacity: 0.7;
+    letter-spacing: 0.04em;
+  }
+  .game-bar .game-back:hover, .game-bar .game-new:hover { opacity: 1; }
+  .game-name { font-weight: 700; letter-spacing: 0.18em; }
+
+  .game-q {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin: 4px 0;
+  }
+  .game-q .ipa { font-size: 12px; font-weight: 400; opacity: 0.7; margin-left: 6px; }
+
+  .game-opts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px 6px;
+  }
+  .game-opt {
+    border: 1px solid var(--lcd-ghost);
+    border-radius: 2px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.1s, border-color 0.1s, color 0.1s;
+  }
+  .game-opt:hover { border-color: var(--lcd-ink); }
+  .game-opt.is-right { background: var(--lcd-ink); color: var(--lcd-bg); border-color: var(--lcd-ink); }
+  .game-opt.is-wrong { opacity: 0.4; text-decoration: line-through; }
+  .game-opt-cn { font-size: 16px; font-weight: 700; text-align: center; font-family: "Noto Serif CJK TC","Songti TC",serif; }
+
+  .game-next {
+    text-align: center;
+    margin-top: 2px;
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--orange);
+    letter-spacing: 0.06em;
+  }
+  .game-next:hover { filter: brightness(1.2); }
+
+  .game-hangman-word {
+    text-align: center;
+    font-family: "Menlo","Courier New",monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    margin: 4px 0 2px;
+  }
+  .game-hint  { text-align: center; font-size: 11px; opacity: 0.75; }
+  .game-reveal { text-align: center; font-size: 13px; font-weight: 700; }
+  .game-sub { font-size: 10px; opacity: 0.6; text-align: center; letter-spacing: 0.2em; margin-top: 6px; }
+  .game-tip { font-size: 9px; opacity: 0.5; text-align: center; letter-spacing: 0.1em; margin-top: 8px; }
+
+  .game-tiles {
+    text-align: center;
+    margin: 5px 0 3px;
+    letter-spacing: 0.18em;
+  }
+  .game-tile {
+    display: inline-block;
+    width: 24px; height: 24px; line-height: 24px;
+    margin: 0 2px;
+    border: 1px solid var(--lcd-ink);
+    border-radius: 3px;
+    font-family: "Menlo", monospace;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .game-input-line {
+    text-align: center;
+    margin-top: 4px;
+    font-size: 12px;
+  }
+  .game-input {
+    font-family: "Menlo", monospace;
+    letter-spacing: 0.15em;
+  }
+  .game-ok  { text-align: center; color: var(--lcd-ink); font-weight: 700; margin-top: 3px; }
+  .game-bad { text-align: center; opacity: 0.85; margin-top: 3px; font-size: 11px; }
+
+  /* History overlay */
+  .hist-section-title {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    opacity: 0.7;
+    border-bottom: 1px dashed var(--lcd-ghost);
+    padding-bottom: 2px;
+    margin: 4px 0 2px;
+  }
+  .hist-list { list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.6; }
+  .hist-list li {
+    cursor: pointer;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+  }
+  .hist-list li:hover { background: var(--lcd-ink); color: var(--lcd-bg); }
+
+  /* Click-to-speak indicator */
+  .speakable { cursor: pointer; transition: background 0.1s; border-radius: 2px; }
+  .speakable:hover {
+    background: var(--lcd-ink);
+    color: var(--lcd-bg);
+  }
+
+  /* 中辭 — radical/stroke browser */
+  #lcd-body.cn-mode {
+    display: block;
+    padding: 0 6px;
+    overflow: auto;
+  }
+  .cn-menu {
+    padding: 16px 6px 4px;
+    text-align: center;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+  }
+  .cn-title { font-size: 14px; letter-spacing: 0.18em; opacity: 0.75; margin-bottom: 14px; }
+  .cn-cards { display: flex; gap: 12px; justify-content: center; }
+  .cn-card {
+    border: 1px solid var(--lcd-ink);
+    border-radius: 4px;
+    padding: 14px 22px;
+    cursor: pointer;
+    background: rgba(0,0,0,0.04);
+    transition: background 0.12s;
+  }
+  .cn-card:hover { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .cn-card-head { font-size: 18px; font-weight: 700; }
+  .cn-card-sub  { font-size: 10px; opacity: 0.7; margin-top: 4px; letter-spacing: 0.05em; }
+  .cn-tip { font-size: 10px; opacity: 0.55; margin-top: 12px; }
+
+  .cn-pick {
+    padding: 4px 0;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+  }
+  .cn-pick-title {
+    font-size: 11px; letter-spacing: 0.16em; opacity: 0.7;
+    border-bottom: 1px dashed var(--lcd-ghost);
+    padding-bottom: 3px; margin-bottom: 4px;
+  }
+  .cn-pick-body {
+    max-height: 130px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  .cn-rad-row {
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    gap: 2px 6px;
+    line-height: 1.5;
+    margin-bottom: 1px;
+  }
+  .cn-rad-label {
+    font-size: 10px; opacity: 0.6;
+    width: 32px; flex: 0 0 32px;
+    letter-spacing: 0.05em;
+  }
+  .cn-rad, .cn-cell {
+    display: inline-block;
+    font-size: 14px;
+    padding: 0 3px;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .cn-rad:hover, .cn-cell:hover { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .cn-cell.is-sel { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .cn-stk-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+  }
+  .cn-stk {
+    border: 1px solid var(--lcd-ghost);
+    padding: 4px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .cn-stk i { opacity: 0.55; font-style: normal; font-size: 10px; }
+  .cn-stk:hover { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .cn-back {
+    font-size: 11px;
+    opacity: 0.6;
+    cursor: pointer;
+    margin-top: 4px;
+    padding: 2px 4px;
+    display: inline-block;
+  }
+  .cn-back:hover { opacity: 1; }
+
+  .cn-list-wrap {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 8px;
+    height: 130px;
+  }
+  .cn-list-pane { overflow-y: auto; }
+  .cn-detail-pane {
+    border-left: 1px dashed var(--lcd-ghost);
+    padding-left: 8px;
+    overflow-y: auto;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+  }
+  .cn-glyph {
+    font-size: 42px; line-height: 1;
+    text-align: center; margin: 2px 0 4px;
+    font-family: "Noto Serif CJK TC","Songti TC","Source Han Serif TC",serif;
+  }
+  .cn-meta {
+    display: flex; gap: 6px; font-size: 10px; opacity: 0.7;
+    justify-content: center; margin-bottom: 4px;
+  }
+  .cn-readings {
+    text-align: center; font-size: 11px;
+    margin-bottom: 4px;
+  }
+  .cn-readings .py { margin-right: 6px; }
+  .cn-readings .bp { letter-spacing: 0.05em; }
+  .cn-readings .cn-alt { display:block; font-size: 10px; opacity: 0.6; margin-top: 2px; }
+  .cn-detail-pane .cn-def, .cn-detail-only .cn-def {
+    font-size: 12px; line-height: 1.55;
+  }
+  .cn-empty { opacity: 0.5; text-align: center; padding: 20px 0; }
+  .cn-detail-only { padding: 8px 6px; font-family: "Noto Sans CJK TC","PingFang TC",sans-serif; }
+
+  /* Poem */
+  .poem-body {
+    font-family: "Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",serif;
+    font-size: 13px; line-height: 1.7; padding: 0 4px;
+  }
+  .poem-body .title { font-size: 15px; font-weight: 700; }
+  .poem-body .author { font-size: 11px; opacity: 0.7; margin-bottom: 4px; }
+  .poem-body .line {
+    letter-spacing: 0.08em;
+    padding: 1px 4px;
+    border-radius: 2px;
+    transition: background 0.18s, color 0.18s;
+  }
+  /* Karaoke-style highlight on the active line during TTS playback. */
+  .poem-body .is-speaking {
+    background: var(--lcd-ink);
+    color: var(--lcd-bg);
+    box-shadow: 0 0 0 1px var(--lcd-ink);
+  }
+  /* Quick-filter author chips above the poem list. */
+  .author-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 4px;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--lcd-ghost);
+  }
+  .author-chip {
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+    font-size: 10px;
+    line-height: 1;
+    border: 1px solid var(--lcd-ink);
+    padding: 2px 5px;
+    border-radius: 2px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .author-chip i {
+    font-style: normal;
+    opacity: 0.55;
+    font-size: 9px;
+    margin-left: 2px;
+  }
+  .author-chip:hover { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .author-chip:hover i { color: var(--lcd-bg); }
+  .author-chip.is-on { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .author-chip.is-on i { color: var(--lcd-bg); }
+
+  /* Calc */
+  .calc-display { padding: 2px 4px; }
+  .calc-display .expr {
+    text-align: right;
+    font-size: 16px;
+    min-height: 22px;
+    word-break: break-all;
+    border-bottom: 1px dashed var(--lcd-ghost);
+    padding-bottom: 4px;
+  }
+  .calc-display .res {
+    text-align: right;
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 6px;
+    word-break: break-all;
+  }
+  .calc-display .hint {
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 1.6;
+    opacity: 0.75;
+    border-top: 1px dashed var(--lcd-ghost);
+    padding-top: 6px;
+  }
+  .calc-display .hint b { font-family: "Menlo", monospace; }
+
+  .badge {
+    display: inline-block;
+    border: 1px solid var(--lcd-ink);
+    padding: 0 4px; font-size: 10px;
+    margin: 2px 4px 0 0; border-radius: 2px;
+  }
+
+  .lcd-flash {
+    position: absolute; right: 8px; top: 4px;
+    font-size: 10px;
+    background: var(--lcd-ink); color: var(--lcd-bg);
+    padding: 1px 4px; letter-spacing: 0.18em;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .lcd-flash.show { opacity: 1; }
+
+  .voice-strip {
+    position: absolute; bottom: 4px; right: 8px;
+    font-size: 9px; letter-spacing: 0.12em;
+    opacity: 0.65;
+    font-family: "Menlo", monospace;
+  }
+  /* Hide voice strip on launcher screens where it overlaps cards. */
+  .lcd:has(.menu-screen) .voice-strip,
+  .lcd:has(.boot-screen) .voice-strip { display: none; }
+
+  /* Base */
+  .base {
+    margin-top: 12px;
+    padding: 14px 12px 10px;
+    background: linear-gradient(180deg, #2c2c30 0%, #1d1d20 100%);
+    border-radius: 12px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+  }
+  .kb {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .kb-main {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    /* All rows are 13-col grids of identical width, so kb-main hugs the
+       row-grid (13×48 + 12×5 = 684px) without expanding. */
+    width: calc(13 * var(--col) + 12 * var(--gap));
+  }
+  /* Side column stretches to match kb-main height; inner keys flex equally
+     so the column never has dead space. */
+  .kb-side {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: stretch;
+  }
+  .kb-side .key { flex: 1 1 0; min-height: 28px; }
+
+  .lang-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: nowrap;
+    /* Pin to kb-main width so it can't bleed into the side column. */
+    width: calc(13 * var(--col) + 12 * var(--gap));
+    overflow: hidden;
+  }
+  .lang-row .gap { width: 6px; }
+  .lang-row .label {
+    color: var(--legend-dim);
+    font-size: 9px;
+    letter-spacing: 0.10em;
+    margin: 0 2px;
+  }
+
+  .row-grid {
+    display: grid;
+    grid-template-columns: repeat(13, var(--col));
+    gap: var(--gap);
+    align-items: end;
+  }
+
+  /* Key base */
+  .key {
+    height: 32px;
+    border-radius: 5px;
+    background: linear-gradient(180deg, #4a4a4e 0%, #2e2e31 80%, #232327 100%);
+    color: var(--legend);
+    font: 600 13px/1 -apple-system, system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.10),
+      inset 0 -2px 0 rgba(0,0,0,0.45),
+      0 1px 0 rgba(0,0,0,0.4);
+    transition: transform 0.05s, box-shadow 0.05s, filter 0.05s;
+    text-align: center;
+    line-height: 1.05;
+  }
+  .key:hover { filter: brightness(1.08); }
+  .key.is-pressed,
+  .key:active {
+    transform: translateY(1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      inset 0 -1px 0 rgba(0,0,0,0.5);
+    filter: brightness(0.9);
+  }
+
+  .key .bopomofo {
+    position: absolute; top: 2px; right: 4px;
+    font: 600 9px/1 "Noto Sans CJK TC","PingFang TC",sans-serif;
+    color: var(--bopomofo); pointer-events: none;
+  }
+  .key .cangjie {
+    position: absolute; bottom: 2px; left: 4px;
+    font: 600 9px/1 "Noto Sans CJK TC","PingFang TC",sans-serif;
+    color: var(--cangjie); pointer-events: none;
+  }
+  .key .sub {
+    position: absolute; bottom: 2px; right: 4px;
+    font: 500 8px/1 -apple-system, system-ui, sans-serif;
+    color: var(--legend-dim); pointer-events: none;
+  }
+  .key .calc-hint {
+    position: absolute; top: 2px; left: 4px;
+    font: 600 9px/1 -apple-system, system-ui, sans-serif;
+    color: #f5b54e; pointer-events: none;
+  }
+  /* When calc mode is active, swap prominence: the orange operator becomes
+     the primary label, the alphabet letter steps back. */
+  .is-calc-mode .key .calc-hint {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 50%;
+    transform: translateY(50%);
+    text-align: center;
+    font-size: 16px;
+    color: var(--orange);
+  }
+  .is-calc-mode .key .bopomofo,
+  .is-calc-mode .key .cangjie,
+  .is-calc-mode .key .sub { opacity: 0.18; }
+
+  /* IME-aware key annotation emphasis. The active IME's hint pops; the others dim. */
+  .is-ime-zhuyin   .key .cangjie,
+  .is-ime-zhuyin   .key .calc-hint { opacity: 0.18; }
+  .is-ime-zhuyin   .key .bopomofo  { font-size: 12px; opacity: 1; }
+
+  .is-ime-cangjie  .key .bopomofo,
+  .is-ime-cangjie  .key .calc-hint { opacity: 0.18; }
+  .is-ime-cangjie  .key .cangjie   { font-size: 12px; opacity: 1; }
+
+  /* Pinyin/Jyutping use plain latin — dim the Chinese annotations so the letters lead. */
+  .is-ime-pinyin   .key .bopomofo,
+  .is-ime-pinyin   .key .cangjie,
+  .is-ime-pinyin   .key .calc-hint,
+  .is-ime-jyutping .key .bopomofo,
+  .is-ime-jyutping .key .cangjie,
+  .is-ime-jyutping .key .calc-hint { opacity: 0.2; }
+  .is-calc-mode .key[data-key]:not(.key--space):not(.key--func) {
+    color: rgba(216,216,216,0.25);
+    font-size: 10px;
+    align-items: flex-start;
+    padding-top: 1px;
+  }
+  .key--clear {
+    color: #ffd166;
+  }
+  .key--clear.is-armed {
+    background: linear-gradient(180deg, #c0271e 0%, #7a140d 100%);
+    color: #fff;
+  }
+
+  .s2 { grid-column: span 2; }
+  .s3 { grid-column: span 3; }
+  .s4 { grid-column: span 4; }
+
+  .key--lang {
+    height: 26px;
+    background: linear-gradient(180deg, #d6d6d4 0%, #b4b4b2 80%, #9c9c9a 100%);
+    color: #1a1a1a;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 0 rgba(0,0,0,0.25);
+    padding: 0 5px;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .key--lang .lang-mark { color: var(--cangjie); margin-right: 2px; font-weight: 700; }
+  .key--lang.is-active { background: linear-gradient(180deg,#7fa852,#587735); color:#fff; }
+  .key--lang.is-active .lang-mark { color: #fff; }
+  .key--mode { flex: 1 1 0; min-width: 0; padding: 0 4px; font-size: 11px; }
+  .key--mode.is-active { background: linear-gradient(180deg,#e66a16,#a14708); color:#fff; }
+
+  .key--func {
+    height: 36px;
+    background: linear-gradient(180deg, #404044 0%, #2a2a2d 100%);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    position: relative;
+  }
+  .key--accent {
+    background: linear-gradient(180deg, #4a3520 0%, #2d1f12 100%);
+  }
+  .key--accent.is-on {
+    background: linear-gradient(180deg, #f5b54e 0%, #b27c1f 100%);
+    color: #1a1a1a;
+  }
+  /* Tiny corner badge showing the keyboard shortcut letter */
+  .kshort {
+    position: absolute;
+    top: 1px;
+    right: 3px;
+    font-size: 8px;
+    color: var(--orange);
+    letter-spacing: 0;
+    opacity: 0.85;
+    font-family: "Menlo", monospace;
+  }
+  /* Function-row mode buttons get a tiny F-key hint */
+  .key--mode::after {
+    content: attr(data-fkey);
+    position: absolute;
+    top: 1px;
+    right: 3px;
+    font-size: 8px;
+    color: var(--orange);
+    opacity: 0.85;
+    font-family: "Menlo", monospace;
+    letter-spacing: 0;
+  }
+  .key--mode { position: relative; }
+  .key--space { font-size: 11px; letter-spacing: 0.18em; height: 36px; }
+  .key--power {
+    background: linear-gradient(180deg, #d8362b 0%, #9c1d14 100%);
+    color: #fff; font-size: 11px; letter-spacing: 0.06em;
+  }
+  .key--side {
+    background: linear-gradient(180deg, #e8e8e6 0%, #b6b6b4 100%);
+    color: #1a1a1a;
+    font-family: "Noto Sans CJK TC","PingFang TC",sans-serif;
+    font-size: 13px;
+  }
+  .key--side-accent {
+    background: linear-gradient(180deg, #c7a878 0%, #8c6b3a 100%);
+    color: #1a1a1a;
+    font-size: 12px;
+  }
+  .key--side-accent.is-on {
+    background: linear-gradient(180deg, #f5b54e 0%, #b27c1f 100%);
+  }
+  .key--side-home {
+    background: linear-gradient(180deg, #5a8c4f 0%, #2f5028 100%);
+    color: #fff;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+  .key--side-home:hover { filter: brightness(1.12); }
+  .key--side-back {
+    background: linear-gradient(180deg, #4f7a8c 0%, #28465a 100%);
+    color: #fff;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+  .key--side-back:hover { filter: brightness(1.12); }
+  .key--data {
+    background: linear-gradient(180deg, #404044 0%, #2a2a2d 100%);
+    color: var(--orange);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    height: 24px;
+    line-height: 1.1;
+  }
+  .key--shift {
+    background: linear-gradient(180deg, #5a5a5e 0%, #3a3a3d 100%);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    height: 36px;
+  }
+  .key--shift.is-on {
+    background: linear-gradient(180deg, #f5b54e 0%, #b27c1f 100%);
+    color: #1a1a1a;
+  }
+  .key--arrow { color: #fff; font-size: 14px; height: 36px; }
+
+  .kb-side .key { min-width: 68px; }
+
+  /* Compact d-pad: ◄ ▲▼(stacked) ► in a single row, all sharing the 36px
+     height of the rest of the bottom row so heights line up cleanly. */
+  .arrow-vstack {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    height: 36px;
+  }
+  .key--arrow-half {
+    height: 17px;
+    font-size: 11px;
+  }
+
+  .device-foot {
+    text-align: right;
+    font-size: 10px; color: #777;
+    letter-spacing: 0.18em;
+    margin-top: 8px; padding-right: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="device-fit" id="device-fit">
+<div class="device" role="application" aria-label="萬能通 OMNI-DICT OD-2026">
+
+  <!-- Lid -->
+  <div class="lid">
+    <div class="brand">
+      <span class="cn">萬能通</span>
+      <span class="en">OMNI<span class="dot">·</span>DICT</span>
+    </div>
+    <div class="model">OD-2026<sup style="font-size:8px">PRO</sup></div>
+
+    <div class="screen-wrap">
+      <div id="screen" aria-live="polite">
+        <div class="lcd-status">
+          <span id="mode-label">DICT  ENG → 中</span>
+          <span class="status-mid" id="status-mid">READY</span>
+          <span id="count-label">0/0</span>
+        </div>
+        <div class="lcd-input"><span id="echo"></span><span class="caret">&nbsp;</span></div>
+        <div class="lcd-body" id="lcd-body">
+          <!-- populated by render() -->
+        </div>
+        <div class="lcd-flash" id="flash"></div>
+        <div class="voice-strip" id="voice-strip">VOICES …</div>
+      </div>
+    </div>
+
+    <div class="speaker" aria-hidden="true"></div>
+    <div class="tag">English ⇄ Chinese · 中辭 · 唐詩三百首 · 計算機</div>
+  </div>
+
+  <!-- Base -->
+  <div class="base">
+    <div class="kb">
+
+      <!-- Main keyboard -->
+      <div class="kb-main">
+
+        <!-- Mode + language strip -->
+        <div class="lang-row">
+          <div class="key key--lang key--mode" data-action="mode" data-mode="dict"   data-fkey="F1">詞典</div>
+          <div class="key key--lang key--mode" data-action="mode" data-mode="cndict" data-fkey="F2">中辭</div>
+          <div class="key key--lang key--mode" data-action="mode" data-mode="poem"   data-fkey="F3">唐詩</div>
+          <div class="key key--lang key--mode" data-action="mode" data-mode="calc"   data-fkey="F4">計算</div>
+          <div class="key key--lang key--mode" data-action="mode" data-mode="wiki"   data-fkey="F5">百科</div>
+          <div class="key key--lang key--mode" data-action="mode" data-mode="game"   data-fkey="F6">遊戲</div>
+          <span class="gap"></span>
+          <span class="label">VOICE</span>
+          <div class="key key--lang" data-action="lang" data-lang="ENG"><span class="lang-mark">英</span>ENG</div>
+          <div class="key key--lang" data-action="lang" data-lang="MAN"><span class="lang-mark">國</span>MAN</div>
+          <div class="key key--lang" data-action="lang" data-lang="CAN"><span class="lang-mark">粵</span>CAN</div>
+        </div>
+
+        <!-- Numbers + 詞頭變化 / 混淆字 / 同音字 -->
+        <div class="row-grid">
+          <div class="key" data-key="1">1<span class="bopomofo">ㄅ</span></div>
+          <div class="key" data-key="2">2<span class="bopomofo">ㄉ</span></div>
+          <div class="key" data-key="3">3<span class="bopomofo">ˇ</span></div>
+          <div class="key" data-key="4">4<span class="bopomofo">ˋ</span></div>
+          <div class="key" data-key="5">5<span class="bopomofo">ㄓ</span></div>
+          <div class="key" data-key="6">6<span class="bopomofo">ˊ</span></div>
+          <div class="key" data-key="7">7<span class="bopomofo">˙</span></div>
+          <div class="key" data-key="8">8<span class="bopomofo">ㄚ</span></div>
+          <div class="key" data-key="9">9<span class="bopomofo">ㄞ</span></div>
+          <div class="key" data-key="0">0<span class="bopomofo">ㄢ</span></div>
+          <div class="key key--func" data-action="inflect">詞頭<br>變化</div>
+          <div class="key key--func" data-action="confuse">混淆字</div>
+          <div class="key key--func key--clear" data-action="clear">清除<br>CLR</div>
+        </div>
+
+        <!-- QWERTY top: Q-P + BS (BS spans 3 cols at right) -->
+        <div class="row-grid">
+          <div class="key" data-key="q"><span class="calc-hint">CLR</span>Q<span class="cangjie">手</span></div>
+          <div class="key" data-key="w"><span class="calc-hint">sin</span>W<span class="cangjie">田</span></div>
+          <div class="key" data-key="e"><span class="calc-hint">cos</span>E<span class="bopomofo">ㄍ</span><span class="cangjie">水</span></div>
+          <div class="key" data-key="r"><span class="calc-hint">tan</span>R<span class="bopomofo">ㄐ</span><span class="cangjie">口</span></div>
+          <div class="key" data-key="t"><span class="calc-hint">log</span>T<span class="bopomofo">ㄔ</span><span class="cangjie">廿</span></div>
+          <div class="key" data-key="y"><span class="calc-hint">ln</span>Y<span class="bopomofo">ㄗ</span><span class="cangjie">卜</span></div>
+          <div class="key" data-key="u"><span class="calc-hint">√</span>U<span class="bopomofo">ㄧ</span><span class="cangjie">山</span></div>
+          <div class="key" data-key="i"><span class="calc-hint">x²</span>I<span class="bopomofo">ㄛ</span><span class="cangjie">戈</span></div>
+          <div class="key" data-key="o"><span class="calc-hint">^</span>O<span class="bopomofo">ㄣ</span><span class="cangjie">人</span></div>
+          <div class="key" data-key="p"><span class="calc-hint">π</span>P<span class="bopomofo">ㄦ</span><span class="cangjie">心</span></div>
+          <div class="key key--func s3" data-action="bs">⌫ BACK</div>
+        </div>
+
+        <!-- A row: CAPS + A-L + apostrophe (extended) -->
+        <div class="row-grid">
+          <div class="key key--func s2" data-action="caps">CAPS</div>
+          <div class="key" data-key="a"><span class="calc-hint">+</span>A<span class="bopomofo">ㄇ</span><span class="cangjie">日</span></div>
+          <div class="key" data-key="s"><span class="calc-hint">−</span>S<span class="bopomofo">ㄋ</span><span class="cangjie">尸</span></div>
+          <div class="key" data-key="d"><span class="calc-hint">×</span>D<span class="bopomofo">ㄎ</span><span class="cangjie">木</span></div>
+          <div class="key" data-key="f"><span class="calc-hint">÷</span>F<span class="bopomofo">ㄑ</span><span class="cangjie">火</span></div>
+          <div class="key" data-key="g"><span class="calc-hint">(</span>G<span class="bopomofo">ㄕ</span><span class="cangjie">土</span></div>
+          <div class="key" data-key="h"><span class="calc-hint">)</span>H<span class="bopomofo">ㄘ</span><span class="cangjie">竹</span></div>
+          <div class="key" data-key="j"><span class="calc-hint">e</span>J<span class="bopomofo">ㄨ</span><span class="cangjie">十</span></div>
+          <div class="key" data-key="k"><span class="calc-hint">%</span>K<span class="bopomofo">ㄜ</span><span class="cangjie">大</span></div>
+          <div class="key" data-key="l"><span class="calc-hint">±</span>L<span class="bopomofo">ㄤ</span><span class="cangjie">中</span></div>
+          <div class="key s2" data-key="'">'<span class="bopomofo">、</span></div>
+        </div>
+
+        <!-- Z row: SHIFT + Z-M + , . + ENTER -->
+        <div class="row-grid">
+          <div class="key key--shift s2" data-action="shift">SHIFT</div>
+          <div class="key" data-key="z">Z<span class="bopomofo">ㄈ</span><span class="cangjie">重</span></div>
+          <div class="key" data-key="x">X<span class="bopomofo">ㄌ</span><span class="cangjie">難</span></div>
+          <div class="key" data-key="c">C<span class="bopomofo">ㄏ</span><span class="cangjie">金</span></div>
+          <div class="key" data-key="v">V<span class="bopomofo">ㄒ</span><span class="cangjie">女</span></div>
+          <div class="key" data-key="b">B<span class="bopomofo">ㄖ</span><span class="cangjie">月</span></div>
+          <div class="key" data-key="n">N<span class="bopomofo">ㄩ</span><span class="cangjie">弓</span></div>
+          <div class="key" data-key="m">M<span class="bopomofo">ㄝ</span><span class="cangjie">一</span></div>
+          <div class="key" data-key=",">,</div>
+          <div class="key" data-key=".">.</div>
+          <div class="key key--func s2" data-action="enter">ENTER ↵</div>
+        </div>
+
+        <!-- Function row: 中／英 / 辭典切換 / 輸入法 / SPACE / 衍生字 -->
+        <div class="row-grid">
+          <div class="key key--func s2" data-action="dir">中／英</div>
+          <div class="key key--func s2" data-action="switch-dict">辭典切換</div>
+          <div class="key key--func s2 key--ime" data-action="ime" id="key-ime"><span class="ime-key-l1">輸入法</span><span class="ime-key-l2" id="ime-key-label">注音</span></div>
+          <div class="key key--space s4" data-key=" ">SPACE</div>
+          <div class="key key--func s3" data-action="deriv">衍生字</div>
+        </div>
+
+        <!-- Bottom row: function keys + extras + arrow d-pad -->
+        <div class="row-grid bottom-grid">
+          <div class="key key--func s2" data-action="syn">同義詞</div>
+          <div class="key key--func s2" data-action="ant">反義詞</div>
+          <div class="key key--func s3" data-action="ex">文法／例句</div>
+          <div class="key key--func key--accent" data-action="random" title="Alt+R">隨機<span class="kshort">R</span></div>
+          <div class="key key--func key--accent" data-action="bookmark" title="Alt+B">書籤<span class="kshort">B</span></div>
+          <div class="key key--func key--accent" data-action="history" title="Alt+H">歷史<span class="kshort">H</span></div>
+          <div class="key key--arrow" data-action="left">◄</div>
+          <div class="arrow-vstack">
+            <div class="key key--arrow key--arrow-half" data-action="up">▲</div>
+            <div class="key key--arrow key--arrow-half" data-action="down">▼</div>
+          </div>
+          <div class="key key--arrow" data-action="right">►</div>
+        </div>
+
+      </div>
+
+      <!-- Side column -->
+      <div class="kb-side">
+        <div class="key key--power" data-action="power">ON/OFF</div>
+        <div class="key key--side key--side-home" data-action="home" title="Home">⌂ 首頁</div>
+        <div class="key key--side key--side-back" data-action="back" title="Back / Esc">◀ 返回</div>
+        <div class="key key--side" data-action="stop-speak" title="Stop voice">■ 停 STOP</div>
+        <div class="key key--side key--side-accent" data-action="random" title="Alt+R">隨機 RND</div>
+        <div class="key key--side key--side-accent" data-action="bookmark" title="Alt+B">★ 書籤</div>
+      </div>
+
+    </div>
+
+    <div class="device-foot">© 萬能通 · HTML5 FAN PROJECT  ·  CC-CEDICT (CC BY-SA) · 唐詩三百首 (Public Domain)</div>
+  </div>
+</div>
+</div>
+
+<script src="dict.js"></script>
+<script src="ecdict.js"></script>
+<script src="cedict.js"></script>
+<script src="cnchars.js"></script>
+<script src="poems.js"></script>
+<script src="wiki.js"></script>
+<script>
+(() => {
+  'use strict';
+
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+  const DICT    = window.DICT    || [];
+  const CNDICT  = window.CNDICT  || [];
+  const CEDICT  = window.CEDICT  || [];
+  const ECDICT  = window.ECDICT  || [];
+  const CNCHARS = window.CNCHARS || [];
+  const WIKI    = window.WIKI    || [];
+  const POEMS   = (window.POEMS_FULL && window.POEMS_FULL.length)
+                    ? window.POEMS_FULL : (window.POEMS || []);
+
+  // Wiki search index: lower-case English title and trimmed Chinese title.
+  const WIKI_BY_EN = new Map(WIKI.map(w => [w.en.toLowerCase(), w]));
+  const WIKI_BY_ZH = new Map(WIKI.map(w => [w.zh, w]));
+
+  // Look up a single character's record.
+  const CNCHARS_MAP = (() => {
+    const m = new Map();
+    for (let i = 0; i < CNCHARS.length; i++) m.set(CNCHARS[i].c, CNCHARS[i]);
+    return m;
+  })();
+  // Group by radical → chars sorted by extra strokes then total strokes.
+  const CN_BY_RADICAL = (() => {
+    const m = new Map();
+    for (const e of CNCHARS) {
+      let arr = m.get(e.r);
+      if (!arr) { arr = []; m.set(e.r, arr); }
+      arr.push(e);
+    }
+    for (const arr of m.values()) arr.sort((a, b) => a.ns - b.ns || a.ts - b.ts || a.c.codePointAt(0) - b.c.codePointAt(0));
+    return m;
+  })();
+  // Sorted list of radicals: by their own stroke count (looked up via the radical char itself), then by codepoint.
+  const CN_RADICALS = (() => {
+    const list = [...CN_BY_RADICAL.keys()].filter(r => r);
+    return list.sort((a, b) => {
+      const sa = (CNCHARS_MAP.get(a) && CNCHARS_MAP.get(a).ts) || a.codePointAt(0);
+      const sb = (CNCHARS_MAP.get(b) && CNCHARS_MAP.get(b).ts) || b.codePointAt(0);
+      return sa - sb || a.codePointAt(0) - b.codePointAt(0);
+    });
+  })();
+  // Group by total stroke count.
+  const CN_BY_STROKES = (() => {
+    const m = new Map();
+    for (const e of CNCHARS) {
+      const k = e.ts;
+      let arr = m.get(k);
+      if (!arr) { arr = []; m.set(k, arr); }
+      arr.push(e);
+    }
+    for (const arr of m.values()) arr.sort((a, b) => a.r.localeCompare(b.r) || a.c.codePointAt(0) - b.c.codePointAt(0));
+    return m;
+  })();
+  const CN_STROKE_COUNTS = [...CN_BY_STROKES.keys()].sort((a, b) => a - b);
+
+  // Build a O(1) lookup map from English headword to ECDICT entry.
+  const ECDICT_MAP = (() => {
+    const m = new Map();
+    for (let i = 0; i < ECDICT.length; i++) m.set(ECDICT[i].w, ECDICT[i]);
+    return m;
+  })();
+
+  // IPA from ECDICT (kept as the same `ipaOf` API used elsewhere).
+  function ipaOf(word) {
+    if (!word) return '';
+    const w = String(word).toLowerCase().trim();
+    const e = ECDICT_MAP.get(w) || ECDICT_MAP.get(w.split(/[\s\-]/)[0]);
+    return e ? (e.ph || '') : '';
+  }
+
+  /* =========================================================
+   * State
+   * ========================================================= */
+  const state = {
+    on: true,
+    mode: 'dict',          // 'dict' | 'cndict' | 'poem' | 'calc'
+    direction: 'en2zh',    // for dict mode only
+    voiceLang: 'en-US',    // last selected via lang strip
+    query: '',
+    results: [],
+    selected: 0,
+    pane: 'detail',        // detail | syn | ant | ex | deriv
+    shift: false,
+    caps: false,
+    // 中辭 navigation: menu | rad-pick | stk-pick | char-list | detail
+    cn: { view: 'menu', rad: '', stk: 0, ch: '', list: null },
+    calc: { expr: '', display: '0', last: null },
+    history: [],          // recent searches: [{mode, query, label, ts}]
+    bookmarks: new Set(), // "mode|key" strings
+    showHistory: false,   // when true, history overlay replaces the result list
+    wikiCat: '',          // 百科 active category code (empty = no filter / menu)
+    wikiVariant: 'tw',    // 百科 Chinese variant: 'tw' (Trad) | 'cn' (Simp)
+    // Chinese IME for 中辭/唐詩: 'off' | 'zhuyin' | 'pinyin' | 'cangjie' | 'jyutping'
+    ime: 'jyutping',
+    imeBuf: '',
+  };
+
+  /* =========================================================
+   * Chinese IME — 注音 / 拼音 (倉頡, 廣東拼音 stubbed, see note)
+   * ========================================================= */
+  // Bopomofo key map: matches the device's red annotations exactly, with q/w/z
+  // filling in ㄆ/ㄊ/ㄈ (which have no on-screen labels on this layout).
+  const ZHUYIN_KEY = {
+    '1':'ㄅ','2':'ㄉ','3':'ˇ','4':'ˋ','5':'ㄓ',
+    '6':'ˊ','7':'˙','8':'ㄚ','9':'ㄞ','0':'ㄢ',
+    q:'ㄆ', w:'ㄊ',
+    e:'ㄍ', r:'ㄐ', t:'ㄔ', y:'ㄗ', u:'ㄧ',
+    i:'ㄛ', o:'ㄣ', p:'ㄦ',
+    a:'ㄇ', s:'ㄋ', d:'ㄎ', f:'ㄑ', g:'ㄕ',
+    h:'ㄘ', j:'ㄨ', k:'ㄜ', l:'ㄤ',
+    z:'ㄈ',
+    x:'ㄌ', c:'ㄒ', v:'ㄖ', b:'ㄥ', n:'ㄩ', m:'ㄝ',
+  };
+  const IME_LABEL = {
+    off: '輸入法 OFF',
+    zhuyin: '注音',
+    pinyin: '拼音',
+    cangjie: '倉頡',
+    jyutping: '廣東拼音',
+  };
+  const IME_CYCLE = ['zhuyin','pinyin','cangjie','jyutping','off'];
+
+  function stripTone(s) {
+    return (s || '').toLowerCase()
+      .replace(/[āáǎà]/g,'a').replace(/[ēéěè]/g,'e').replace(/[īíǐì]/g,'i')
+      .replace(/[ōóǒò]/g,'o').replace(/[ūúǔù]/g,'u').replace(/[ǖǘǚǜü]/g,'v')
+      .replace(/<[^>]+>/g,' ');
+  }
+  function imeIsCN() { return state.mode === 'cndict' || state.mode === 'poem'; }
+  function imeAvailable(m) { return m === 'zhuyin' || m === 'pinyin' || m === 'cangjie' || m === 'jyutping'; }
+  // Cangjie radicals shown as a hint above the buffer (倉頡 letter → radical char).
+  const CANGJIE_RADICAL = {
+    a:'日', b:'月', c:'金', d:'木', e:'水', f:'火', g:'土', h:'竹',
+    i:'戈', j:'十', k:'大', l:'中', m:'一', n:'弓', o:'人', p:'心',
+    q:'手', r:'口', s:'尸', t:'廿', u:'山', v:'女', w:'田', x:'難', y:'卜',
+  };
+  function imeCandidates() {
+    const buf = state.imeBuf;
+    if (!buf) return [];
+    if (state.ime === 'zhuyin') {
+      return CNCHARS.filter(c => c.bp && c.bp.indexOf(buf) >= 0).slice(0, 9);
+    }
+    if (state.ime === 'pinyin') {
+      const out = [];
+      for (const c of CNCHARS) {
+        if (!c.py) continue;
+        const py = stripTone(c.py);
+        if (py.split(/\s+/).some(p => p && p.startsWith(buf))) { out.push(c); if (out.length >= 9) break; }
+      }
+      return out;
+    }
+    if (state.ime === 'cangjie') {
+      const up = buf.toUpperCase();
+      // Exact match first, then prefix match — exact codes are usually what users want.
+      const exact = [], prefix = [];
+      for (const c of CNCHARS) {
+        if (!c.cj) continue;
+        if (c.cj === up) exact.push(c);
+        else if (c.cj.startsWith(up)) prefix.push(c);
+        if (exact.length + prefix.length >= 30) break;
+      }
+      return exact.concat(prefix).slice(0, 9);
+    }
+    if (state.ime === 'jyutping') {
+      // The user types "廣東拼音" / Yale-style (jong, jung, ching, yeung, …)
+      // but our stored `jp` field is LSHK Jyutping (zong1, zung1, cing1, joeng5).
+      // Convert the buffer to Jyutping for prefix matching.
+      const q = yaleToJyutping(buf);
+      // Collect ALL matches, then prefer common chars (low stroke count) and
+      // exact-syllable matches (q + a tone digit) over longer prefix matches.
+      const exact = [], partial = [];
+      for (const c of CNCHARS) {
+        if (!c.jp) continue;
+        const readings = c.jp.split(/\s+/);
+        if (readings.some(r => r.length === q.length + 1 && r.startsWith(q) && /[1-6]$/.test(r))) {
+          exact.push(c);
+        } else if (readings.some(r => r && r.startsWith(q))) {
+          partial.push(c);
+        }
+      }
+      const byStrokes = (a, b) => (a.ts || 99) - (b.ts || 99);
+      exact.sort(byStrokes);
+      partial.sort(byStrokes);
+      return exact.concat(partial).slice(0, 9);
+    }
+    return [];
+  }
+  // Yale-style Cantonese romanization → LSHK Jyutping. Handles common
+  // initials (j↔z, y↔j, ch→c) and the eu/oe/eo vowel split.
+  function yaleToJyutping(s) {
+    s = (s || '').toLowerCase();
+    // Two-step swap so j ⇄ z and y ⇄ j don't clobber each other.
+    s = s.replace(/y/g, '\x01');   // mark Yale-y
+    s = s.replace(/j/g, 'z');      // Yale j → Jyutping z
+    s = s.replace(/\x01/g, 'j');   // marked Yale-y → Jyutping j
+    s = s.replace(/ch/g, 'c');     // Yale ch → Jyutping c
+    // Yale "eu" splits in Jyutping: eung→oeng, euk→oek, eun→eon, eut→eot,
+    // and bare "eu" → "oe".
+    s = s.replace(/eung/g, 'oeng');
+    s = s.replace(/euk/g,  'oek');
+    s = s.replace(/eun/g,  'eon');
+    s = s.replace(/eut/g,  'eot');
+    s = s.replace(/eu/g,   'oe');
+    return s;
+  }
+  function imeCycle() {
+    const i = IME_CYCLE.indexOf(state.ime);
+    state.ime = IME_CYCLE[(i + 1) % IME_CYCLE.length];
+    state.imeBuf = '';
+    flash('IME ' + IME_LABEL[state.ime]);
+    render();
+  }
+  function imeFeed(ch) {
+    // Returns true if the keystroke was consumed by the IME.
+    if (!imeIsCN()) return false;
+    if (state.ime === 'off') return false;
+    // Digit candidate select (1-9). Jyutping uses 1-6 for tones at the END of
+    // a syllable, so we only treat digits as candidate selectors for non-tonal
+    // IMEs, OR for jyutping when the buffer doesn't end in a letter (i.e. a
+    // tone has already been typed and we're between syllables).
+    if (/^[1-9]$/.test(ch) && state.imeBuf) {
+      const isJyutTone = state.ime === 'jyutping' && /[a-z]$/.test(state.imeBuf) && +ch >= 1 && +ch <= 6;
+      if (!isJyutTone) {
+        const cands = imeCandidates();
+        const idx = +ch - 1;
+        if (cands[idx]) { imeCommit(cands[idx].c); return true; }
+      }
+    }
+    if (state.ime === 'zhuyin') {
+      const k = ch.toLowerCase();
+      if (ZHUYIN_KEY[k]) { state.imeBuf += ZHUYIN_KEY[k]; render(); return true; }
+      if (/[ㄅ-ㄯˊˇˋ˙]/.test(ch)) { state.imeBuf += ch; render(); return true; }
+      return false;
+    }
+    if (state.ime === 'pinyin') {
+      if (/^[a-z]$/i.test(ch)) { state.imeBuf += ch.toLowerCase(); render(); return true; }
+      return false;
+    }
+    if (state.ime === 'cangjie') {
+      // Standard cangjie input — letters a-y map to radicals (z is unused).
+      const k = ch.toLowerCase();
+      if (/^[a-y]$/.test(k)) {
+        if (state.imeBuf.length < 5) state.imeBuf += k;
+        render();
+        return true;
+      }
+      return false;
+    }
+    if (state.ime === 'jyutping') {
+      const k = ch.toLowerCase();
+      if (/^[a-z]$/.test(k)) { state.imeBuf += k; render(); return true; }
+      // Tones 1-6: append to buffer when the previous char is a letter.
+      if (/^[1-6]$/.test(ch) && /[a-z]$/.test(state.imeBuf)) {
+        state.imeBuf += ch; render(); return true;
+      }
+      return false;
+    }
+    return false;
+  }
+  function imeCommit(ch) {
+    state.query += ch;
+    state.imeBuf = '';
+    refresh();
+  }
+  function imeBackspace() {
+    if (state.imeBuf) { state.imeBuf = state.imeBuf.slice(0, -1); render(); return true; }
+    return false;
+  }
+  function imeDisplayBuf() {
+    // What the user sees in the buffer slot. Cangjie shows radical chars
+    // (日月金…) rather than the latin letters used internally for matching.
+    if (state.ime === 'cangjie') {
+      return state.imeBuf.split('').map(c => CANGJIE_RADICAL[c] || c).join('');
+    }
+    return state.imeBuf;
+  }
+  function imeBarHTML() {
+    if (!imeIsCN()) return '';
+    const label = IME_LABEL[state.ime];
+    if (state.ime === 'off') {
+      return `<div class="ime-bar"><span class="ime-tag">${label}</span><span class="ime-tip">按 輸入法 切換中文輸入</span></div>`;
+    }
+    const cands = imeCandidates();
+    const candHtml = cands.length
+      ? cands.map((c, i) => `<span class="ime-cand" data-ime-pick="${i}">${i+1}.${c.c}</span>`).join('')
+      : (state.imeBuf ? '<span class="ime-tip">無候選字</span>' : '<span class="ime-tip">輸入鍵盤對應字母</span>');
+    const buf = escHtml(imeDisplayBuf()) || '<span class="ime-tip-inline">_</span>';
+    return `<div class="ime-bar">
+      <span class="ime-tag">${label}</span>
+      <span class="ime-buf">${buf}</span>
+      <span class="ime-cands">${candHtml}</span>
+    </div>`;
+  }
+
+  /* =========================================================
+   * History + bookmarks (persisted to localStorage where allowed)
+   * ========================================================= */
+  const STORAGE_KEY = 'omnidict.v1';
+  function loadStore() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      state.history   = (data.history || []).slice(0, 30);
+      state.bookmarks = new Set(data.bookmarks || []);
+    } catch (_) {}
+  }
+  function saveStore() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        history:   state.history.slice(0, 30),
+        bookmarks: [...state.bookmarks],
+      }));
+    } catch (_) {}
+  }
+  function pushHistory(label) {
+    if (!label) return;
+    const entry = { mode: state.mode, query: state.query, label, ts: Date.now() };
+    state.history = state.history.filter(h => !(h.mode === entry.mode && h.label === entry.label));
+    state.history.unshift(entry);
+    if (state.history.length > 30) state.history.length = 30;
+    saveStore();
+  }
+  function currentBookmarkKey() {
+    if (state.mode === 'cndict') {
+      if (state.cn.view === 'detail') return 'cndict|' + state.cn.ch;
+      const list = state.cn.list || (state.cn.rad
+        ? CN_BY_RADICAL.get(state.cn.rad)
+        : CN_BY_STROKES.get(state.cn.stk));
+      const cur = list && list[state.selected];
+      return cur ? 'cndict|' + cur.c : '';
+    }
+    if (state.mode === 'poem') {
+      const p = state.results[state.selected];
+      return p ? 'poem|' + p.title + '|' + p.author : '';
+    }
+    if (state.mode === 'dict') {
+      const sel = state.results[state.selected];
+      if (!sel) return '';
+      const e = sel.e || sel;
+      const head = sel.kind === 'cedict' ? e.t
+                 : sel.kind === 'ecdict' ? e.w
+                 : e.en;
+      return 'dict|' + (state.direction === 'en2zh' ? 'e:' : 'z:') + head;
+    }
+    return '';
+  }
+  function currentBookmarkLabel() {
+    if (state.mode === 'cndict') {
+      const ch = state.cn.view === 'detail' ? state.cn.ch
+        : (() => {
+            const list = state.cn.list || (state.cn.rad ? CN_BY_RADICAL.get(state.cn.rad) : CN_BY_STROKES.get(state.cn.stk));
+            return list && list[state.selected] ? list[state.selected].c : '';
+          })();
+      return ch ? ch + ' · 中辭' : '';
+    }
+    if (state.mode === 'poem') {
+      const p = state.results[state.selected];
+      return p ? p.title + ' · ' + p.author : '';
+    }
+    if (state.mode === 'dict') {
+      const sel = state.results[state.selected];
+      if (!sel) return '';
+      const e = sel.e || sel;
+      if (sel.kind === 'cedict') return e.t + ' · 詞典';
+      if (sel.kind === 'ecdict') return e.w + ' · 詞典';
+      return e.en + ' · 詞典';
+    }
+    return '';
+  }
+  function toggleBookmark() {
+    const key = currentBookmarkKey();
+    if (!key) { flash('NO ENTRY'); return; }
+    const label = currentBookmarkLabel();
+    if (state.bookmarks.has(key)) {
+      state.bookmarks.delete(key);
+      flash('★ REMOVED');
+    } else {
+      state.bookmarks.add(key);
+      pushHistory(label);
+      flash('★ SAVED');
+    }
+    saveStore();
+    render();
+  }
+  function toggleHistory() {
+    state.showHistory = !state.showHistory;
+    if (state.showHistory && state.history.length === 0) {
+      flash('NO HISTORY');
+      state.showHistory = false;
+      return;
+    }
+    render();
+  }
+  function pickRandom() {
+    if (state.mode === 'dict') {
+      if (state.direction === 'en2zh' && ECDICT.length) {
+        const e = ECDICT[(Math.random() * ECDICT.length) | 0];
+        state.query = e.w;
+        refresh();
+        flash('RND ' + e.w);
+      } else if (CEDICT.length) {
+        const e = CEDICT[(Math.random() * CEDICT.length) | 0];
+        state.query = e.t;
+        refresh();
+        flash('RND ' + e.t);
+      }
+    } else if (state.mode === 'cndict' && CNCHARS.length) {
+      const e = CNCHARS[(Math.random() * CNCHARS.length) | 0];
+      state.cn = { view: 'detail', rad: '', stk: 0, ch: e.c, list: null };
+      state.query = '';
+      render();
+      flash(e.c);
+    } else if (state.mode === 'poem' && POEMS.length) {
+      state.selected = (Math.random() * POEMS.length) | 0;
+      state.results = POEMS.slice();
+      state.query = '';
+      render();
+      const p = POEMS[state.selected];
+      flash(p.title);
+    } else if (state.mode === 'wiki' && WIKI.length) {
+      state.results = WIKI.slice();
+      state.selected = (Math.random() * WIKI.length) | 0;
+      state.query = '';
+      render();
+      flash(WIKI[state.selected].en);
+    } else {
+      flash('N/A');
+    }
+  }
+
+  // Context-aware "back" — peel one layer of UI state. When we can't go any
+  // further inside the active mode, fall back to the main menu.
+  function goBack() {
+    if (!state.on)        { flash('OFF'); return; }
+    if (state.mode === 'welcome') { state.mode = 'menu'; render(); return; }
+    if (state.mode === 'menu')    { flash('AT MENU'); return; }
+    if (state.showHistory)        { state.showHistory = false; render(); return; }
+    if (state.mode === 'cndict' && state.cn.view !== 'menu') { cnGoBack(); return; }
+    if (state.mode === 'wiki') {
+      // From a list/detail back to the category index, then back to wiki menu.
+      if (state.query) { state.query = ''; state.selected = 0; refresh(); return; }
+      if (state.wikiCat) { state.wikiCat = ''; state.selected = 0; render(); return; }
+      ACTIONS.home(); return;
+    }
+    if (state.query) { state.query = ''; refresh(); return; }
+    ACTIONS.home();
+  }
+
+  /* =========================================================
+   * Search per mode
+   * ========================================================= */
+  // Wrap entries to a uniform shape so the renderer can dispatch on `kind`.
+  function wrapCurated(e) { return { kind: 'curated', e }; }
+  function wrapEcdict(e)  { return { kind: 'ecdict',  e }; }
+  function wrapCedict(e)  { return { kind: 'cedict',  e }; }
+
+  // Simple-dictionary semantics: exactly one result per query (or none).
+  // - EN→ZH: curated DICT headword wins; otherwise ECDICT exact match.
+  // - ZH→EN: curated DICT zh wins; otherwise CEDICT headword equality.
+  function dictSearch(q) {
+    if (!q) return [];
+    const Q = q.toLowerCase().trim();
+    if (!Q) return [];
+    const enQ = state.direction === 'en2zh';
+
+    if (enQ) {
+      for (const e of DICT) {
+        if ((e.en || '').toLowerCase() === Q) {
+          const w = wrapCurated(e); w._exact = true; return [w];
+        }
+      }
+      const e = ECDICT_MAP.get(Q);
+      if (e) { const w = wrapEcdict(e); w._exact = true; return [w]; }
+      return [];
+    }
+
+    // ZH → EN
+    for (const e of DICT) {
+      if ((e.zh || '') === q) {
+        const w = wrapCurated(e); w._exact = true; return [w];
+      }
+    }
+    for (let i = 0; i < CEDICT.length; i++) {
+      const e = CEDICT[i];
+      if (e.t === q || e.s === q) {
+        const w = wrapCedict(e); w._exact = true; return [w];
+      }
+    }
+    return [];
+  }
+
+  // Bounded-edit-distance Levenshtein with early exit at `max`.
+  function editDistance(a, b, max) {
+    const m = a.length, n = b.length;
+    if (Math.abs(m - n) > max) return max + 1;
+    let prev = new Array(n + 1);
+    let curr = new Array(n + 1);
+    for (let j = 0; j <= n; j++) prev[j] = j;
+    for (let i = 1; i <= m; i++) {
+      curr[0] = i;
+      let rowMin = i;
+      for (let j = 1; j <= n; j++) {
+        const cost = a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1;
+        curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+        if (curr[j] < rowMin) rowMin = curr[j];
+      }
+      if (rowMin > max) return max + 1;
+      [prev, curr] = [curr, prev];
+    }
+    return prev[n];
+  }
+  // Build a flat list of common English headwords once, used for spelling
+  // suggestions. We use ECDICT's keys (~40k common English words).
+  const SPELL_WORDS = ECDICT.map(e => e.w);
+  function suggestSpelling(Q) {
+    if (Q.length < 3) return [];
+    const max = Q.length <= 4 ? 1 : 2;
+    const out = [];
+    for (let i = 0; i < SPELL_WORDS.length; i++) {
+      const w = SPELL_WORDS[i];
+      if (Math.abs(w.length - Q.length) > max) continue;
+      // cheap first-char filter: same first OR second letter
+      if (w[0] !== Q[0] && w[1] !== Q[1]) continue;
+      const d = editDistance(w, Q, max);
+      if (d <= max) out.push({ w, d });
+    }
+    out.sort((a, b) => a.d - b.d || a.w.length - b.w.length || a.w.localeCompare(b.w));
+    return out.slice(0, 8).map(x => x.w);
+  }
+  function stripTone(s) {
+    return s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+  // 中辭 search: typed query is treated as a single character lookup if it
+  // contains a CJK char; otherwise interpreted as pinyin (toneless prefix).
+  function cndictSearch(q) {
+    if (!q) return [];
+    const cjk = q.match(/[㐀-鿿]/);
+    if (cjk) {
+      const e = CNCHARS_MAP.get(cjk[0]);
+      return e ? [e] : [];
+    }
+    const Qs = stripTone(q.toLowerCase());
+    const out = [];
+    for (const e of CNCHARS) {
+      const py = stripTone((e.py || '').toLowerCase());
+      if (py === Qs) out.push(e);
+      if (out.length > 80) break;
+    }
+    return out;
+  }
+  // 百科 search — case-insensitive prefix on EN title; substring on ZH title;
+  // also matches the ZH simplified form. If `state.wikiCat` is set, results
+  // are restricted to that category.
+  function wikiSearch(q) {
+    const cat = state.wikiCat || '';
+    const corpus = cat ? (WIKI_BY_CAT.get(cat) || []) : WIKI;
+    if (!q) return corpus.slice(0, 200);
+    const Q = q.trim();
+    const Ql = Q.toLowerCase();
+    // Direct map hit gets surfaced first.
+    if (WIKI_BY_EN.has(Ql)) {
+      const r = [WIKI_BY_EN.get(Ql)];
+      for (const w of WIKI) {
+        if (w === r[0]) continue;
+        const en = w.en.toLowerCase();
+        if (en.startsWith(Ql) || w.zh.includes(Q)) r.push(w);
+        if (r.length >= 60) break;
+      }
+      return r;
+    }
+    if (WIKI_BY_ZH.has(Q)) {
+      const r = [WIKI_BY_ZH.get(Q)];
+      for (const w of WIKI) {
+        if (w === r[0]) continue;
+        if (w.zh.includes(Q) || w.en.toLowerCase().startsWith(Ql)) r.push(w);
+        if (r.length >= 60) break;
+      }
+      return r;
+    }
+    const starts = [], contains = [];
+    for (const w of corpus) {
+      const en = w.en.toLowerCase();
+      const head_ez = (w.ez || '').slice(0, 60);
+      const head_es = (w.es || '').slice(0, 60);
+      if (en.startsWith(Ql) || w.zh.startsWith(Q) || head_ez.startsWith(Q) || head_es.startsWith(Q)) {
+        starts.push(w);
+      } else if (en.includes(Ql) || w.zh.includes(Q)
+                 || (w.ez || '').includes(Q) || (w.es || '').includes(Q)) {
+        contains.push(w);
+      }
+      if (starts.length + contains.length >= 200) break;
+    }
+    return starts.concat(contains).slice(0, 60);
+  }
+
+  function poemSearch(q) {
+    if (!q) return POEMS;
+    const Q = q.toLowerCase().trim();
+    const out = [];
+    for (const p of POEMS) {
+      if (p.title.includes(q) || p.author.includes(q) ||
+          p.lines.some(l => l.includes(q))) out.push(p);
+    }
+    return out;
+  }
+
+  /* =========================================================
+   * DOM refs
+   * ========================================================= */
+  const elScreen     = $('#screen');
+  const elMode       = $('#mode-label');
+  const elStatusMid  = $('#status-mid');
+  const elCount      = $('#count-label');
+  const elEcho       = $('#echo');
+  const elLcdBody    = $('#lcd-body');
+  const elFlash      = $('#flash');
+  const elVoiceStrip = $('#voice-strip');
+
+  function escHtml(s) {
+    return String(s).replace(/[&<>"']/g,
+      c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  /* =========================================================
+   * Render dispatch
+   * ========================================================= */
+  function render() {
+    if (!state.on) { elScreen.classList.add('is-off'); return; }
+    elScreen.classList.remove('is-off');
+    elMode.textContent = modeLabel();
+    // Mark the bookmark key (if any) as "on" so the keyboard light reflects state.
+    const bmKey = currentBookmarkKey();
+    const bmKeyEl = document.querySelector('[data-action="bookmark"]');
+    if (bmKeyEl) bmKeyEl.classList.toggle('is-on', bmKey && state.bookmarks.has(bmKey));
+    // IME key label reflects current method; lights up when in CN modes with IME on.
+    const imeKey = document.getElementById('key-ime');
+    const imeKeyLbl = document.getElementById('ime-key-label');
+    if (imeKey && imeKeyLbl) {
+      imeKeyLbl.textContent = state.ime === 'off' ? 'OFF' : IME_LABEL[state.ime];
+      imeKey.classList.toggle('is-on', imeIsCN() && state.ime !== 'off');
+    }
+    // Re-style the keyboard annotations so the active IME's hint stands out.
+    document.body.classList.remove('is-ime-zhuyin','is-ime-pinyin','is-ime-cangjie','is-ime-jyutping');
+    if (imeIsCN() && state.ime !== 'off') {
+      document.body.classList.add('is-ime-' + state.ime);
+    }
+    // Track history: any time a real entry is on screen with a non-empty query.
+    if (state.query && !state.showHistory) {
+      const lbl = currentBookmarkLabel();
+      if (lbl) pushHistory(lbl);
+    }
+    // History overlay short-circuits the normal render.
+    if (state.showHistory) return renderHistory();
+
+    if (state.mode === 'welcome') return renderWelcome();
+    if (state.mode === 'menu')    return renderMenu();
+    if (state.mode === 'calc')    return renderCalc();
+    if (state.mode === 'poem')    return renderPoem();
+    if (state.mode === 'cndict')  return renderCnDict();
+    if (state.mode === 'wiki')    return renderWiki();
+    if (state.mode === 'game')    return renderGame();
+    return renderDict();
+  }
+  function modeLabel() {
+    if (state.mode === 'welcome') return 'BOOT';
+    if (state.mode === 'menu')    return 'MAIN  MENU';
+    if (state.mode === 'wiki')    return '百科  ENCYCLOPEDIA';
+    if (state.mode === 'game') {
+      const t = state.game && state.game.type;
+      if (t === 'hangman') return '遊戲  猜字 HANGMAN';
+      if (t === 'match')   return '遊戲  配對 MATCH';
+      if (t === 'anagram') return '遊戲  拼字 ANAGRAM';
+      if (t === 'pinyin')  return '遊戲  拼音 PINYIN';
+      return '遊戲  GAMES';
+    }
+    if (state.mode === 'dict')
+      return 'DICT  ' + (state.direction === 'en2zh' ? 'ENG → 中' : '中 → ENG');
+    if (state.mode === 'cndict') {
+      const v = state.cn.view;
+      if (v === 'rad-pick')  return '中辭  部首索引';
+      if (v === 'stk-pick')  return '中辭  筆劃索引';
+      if (v === 'char-list') return state.cn.rad
+        ? `中辭  部首 ${state.cn.rad}`
+        : `中辭  ${state.cn.stk} 劃`;
+      if (v === 'detail')    return '中辭  字釋';
+      return '中辭  索引';
+    }
+    if (state.mode === 'poem')   return '唐詩三百首';
+    if (state.mode === 'calc')   return 'CALC';
+    return '';
+  }
+
+  /* ----- Welcome (boot splash) + Main menu ----- */
+  function renderWelcome() {
+    elEcho.textContent = '';
+    elCount.textContent = '';
+    elStatusMid.textContent = 'POWER  ON';
+    elLcdBody.classList.remove('single', 'cn-mode');
+    elLcdBody.classList.add('single');
+    // ASCII frame around the brand. The Chinese block is rendered with CSS
+    // sizing rather than block-letter ASCII (CJK in figlet looks broken on
+    // narrow LCDs), but the surrounding frame keeps the boot-screen feel.
+    elLcdBody.innerHTML = `
+      <div class="boot-screen">
+        <div class="boot-zh">萬　能　通</div>
+        <div class="boot-frame">
+          <div class="boot-row boot-row-mono">O M N I  ·  D I C T</div>
+          <div class="boot-row boot-row-mono boot-row-sub">OD-2026  PRO</div>
+          <div class="boot-row boot-row-zh">English　·　繁中　·　簡中</div>
+          <div class="boot-row boot-row-zh">詞典　中辭　唐詩　計算　百科</div>
+        </div>
+        <div class="boot-status">SYSTEM  READY <span class="boot-cursor">_</span></div>
+      </div>
+    `;
+  }
+
+  // Numbered launcher items, classic Instant-Dict style. Each item maps to
+  // an action triggered by pressing the digit, clicking, or Enter on the row.
+  const MENU_ITEMS = [
+    { n: 1, zh: '詞典',  sub: 'EN ⇄ 中',     en: 'Dictionary',     action: () => setMode('dict') },
+    { n: 2, zh: '中辭',  sub: '部首/筆劃',   en: 'Chinese Char',   action: () => setMode('cndict') },
+    { n: 3, zh: '唐詩',  sub: '三百首',      en: 'Tang Poems',     action: () => setMode('poem') },
+    { n: 4, zh: '計算',  sub: 'Calculator',  en: 'Sci. Calc',      action: () => setMode('calc') },
+    { n: 5, zh: '百科',  sub: 'Wikipedia',   en: 'Encyclopedia',   action: () => setMode('wiki') },
+    { n: 6, zh: '遊戲',  sub: 'Word Games',  en: 'Mini Games',     action: () => setMode('game') },
+  ];
+  function menuActivate(n) {
+    const item = MENU_ITEMS.find(it => it.n === n);
+    if (item) item.action();
+  }
+
+  function renderMenu() {
+    elEcho.textContent = '';
+    elCount.textContent = '';
+    elStatusMid.textContent = '';   // top-left already says MAIN MENU
+    elLcdBody.classList.remove('cn-mode');
+    elLcdBody.classList.add('single');   // full-width menu
+    if (state.menuSel == null) state.menuSel = 0;
+    // 2-row × 5-col layout (everything visible, no scroll).
+    const renderItem = (it, idx) => {
+      const sel = idx === state.menuSel ? ' is-sel' : '';
+      return `<div class="menu-row${sel}" data-menu-n="${it.n}">
+        <span class="menu-row-n">${it.n}</span>
+        <span class="menu-row-zh">${escHtml(it.zh)}</span>
+        <span class="menu-row-sub">${escHtml(it.sub || '')}</span>
+      </div>`;
+    };
+    const items = MENU_ITEMS.map(renderItem).join('');
+    elLcdBody.innerHTML = `
+      <div class="menu-screen" style="grid-column:1/-1">
+        <div class="menu-grid">${items}</div>
+        <div class="menu-tip">輸入 1-6 / 點選 · ←→ 方向鍵移動 · ENTER 確定</div>
+      </div>
+    `;
+  }
+
+  /* ----- History overlay ----- */
+  function renderHistory() {
+    elEcho.textContent = '';
+    elCount.textContent = state.history.length + ' / 30';
+    elStatusMid.textContent = 'HISTORY';
+    elLcdBody.classList.remove('single', 'cn-mode');
+    const items = state.history.map((h, i) =>
+      `<li data-hist="${i}">${escHtml(h.label)} <span style="opacity:.55">[${h.mode}]</span></li>`
+    ).join('');
+    const bmList = [...state.bookmarks].slice(0, 30);
+    const bmHtml = bmList.length
+      ? bmList.map(k => {
+          const [mode, ...rest] = k.split('|');
+          return `<li data-bm="${escHtml(k)}">★ ${escHtml(rest.join('|'))} <span style="opacity:.55">[${mode}]</span></li>`;
+        }).join('')
+      : '<li class="empty" style="opacity:.5">— none —</li>';
+    elLcdBody.innerHTML = `
+      <div class="lcd-list" style="grid-column:1/span 2">
+        <div class="hist-section-title">RECENT · ${state.history.length}</div>
+        <ol class="hist-list">${items || '<li class="empty" style="opacity:.5">— empty —</li>'}</ol>
+        <div class="hist-section-title">★ BOOKMARKS · ${state.bookmarks.size}</div>
+        <ol class="hist-list">${bmHtml}</ol>
+      </div>
+    `;
+  }
+
+  /* ----- EN/CN dict ----- */
+  function renderDict() {
+    elEcho.textContent = state.query;
+    elCount.textContent = state.results.length
+      ? (state.selected + 1) + '/' + state.results.length
+      : '0/0';
+
+    elLcdBody.classList.remove('single', 'cn-mode');
+    elLcdBody.innerHTML = `
+      <div class="lcd-list"><ol id="results"></ol></div>
+      <div class="lcd-detail" id="detail"></div>
+    `;
+    const elResults = elLcdBody.querySelector('#results');
+    const elDetail  = elLcdBody.querySelector('#detail');
+
+    if (!state.query) {
+      elResults.innerHTML = '<li class="empty">Type a word…</li>';
+    } else if (state.results.length === 0) {
+      elResults.innerHTML = '<li class="empty">NOT FOUND</li>';
+    } else {
+      renderEnList(elResults);
+    }
+
+    const cur = state.results[state.selected];
+    if (!cur) {
+      elStatusMid.textContent = state.query ? 'NO MATCH' : 'READY';
+      // Offer spelling suggestions for English queries with no match.
+      if (state.query && state.mode === 'dict' && state.direction === 'en2zh') {
+        const suggestions = suggestSpelling(state.query.toLowerCase().trim());
+        if (suggestions.length) {
+          elDetail.innerHTML = `
+            <div class="panel-title">DID YOU MEAN?</div>
+            <div class="suggest">${suggestions
+              .map(w => `<span class="sugg" data-suggest="${escHtml(w)}">${escHtml(w)}</span>`)
+              .join(' ')}</div>
+          `;
+        }
+      }
+      return;
+    }
+    elStatusMid.textContent = state.pane.toUpperCase();
+    renderEnDetail(elDetail, cur);
+  }
+  // Pull the first concise Chinese gloss out of an ECDICT translation.
+  // ECDICT translations are POS-prefixed and newline-separated, e.g.
+  // "n. 男孩\nn. 仆人". We just want "男孩" for the list summary.
+  function ecdictPrimaryZh(e) {
+    const tr = (e && e.tr) || '';
+    const first = tr.split('\n').find(s => s.trim()) || '';
+    return first.replace(/^[a-zA-Z.\-]+\.\s*/, '').trim();
+  }
+
+  function renderEnList(el) {
+    el.innerHTML = state.results.map((r, i) => {
+      let head;
+      if (r.kind === 'cedict') {
+        const e = r.e;
+        const firstSense = (e.d || '').split('/')[0] || '';
+        head = state.direction === 'en2zh'
+          ? `${escHtml(firstSense)} <span style="opacity:.6">${escHtml(e.t)}</span>`
+          : `${escHtml(e.t)} <span style="opacity:.6">${escHtml(firstSense)}</span>`;
+      } else if (r.kind === 'ecdict') {
+        const e = r.e;
+        head = `${escHtml(e.w)} <span style="opacity:.6">${escHtml(ecdictPrimaryZh(e))}</span>`;
+      } else {
+        const e = r.e || r;
+        head = state.direction === 'en2zh'
+          ? `${escHtml(e.en)} <span style="opacity:.6">${escHtml(e.zh)}</span>`
+          : `${escHtml(e.zh)} <span style="opacity:.6">${escHtml(e.en)}</span>`;
+      }
+      const cls = [];
+      if (i === state.selected) cls.push('is-sel');
+      if (r._exact)             cls.push('is-exact');
+      return `<li class="${cls.join(' ')}" data-i="${i}">${head}</li>`;
+    }).join('');
+    const sel = el.querySelector('.is-sel');
+    if (sel) sel.scrollIntoView({ block: 'nearest' });
+  }
+  /* ----- 中辭 (radical / stroke browse) ----- */
+  function renderCnDict() {
+    elEcho.textContent = state.query || '';
+    elCount.textContent = '';
+    elStatusMid.textContent = IME_LABEL[state.ime] || '';
+    elLcdBody.classList.add('cn-mode');
+
+    const v = state.cn.view;
+    if (v === 'menu')      cnRenderMenu();
+    else if (v === 'rad-pick')  cnRenderRadPick();
+    else if (v === 'stk-pick')  cnRenderStkPick();
+    else if (v === 'char-list') cnRenderCharList();
+    else if (v === 'detail')    cnRenderDetail();
+    elLcdBody.insertAdjacentHTML('afterbegin', imeBarHTML());
+  }
+
+  function cnRenderMenu() {
+    elLcdBody.innerHTML = `
+      <div class="cn-menu">
+        <div class="cn-title">中文字典 · 索引</div>
+        <div class="cn-cards">
+          <div class="cn-card" data-cn-action="goto-rad">
+            <div class="cn-card-head">部首索引</div>
+            <div class="cn-card-sub">By radical · ${CN_RADICALS.length} radicals · ${CNCHARS.length} chars</div>
+          </div>
+          <div class="cn-card" data-cn-action="goto-stk">
+            <div class="cn-card-head">筆劃索引</div>
+            <div class="cn-card-sub">By stroke count · ${CN_STROKE_COUNTS[0]}–${CN_STROKE_COUNTS[CN_STROKE_COUNTS.length-1]} 劃</div>
+          </div>
+        </div>
+        <div class="cn-tip">或直接輸入單字 / 拼音查字</div>
+      </div>
+    `;
+  }
+
+  function cnRenderRadPick() {
+    // Bucket radicals by their own stroke count
+    const buckets = new Map();
+    for (const r of CN_RADICALS) {
+      const rec = CNCHARS_MAP.get(r);
+      const s = (rec && rec.ts) || 0;
+      let arr = buckets.get(s);
+      if (!arr) { arr = []; buckets.set(s, arr); }
+      arr.push(r);
+    }
+    const ordered = [...buckets.keys()].sort((a, b) => a - b);
+    const rows = ordered.map(s => {
+      const cells = buckets.get(s).map(r => {
+        const n = (CN_BY_RADICAL.get(r) || []).length;
+        return `<span class="cn-rad" data-cn-rad="${escHtml(r)}" title="${n} 字">${escHtml(r)}</span>`;
+      }).join('');
+      return `<div class="cn-rad-row"><span class="cn-rad-label">${s}劃</span>${cells}</div>`;
+    }).join('');
+    elLcdBody.innerHTML = `
+      <div class="cn-pick">
+        <div class="cn-pick-title">部首索引 — 點選部首</div>
+        <div class="cn-pick-body">${rows}</div>
+        <div class="cn-back" data-cn-action="back">← 返回</div>
+      </div>
+    `;
+  }
+
+  function cnRenderStkPick() {
+    const cells = CN_STROKE_COUNTS.map(s => {
+      const n = CN_BY_STROKES.get(s).length;
+      return `<span class="cn-stk" data-cn-stk="${s}">${s}劃 <i>${n}</i></span>`;
+    }).join('');
+    elLcdBody.innerHTML = `
+      <div class="cn-pick">
+        <div class="cn-pick-title">筆劃索引 — 點選總筆劃數</div>
+        <div class="cn-pick-body cn-stk-grid">${cells}</div>
+        <div class="cn-back" data-cn-action="back">← 返回</div>
+      </div>
+    `;
+  }
+
+  function cnRenderCharList() {
+    const list = state.cn.list
+      ? state.cn.list
+      : state.cn.rad
+        ? (CN_BY_RADICAL.get(state.cn.rad) || [])
+        : (CN_BY_STROKES.get(state.cn.stk) || []);
+    if (state.selected >= list.length) state.selected = 0;
+    elCount.textContent = list.length ? `${state.selected + 1}/${list.length}` : '0/0';
+
+    const heading = state.cn.list
+      ? `搜尋: ${escHtml(state.query)} · ${list.length} 字`
+      : state.cn.rad
+        ? `部首 ${state.cn.rad} · ${list.length} 字`
+        : `${state.cn.stk} 劃 · ${list.length} 字`;
+
+    // Group chars within radical view by extra stroke count (ns)
+    let body;
+    if (state.cn.rad) {
+      const groups = new Map();
+      list.forEach((e, i) => {
+        let arr = groups.get(e.ns);
+        if (!arr) { arr = []; groups.set(e.ns, arr); }
+        arr.push({ e, i });
+      });
+      const keys = [...groups.keys()].sort((a, b) => a - b);
+      body = keys.map(k => {
+        const cells = groups.get(k).map(({e, i}) =>
+          `<span class="cn-cell ${i===state.selected?'is-sel':''}" data-cn-i="${i}">${escHtml(e.c)}</span>`
+        ).join('');
+        return `<div class="cn-rad-row"><span class="cn-rad-label">+${k}</span>${cells}</div>`;
+      }).join('');
+    } else {
+      body = `<div class="cn-rad-row">${list.map((e, i) =>
+        `<span class="cn-cell ${i===state.selected?'is-sel':''}" data-cn-i="${i}">${escHtml(e.c)}</span>`
+      ).join('')}</div>`;
+    }
+
+    const cur = list[state.selected];
+    const detail = cur ? cnDetailHtml(cur) : '<div class="cn-empty">—</div>';
+    elLcdBody.innerHTML = `
+      <div class="cn-list-wrap">
+        <div class="cn-list-pane">
+          <div class="cn-pick-title">${heading}</div>
+          <div class="cn-pick-body">${body}</div>
+        </div>
+        <div class="cn-detail-pane">${detail}</div>
+      </div>
+      <div class="cn-back" data-cn-action="back">← 返回</div>
+    `;
+    const sel = elLcdBody.querySelector('.cn-cell.is-sel');
+    if (sel) sel.scrollIntoView({ block: 'nearest' });
+  }
+
+  function cnRenderDetail() {
+    const e = CNCHARS_MAP.get(state.cn.ch);
+    elLcdBody.innerHTML = `
+      <div class="cn-detail-only">${e ? cnDetailHtml(e) : '<div class="cn-empty">字未收錄</div>'}</div>
+      <div class="cn-back" data-cn-action="back">← 返回</div>
+    `;
+  }
+
+  function cnDetailHtml(e) {
+    const alt = e.a && e.a.length ? `<span class="cn-alt">又讀: ${e.a.map(escHtml).join(' · ')}</span>` : '';
+    const def = e.d || '';
+    return `
+      <div class="cn-glyph speakable" data-speak="${escHtml(e.c)}" data-speak-lang="zh-CN">${escHtml(e.c)}</div>
+      <div class="cn-meta">
+        <span>部首 ${escHtml(e.r)}</span>
+        <span>+${e.ns}劃</span>
+        <span>共 ${e.ts} 劃</span>
+      </div>
+      <div class="cn-readings">
+        <span class="py">[${escHtml(e.py)}]</span>
+        ${e.bp ? `<span class="bp">${escHtml(e.bp)}</span>` : ''}
+        ${alt}
+      </div>
+      <div class="cn-def ${def ? 'speakable' : ''}" ${def ? `data-speak="${escHtml(def)}" data-speak-lang="zh-CN"` : ''}>${escHtml(def || '—')}</div>
+    `;
+  }
+  function renderEnDetail(el, wrapped) {
+    const cur = wrapped.e || wrapped;
+    const kind = wrapped.kind;
+
+    if (kind === 'ecdict') {
+      // ECDICT entry: { w, ph, tr, p, df }
+      const ipa = cur.ph ? `<span class="ipa">/${escHtml(cur.ph)}/</span>` : '';
+      const pos = cur.p  ? `<span class="pos">${escHtml(cur.p)}</span>`   : '';
+      const trLines = (cur.tr || '').split('\n').map(s => s.trim()).filter(Boolean);
+      const trHtml = trLines.map(l =>
+        `<div class="speakable" data-speak="${escHtml(l.replace(/^[a-zA-Z.\-]+\.\s*/, ''))}" data-speak-lang="zh-CN">${escHtml(l)}</div>`
+      ).join('');
+      const dfHtml = cur.df
+        ? `<div class="ex"><div class="panel-sub">English</div><div class="speakable" data-speak="${escHtml(cur.df)}" data-speak-lang="en-US">${escHtml(cur.df)}</div></div>`
+        : '';
+      el.innerHTML = `
+        <div class="head"><span class="speakable" data-speak="${escHtml(cur.w)}" data-speak-lang="en-US">${escHtml(cur.w)}</span> ${pos} ${ipa}</div>
+        <div class="gloss">${trHtml}</div>
+        ${dfHtml}
+      `;
+      return;
+    }
+
+    if (kind === 'cedict') {
+      // CEDICT entry shape: { t, s, p, d }
+      const senses = (cur.d || '').split('/').filter(Boolean);
+      const simp = cur.s ? `<span style="opacity:.6">／${escHtml(cur.s)}</span>` : '';
+      const py = cur.p ? `<span class="py">[${escHtml(cur.p)}]</span>` : '';
+      // IPA for this entry's primary English meaning (not the raw query — so
+      // 幹's primary sense "tree trunk" gets /tɹˈi tɹˈʌŋk/, not the query's IPA).
+      const primary = (senses[0] || '')
+        .replace(/^(to |a |an |the )/i, '')
+        .replace(/\([^)]*\)/g, '')
+        .trim();
+      const headWord = primary.split(/[\s\-,;]/)[0];
+      const ipa = ipaOf(headWord);
+      const ipaTag = ipa ? `<span class="ipa">/${escHtml(ipa)}/</span>` : '';
+      const variants = wrapped._variants || [];
+      const varHtml = variants.length
+        ? `<div class="variants">亦作: ${variants.slice(0, 8).map(v => escHtml(v.t)).join(' · ')}</div>`
+        : '';
+      const headSpeak = `<span class="speakable" data-speak="${escHtml(cur.t)}" data-speak-lang="zh-CN">${escHtml(cur.t)}</span>`;
+      const senseHtml = senses.map((s,i) =>
+        `<div class="speakable" data-speak="${escHtml(s)}" data-speak-lang="en-US">${i+1}. ${escHtml(s)}</div>`
+      ).join('');
+      el.innerHTML = `
+        <div class="head">${headSpeak} ${simp} ${py}</div>
+        ${ipa ? `<div class="ipa-line">${escHtml(headWord)} ${ipaTag}</div>` : ''}
+        <div class="gloss" style="font-family:inherit">${senseHtml}</div>
+        ${varHtml}
+        <div class="ex" style="opacity:.6">CC-CEDICT · ${senses.length} sense${senses.length>1?'s':''}</div>
+      `;
+      return;
+    }
+
+    if (state.pane === 'syn')   return el.innerHTML = paneList('SYNONYMS 同義詞', cur, 'syn');
+    if (state.pane === 'ant')   return el.innerHTML = paneList('ANTONYMS 反義詞', cur, 'ant');
+    if (state.pane === 'deriv') return el.innerHTML = paneList('DERIVATIVES 衍生字', cur, 'deriv');
+    if (state.pane === 'ex') {
+      const ex = cur.example
+        ? `<div style="font-size:12px;line-height:1.5">${escHtml(cur.example.en)}<br><span style="font-family:'Noto Sans CJK TC','PingFang TC',sans-serif">${escHtml(cur.example.zh)}</span></div>`
+        : '<div style="opacity:.55">— no example —</div>';
+      return el.innerHTML = `<div class="panel-title">EXAMPLE 例句</div><div class="head">${escHtml(cur.en)}</div>${ex}`;
+    }
+    const ex = cur.example
+      ? `<div class="ex">
+           <div class="speakable" data-speak="${escHtml(cur.example.en)}" data-speak-lang="en-US">${escHtml(cur.example.en)}</div>
+           <div class="zh speakable" data-speak="${escHtml(cur.example.zh)}" data-speak-lang="zh-CN">${escHtml(cur.example.zh)}</div>
+         </div>`
+      : '';
+    const py = cur.py ? `<span class="py">[${escHtml(cur.py)}]</span>` : '';
+    const pos = cur.pos ? `<span class="pos">${escHtml(cur.pos)}</span>` : '';
+    const ipa = ipaOf(cur.en);
+    const ipaTag = ipa ? `<span class="ipa">/${escHtml(ipa)}/</span>` : '';
+    const variants = wrapped._variants || [];
+    const varHtml = variants.length
+      ? `<div class="variants">亦作: ${variants.slice(0, 8).map(v => escHtml(v.t)).join(' · ')}</div>`
+      : '';
+    el.innerHTML = `
+      <div class="head"><span class="speakable" data-speak="${escHtml(cur.en)}" data-speak-lang="en-US">${escHtml(cur.en)}</span> ${pos} ${ipaTag} ${py}</div>
+      <div class="gloss speakable" data-speak="${escHtml(cur.zh)}" data-speak-lang="zh-CN">${escHtml(cur.zh)}</div>
+      ${ex}
+      ${varHtml}
+    `;
+  }
+  function paneList(title, entry, key) {
+    const arr = entry[key] || [];
+    const body = arr.length
+      ? arr.map(s => `<span class="badge">${escHtml(s)}</span>`).join(' ')
+      : '<span style="opacity:.55">—</span>';
+    return `<div class="panel-title">${title}</div>
+            <div class="head">${escHtml(entry.en)}</div>
+            <div style="margin-top:4px">${body}</div>`;
+  }
+
+  /* ----- Poem ----- */
+  // Top authors by poem count, computed once.
+  const POEM_AUTHORS = (() => {
+    const counts = new Map();
+    for (const p of POEMS) counts.set(p.author, (counts.get(p.author) || 0) + 1);
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, n]) => ({ name, n }));
+  })();
+
+  function renderPoem() {
+    elEcho.textContent = state.query;
+    elCount.textContent = state.results.length
+      ? (state.selected + 1) + '/' + state.results.length
+      : '0/0';
+    elLcdBody.classList.remove('single', 'cn-mode');
+    // Author chips: shown when no specific author is set in the query.
+    const chips = POEM_AUTHORS.slice(0, 12).map(a =>
+      `<span class="author-chip ${state.query === a.name ? 'is-on' : ''}" data-author="${escHtml(a.name)}">${escHtml(a.name)} <i>${a.n}</i></span>`
+    ).join('');
+    elLcdBody.innerHTML = `
+      ${imeBarHTML()}
+      <div class="lcd-list">
+        <div class="author-chips">${chips}</div>
+        <ol id="results"></ol>
+      </div>
+      <div class="lcd-detail poem-body" id="detail"></div>
+    `;
+    const elResults = elLcdBody.querySelector('#results');
+    const elDetail  = elLcdBody.querySelector('#detail');
+
+    if (state.results.length === 0) {
+      elResults.innerHTML = '<li class="empty">No poem matched.</li>';
+      elStatusMid.textContent = 'EMPTY';
+      return;
+    }
+    elResults.innerHTML = state.results.map((p, i) =>
+      `<li class="${i===state.selected?'is-sel':''}" data-i="${i}">${escHtml(p.title)} <span style="opacity:.6">${escHtml(p.author)}</span></li>`
+    ).join('');
+    const sel = elResults.querySelector('.is-sel');
+    if (sel) sel.scrollIntoView({ block: 'nearest' });
+
+    const cur = state.results[state.selected];
+    elStatusMid.textContent = cur.dyn || '';
+    elDetail.innerHTML = `
+      <div class="title">${escHtml(cur.title)}</div>
+      <div class="author">${escHtml(cur.dyn)}　${escHtml(cur.author)}</div>
+      ${cur.lines.map(l => `<div class="line">${escHtml(l)}</div>`).join('')}
+    `;
+  }
+
+  /* ----- 百科 (Wikipedia summary) ----- */
+  // Category metadata: code → { label, ico (text icon), order }
+  const WIKI_CATS = [
+    { c: 'tech',    label: '科技 Tech' },
+    { c: 'sci',     label: '科學 Science' },
+    { c: 'space',   label: '太空 Space' },
+    { c: 'hist',    label: '歷史 History' },
+    { c: 'ppl',     label: '人物 People' },
+    { c: 'culture', label: '文化 Culture' },
+    { c: 'animal',  label: '動物 Animals' },
+    { c: 'plant',   label: '植物 Plants' },
+    { c: 'geo',     label: '地理 Geography' },
+    { c: 'pop',     label: '流行 Pop' },
+    { c: 'other',   label: '其他 Other' },
+  ];
+  const WIKI_BY_CAT = (() => {
+    const m = new Map();
+    for (const c of WIKI_CATS) m.set(c.c, []);
+    for (const w of WIKI) {
+      const arr = m.get(w.c) || m.get('other');
+      arr.push(w);
+    }
+    return m;
+  })();
+
+  function renderWiki() {
+    elEcho.textContent = state.query;
+    elLcdBody.classList.remove('single', 'cn-mode');
+
+    if (!WIKI.length) {
+      elCount.textContent = '0/0';
+      elLcdBody.innerHTML = `
+        <div class="lcd-list" style="grid-column:1/span 2; text-align:center; padding:20px 8px">
+          <div style="font-size:16px; opacity:.7; margin-bottom:6px">百科 · ENCYCLOPEDIA</div>
+          <div style="font-size:11px; opacity:.55">資料載入中… (Wikipedia summaries · CC BY-SA)<br>
+          請稍後再試。</div>
+        </div>
+      `;
+      elStatusMid.textContent = 'NO DATA';
+      return;
+    }
+
+    // Landing screen: categories. Shown when no search query and no category
+    // is selected. Click a category card or type a query to dive into a list.
+    if (!state.query && !state.wikiCat) {
+      elCount.textContent = WIKI.length + ' entries';
+      elStatusMid.textContent = 'INDEX';
+      const cards = WIKI_CATS.map(c => {
+        const n = (WIKI_BY_CAT.get(c.c) || []).length;
+        if (!n) return '';
+        return `<div class="wiki-cat" data-wiki-cat="${c.c}">
+          <div class="wiki-cat-label">${escHtml(c.label)}</div>
+          <div class="wiki-cat-count">${n}</div>
+        </div>`;
+      }).join('');
+      elLcdBody.innerHTML = `
+        <div class="wiki-menu" style="grid-column:1/span 2">
+          <div class="wiki-menu-title">百科 · ENCYCLOPEDIA</div>
+          <div class="wiki-cat-grid">${cards}</div>
+          <div class="wiki-menu-tip">點選分類 · 或輸入關鍵字搜尋</div>
+        </div>
+      `;
+      return;
+    }
+
+    elCount.textContent = state.results.length
+      ? (state.selected + 1) + '/' + state.results.length
+      : '0/0';
+
+    const catLabel = state.wikiCat
+      ? (WIKI_CATS.find(c => c.c === state.wikiCat) || {}).label || state.wikiCat
+      : '';
+    const backChip = `<span class="wiki-back" data-wiki-action="back">← 索引</span>`;
+    const catChip  = catLabel ? `<span class="wiki-cat-chip">${escHtml(catLabel)}</span>` : '';
+    elLcdBody.innerHTML = `
+      <div class="lcd-list">
+        <div class="wiki-list-bar">${backChip} ${catChip}</div>
+        <ol id="results"></ol>
+      </div>
+      <div class="lcd-detail wiki-body" id="detail"></div>
+    `;
+    const elResults = elLcdBody.querySelector('#results');
+    const elDetail  = elLcdBody.querySelector('#detail');
+
+    if (state.results.length === 0) {
+      elResults.innerHTML = '<li class="empty">NOT FOUND</li>';
+      elStatusMid.textContent = 'NO MATCH';
+      return;
+    }
+    const variantList = state.wikiVariant || 'tw';
+    elResults.innerHTML = state.results.map((w, i) => {
+      const t = ((variantList === 'cn' ? w.es : w.ez) || '').split(/[（(，,「『:：—–]/)[0].trim() || w.zh;
+      return `<li class="${i===state.selected?'is-sel':''}" data-i="${i}">${escHtml(w.en)} <span style="opacity:.6">${escHtml(t)}</span></li>`;
+    }).join('');
+    const sel = elResults.querySelector('.is-sel');
+    if (sel) sel.scrollIntoView({ block: 'nearest' });
+
+    const cur = state.results[state.selected];
+    if (!cur) { elStatusMid.textContent = 'EMPTY'; return; }
+    elStatusMid.textContent = cur.d ? cur.d.toUpperCase() : '';
+    // Default to Traditional Chinese; the user can flip via the 繁/簡 pills.
+    const variant = state.wikiVariant || 'tw';
+    const zhEx = (variant === 'cn' ? cur.es : cur.ez) || cur.ez || cur.es || '';
+    // Derive the Chinese title from the active variant's extract — first
+    // chunk before '（' / '：' / ',' is almost always the headword in that script.
+    const titleFromExt = (txt) => (txt || '').split(/[（(，,「『:：—–]/)[0].trim();
+    const zhTitle = (variant === 'cn'
+      ? titleFromExt(cur.es) || cur.zh
+      : titleFromExt(cur.ez) || cur.zh);
+    const variantLabel = variant === 'cn' ? '簡體' : '繁體';
+    elDetail.innerHTML = `
+      <div class="head">
+        <span class="speakable" data-speak="${escHtml(cur.en)}" data-speak-lang="en-US">${escHtml(cur.en)}</span>
+        <span class="wiki-zh-title speakable" data-speak="${escHtml(zhTitle)}" data-speak-lang="zh-CN">${escHtml(zhTitle)}</span>
+        <span class="wiki-tab ${variant==='tw'?'is-on':''}" data-wiki-variant="tw">繁</span>
+        <span class="wiki-tab ${variant==='cn'?'is-on':''}" data-wiki-variant="cn">简</span>
+      </div>
+      ${cur.d ? `<div class="wiki-desc">${escHtml(cur.d)}</div>` : ''}
+      <div class="wiki-section">
+        <div class="panel-sub">EN · English</div>
+        <div class="speakable wiki-ext" data-speak="${escHtml(cur.ee)}" data-speak-lang="en-US">${escHtml(cur.ee)}</div>
+      </div>
+      <div class="wiki-section">
+        <div class="panel-sub">中文 · ${variantLabel}</div>
+        <div class="speakable wiki-ext" data-speak="${escHtml(zhEx)}" data-speak-lang="zh-CN">${escHtml(zhEx) || '—'}</div>
+      </div>
+      <div class="wiki-source">Wikipedia · CC BY-SA 4.0</div>
+    `;
+  }
+
+  /* ----- 遊戲 (mini word games) -----
+     A small game state lives on state.game.{type, hangman, match, anagram, pinyin}.
+     Each round picks a fresh target so the games are infinite. */
+
+  // Pool of common, sensibly-spelled English words (length 3-9 letters,
+  // alphabetic only). Used by hangman + anagram.
+  const GAME_WORD_POOL = (() => {
+    if (!ECDICT.length) return [];
+    const out = [];
+    for (const e of ECDICT) {
+      const w = e.w;
+      if (!/^[a-z]{3,9}$/.test(w)) continue;
+      if (!e.tr || !/[一-鿿]/.test(e.tr)) continue;
+      out.push(e);
+      if (out.length >= 4000) break;
+    }
+    return out;
+  })();
+  function gameRandWord() {
+    return GAME_WORD_POOL[(Math.random() * GAME_WORD_POOL.length) | 0];
+  }
+  function gameZhHint(e) {
+    const first = (e.tr || '').split('\n').find(s => s.trim()) || '';
+    return first.replace(/^[a-zA-Z.\-]+\.\s*/, '').trim();
+  }
+
+  function ensureGame() {
+    if (!state.game) state.game = { type: 'menu' };
+    return state.game;
+  }
+  function gameStart(type) {
+    ensureGame().type = type;
+    if (type === 'hangman') gameInitHangman();
+    else if (type === 'match')   gameInitMatch();
+    else if (type === 'anagram') gameInitAnagram();
+    else if (type === 'pinyin')  gameInitPinyin();
+    render();
+  }
+  function gameInitHangman() {
+    const e = gameRandWord();
+    state.game.hangman = {
+      word: e.w,
+      hint: gameZhHint(e),
+      ph: e.ph || '',
+      guessed: new Set(),
+      wrong: 0,
+      max: 6,
+      status: 'playing',   // playing | won | lost
+    };
+  }
+  function gameInitMatch() {
+    if (!state.game.match) state.game.match = { score: 0, total: 0 };
+    const target = gameRandWord();
+    const opts = [target];
+    while (opts.length < 4) {
+      const c = gameRandWord();
+      if (!opts.find(o => o.w === c.w)) opts.push(c);
+    }
+    // Shuffle
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    Object.assign(state.game.match, {
+      target,
+      options: opts,
+      picked: null,
+      status: 'playing',
+    });
+  }
+  function gameInitAnagram() {
+    if (!state.game.anagram) state.game.anagram = { score: 0, total: 0 };
+    let e, scrambled;
+    do {
+      e = gameRandWord();
+      const arr = e.w.split('');
+      do {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = (Math.random() * (i + 1)) | 0;
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        scrambled = arr.join('');
+      } while (scrambled === e.w && e.w.length > 1);
+    } while (e.w.length < 4);   // prefer 4+ letters so it's not trivial
+    Object.assign(state.game.anagram, {
+      target: e.w,
+      hint: gameZhHint(e),
+      scrambled,
+      input: '',
+      status: 'playing',
+    });
+  }
+  function gameInitPinyin() {
+    if (!CNCHARS.length) return;
+    if (!state.game.pinyin) state.game.pinyin = { score: 0, total: 0 };
+    const target = CNCHARS[(Math.random() * CNCHARS.length) | 0];
+    const opts = [target];
+    while (opts.length < 4) {
+      const c = CNCHARS[(Math.random() * CNCHARS.length) | 0];
+      if (!opts.find(o => o.c === c.c)) opts.push(c);
+    }
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    Object.assign(state.game.pinyin, {
+      target,
+      options: opts,
+      picked: null,
+      status: 'playing',
+    });
+  }
+
+  function renderGame() {
+    elEcho.textContent = '';
+    elCount.textContent = '';
+    elLcdBody.classList.remove('cn-mode');
+    elLcdBody.classList.add('single');
+    const g = ensureGame();
+    if (g.type === 'menu')    return gameRenderMenu();
+    if (g.type === 'hangman') return gameRenderHangman();
+    if (g.type === 'match')   return gameRenderMatch();
+    if (g.type === 'anagram') return gameRenderAnagram();
+    if (g.type === 'pinyin')  return gameRenderPinyin();
+  }
+
+  function gameRenderMenu() {
+    elStatusMid.textContent = 'GAMES';
+    const cards = [
+      { t: 'hangman', zh: '猜字',   en: 'Hangman' },
+      { t: 'match',   zh: '配對',   en: 'Match Word' },
+      { t: 'anagram', zh: '拼字',   en: 'Anagram' },
+      { t: 'pinyin',  zh: '拼音',   en: 'Pinyin Quiz' },
+    ].map((it, i) => `
+      <div class="game-card" data-game-start="${it.t}">
+        <div class="game-card-zh">${escHtml(it.zh)}</div>
+        <div class="game-card-en">${escHtml(it.en)}</div>
+      </div>`).join('');
+    elLcdBody.innerHTML = `
+      <div class="game-screen">
+        <div class="game-title">遊戲 · WORD GAMES</div>
+        <div class="game-cards">${cards}</div>
+      </div>
+    `;
+  }
+
+  function gameRenderHangman() {
+    const h = state.game.hangman;
+    elStatusMid.textContent = h.status === 'won' ? '✓ WIN'
+                            : h.status === 'lost' ? '✗ LOST'
+                            : `LIVES ${h.max - h.wrong}/${h.max}`;
+    const masked = h.word.split('').map(c => h.guessed.has(c) ? c : '_').join(' ');
+    const wrong = [...h.guessed].filter(c => !h.word.includes(c)).join(' ').toUpperCase();
+    const reveal = (h.status !== 'playing')
+      ? `<div class="game-reveal">${escHtml(h.word.toUpperCase())} ${h.ph ? `<span class="ipa">/${escHtml(h.ph)}/</span>` : ''}</div>`
+      : '';
+    const tip = h.status === 'playing' ? '鍵盤輸入字母 · ENTER 新題' : 'ENTER 新題';
+    elLcdBody.innerHTML = `
+      <div class="game-screen">
+        <div class="game-bar">
+          <span class="game-back" data-game-action="exit">← 返回</span>
+          <span class="game-name">猜字 HANGMAN</span>
+          <span class="game-new" data-game-action="new">↻ 新題</span>
+        </div>
+        <div class="game-hangman-word">${masked}</div>
+        <div class="game-hint">提示: ${escHtml(h.hint)}</div>
+        ${reveal}
+        <div class="game-sub">已試錯: ${wrong || '—'}</div>
+        <div class="game-tip">${tip}</div>
+      </div>
+    `;
+  }
+  function gameHangmanGuess(letter) {
+    const h = state.game.hangman;
+    if (!h || h.status !== 'playing') return;
+    const c = letter.toLowerCase();
+    if (h.guessed.has(c)) return;
+    h.guessed.add(c);
+    if (!h.word.includes(c)) {
+      h.wrong++;
+      if (h.wrong >= h.max) h.status = 'lost';
+    } else if (h.word.split('').every(ch => h.guessed.has(ch))) {
+      h.status = 'won';
+    }
+    render();
+  }
+
+  function gameRenderMatch() {
+    const m = state.game.match;
+    elStatusMid.textContent = `SCORE  ${m.score}/${m.total}`;
+    const opts = m.options.map((o, i) => {
+      const cls = m.picked == null ? ''
+                : (o === m.target ? 'is-right'
+                  : (i === m.picked ? 'is-wrong' : ''));
+      return `<div class="game-opt ${cls}" data-game-opt="${i}">${i+1}. ${escHtml(gameZhHint(o))}</div>`;
+    }).join('');
+    const next = m.status !== 'playing'
+      ? `<div class="game-next" data-game-action="next">↻ 下一題  (Enter)</div>` : '';
+    elLcdBody.innerHTML = `
+      <div class="game-screen">
+        <div class="game-bar">
+          <span class="game-back" data-game-action="exit">← 返回</span>
+          <span class="game-name">配對 MATCH</span>
+          <span class="game-new" data-game-action="reset">重置分數</span>
+        </div>
+        <div class="game-q">
+          <span class="speakable" data-speak="${escHtml(m.target.w)}" data-speak-lang="en-US">
+            ${escHtml(m.target.w)}</span>
+          ${m.target.ph ? `<span class="ipa">/${escHtml(m.target.ph)}/</span>` : ''}
+        </div>
+        <div class="game-opts">${opts}</div>
+        ${next}
+      </div>
+    `;
+  }
+  function gameMatchPick(idx) {
+    const m = state.game.match;
+    if (!m || m.status !== 'playing') return;
+    m.picked = idx;
+    m.total++;
+    if (m.options[idx] === m.target) m.score++;
+    m.status = 'done';
+    render();
+  }
+
+  function gameRenderAnagram() {
+    const a = state.game.anagram;
+    elStatusMid.textContent = `SCORE  ${a.score}/${a.total}`;
+    const tiles = a.scrambled.split('').map(c =>
+      `<span class="game-tile">${c.toUpperCase()}</span>`).join('');
+    const verdict = a.status === 'won'  ? `<div class="game-ok">✓ 正確!</div>`
+                  : a.status === 'lost' ? `<div class="game-bad">✗ 答案: ${escHtml(a.target.toUpperCase())}</div>`
+                  : '';
+    const next = a.status !== 'playing'
+      ? `<div class="game-next" data-game-action="next">↻ 下一題  (Enter)</div>` : '';
+    elLcdBody.innerHTML = `
+      <div class="game-screen">
+        <div class="game-bar">
+          <span class="game-back" data-game-action="exit">← 返回</span>
+          <span class="game-name">拼字 ANAGRAM</span>
+          <span class="game-new" data-game-action="next">↻ 跳過</span>
+        </div>
+        <div class="game-tiles">${tiles}</div>
+        <div class="game-hint">提示: ${escHtml(a.hint)}</div>
+        <div class="game-input-line">
+          輸入答案: <span class="game-input">${escHtml((a.input || '').toUpperCase())}<span class="boot-cursor">_</span></span>
+        </div>
+        ${verdict}
+        ${next}
+      </div>
+    `;
+  }
+  function gameAnagramType(c) {
+    const a = state.game.anagram;
+    if (!a || a.status !== 'playing') return;
+    if (c === '\b') { a.input = a.input.slice(0, -1); render(); return; }
+    if (c === '\n') {
+      // Submit
+      a.total++;
+      if (a.input.toLowerCase() === a.target) { a.score++; a.status = 'won'; }
+      else                                    { a.status = 'lost'; }
+      render();
+      return;
+    }
+    if (!/^[a-z]$/.test(c)) return;
+    if (a.input.length >= a.target.length) return;
+    a.input += c;
+    render();
+  }
+
+  function gameRenderPinyin() {
+    const q = state.game.pinyin;
+    if (!q) return;
+    elStatusMid.textContent = `SCORE  ${q.score}/${q.total}`;
+    const opts = q.options.map((o, i) => {
+      const cls = q.picked == null ? ''
+                : (o === q.target ? 'is-right'
+                  : (i === q.picked ? 'is-wrong' : ''));
+      return `<div class="game-opt game-opt-cn ${cls}" data-game-opt="${i}">${i+1}. ${escHtml(o.c)}</div>`;
+    }).join('');
+    const next = q.status !== 'playing'
+      ? `<div class="game-next" data-game-action="next">↻ 下一題  (Enter)</div>` : '';
+    elLcdBody.innerHTML = `
+      <div class="game-screen">
+        <div class="game-bar">
+          <span class="game-back" data-game-action="exit">← 返回</span>
+          <span class="game-name">拼音 PINYIN</span>
+          <span class="game-new" data-game-action="reset">重置分數</span>
+        </div>
+        <div class="game-q">
+          <span class="speakable" data-speak="${escHtml(q.target.c)}" data-speak-lang="zh-CN">[${escHtml(q.target.py)}]</span>
+          ${q.target.bp ? `<span class="ipa">${escHtml(q.target.bp)}</span>` : ''}
+        </div>
+        <div class="game-opts">${opts}</div>
+        ${next}
+      </div>
+    `;
+  }
+  function gamePinyinPick(idx) {
+    const q = state.game.pinyin;
+    if (!q || q.status !== 'playing') return;
+    q.picked = idx;
+    q.total++;
+    if (q.options[idx] === q.target) q.score++;
+    q.status = 'done';
+    render();
+  }
+
+  function gameNext() {
+    const t = state.game.type;
+    if (t === 'hangman') gameInitHangman();
+    else if (t === 'match')   gameInitMatch();
+    else if (t === 'anagram') gameInitAnagram();
+    else if (t === 'pinyin')  gameInitPinyin();
+    render();
+  }
+  function gameReset() {
+    const t = state.game.type;
+    if (state.game[t]) state.game[t].score = state.game[t].total = 0;
+    gameNext();
+  }
+
+  /* ----- Calculator ----- */
+  function renderCalc() {
+    elEcho.textContent = '';
+    elCount.textContent = '';
+    elStatusMid.textContent = state.calc.last !== null ? 'OK' : 'INPUT';
+    elLcdBody.classList.remove('cn-mode');
+    elLcdBody.classList.add('single');
+    elLcdBody.innerHTML = `
+      <div class="calc-display">
+        <div class="expr">${escHtml(state.calc.expr || '0')}</div>
+        <div class="res">= ${escHtml(state.calc.display)}</div>
+        <div class="hint">
+          Operators are printed in <b style="color:#e66a16">orange</b> on the keys.<br>
+          <b>清除</b> clears · <b>ENTER</b> or <b>=</b> evaluates · <b>⌫ BACK</b> deletes
+        </div>
+      </div>
+    `;
+  }
+
+  /* =========================================================
+   * Common helpers
+   * ========================================================= */
+  function flash(msg) {
+    elFlash.textContent = msg;
+    elFlash.classList.add('show');
+    clearTimeout(flash._t);
+    flash._t = setTimeout(() => elFlash.classList.remove('show'), 1100);
+  }
+  function refresh() {
+    state.showHistory = false;
+    if (state.mode === 'dict') state.results = dictSearch(state.query);
+    else if (state.mode === 'poem') state.results = poemSearch(state.query);
+    else if (state.mode === 'wiki') state.results = wikiSearch(state.query);
+    else if (state.mode === 'cndict') {
+      // Typing in 中辭: jump straight to a char detail (CJK char) or
+      // a pinyin-matched char list. Empty query → return to menu.
+      if (!state.query) {
+        state.cn = { view: 'menu', rad: '', stk: 0, ch: '', list: null };
+      } else {
+        const matches = cndictSearch(state.query);
+        if (matches.length === 1) {
+          state.cn = { view: 'detail', rad: '', stk: 0, ch: matches[0].c, list: null };
+        } else if (matches.length > 1) {
+          state.cn = { view: 'char-list', rad: '', stk: 0, ch: '', list: matches };
+        } else {
+          state.cn = { view: 'menu', rad: '', stk: 0, ch: '', list: null };
+        }
+      }
+    }
+    state.selected = 0;
+    state.pane = 'detail';
+    render();
+  }
+  function clearAll() { state.query = ''; refresh(); }
+
+  function backspace() {
+    if (state.mode === 'calc') return calcBackspace();
+    if (imeIsCN() && imeBackspace()) return;
+    state.query = state.query.slice(0, -1);
+    refresh();
+  }
+  function typeChar(ch) {
+    if (state.mode === 'calc') return calcType(ch);
+    // SPACE: when IME buffer is non-empty, commit the first candidate.
+    if (ch === ' ' && imeIsCN() && state.imeBuf && imeAvailable(state.ime)) {
+      const c = imeCandidates()[0];
+      if (c) { imeCommit(c.c); return; }
+    }
+    if (imeIsCN() && imeFeed(ch)) return;
+    if (state.mode === 'game') {
+      const t = state.game && state.game.type;
+      if (t === 'hangman' && /^[a-z]$/i.test(ch)) return gameHangmanGuess(ch);
+      if (t === 'anagram' && /^[a-z]$/i.test(ch)) return gameAnagramType(ch.toLowerCase());
+      if ((t === 'match' || t === 'pinyin') && /^[1-4]$/.test(ch)) {
+        return t === 'match' ? gameMatchPick(+ch - 1) : gamePinyinPick(+ch - 1);
+      }
+      if (t === 'menu' && /^[1-4]$/.test(ch)) {
+        const map = ['hangman','match','anagram','pinyin'];
+        return gameStart(map[+ch - 1]);
+      }
+      return;
+    }
+    state.query += ch;
+    refresh();
+  }
+
+  /* =========================================================
+   * Calculator engine
+   * ========================================================= */
+  const CALC_KEYS = {
+    q: 'CLR', w: 'sin(', e: 'cos(', r: 'tan(', t: 'log(', y: 'ln(',
+    u: 'sqrt(', i: 'SQR', o: '^', p: 'π',
+    a: '+', s: '−', d: '×', f: '÷', g: '(', h: ')', j: 'e', k: '%', l: 'NEG',
+    '.': '.'
+  };
+  function calcType(ch) {
+    const c = ch.toLowerCase();
+    if (state.calc.last !== null && /^[0-9.(]$/.test(c)) {
+      // Start fresh after a result if a number is typed
+      state.calc.expr = '';
+      state.calc.last = null;
+    }
+    if (/^[0-9]$/.test(c)) {
+      state.calc.expr += c;
+    } else if (c === ' ') {
+      // ignore
+    } else if (CALC_KEYS[c] !== undefined) {
+      const t = CALC_KEYS[c];
+      if (t === 'CLR') {
+        state.calc.expr = '';
+        state.calc.display = '0';
+        state.calc.last = null;
+      } else if (t === 'SQR') {
+        state.calc.expr = '(' + (state.calc.expr || '0') + ')^2';
+      } else if (t === 'NEG') {
+        state.calc.expr = '-(' + (state.calc.expr || '0') + ')';
+      } else {
+        state.calc.expr += t;
+      }
+    } else if ('+-*/()^%.'.includes(c)) {
+      state.calc.expr += c;
+    }
+    render();
+  }
+  function calcBackspace() {
+    state.calc.expr = state.calc.expr.slice(0, -1);
+    state.calc.last = null;
+    render();
+  }
+  function calcEval() {
+    let s = state.calc.expr.trim();
+    if (!s) { state.calc.display = '0'; render(); return; }
+    let js = s
+      .replace(/π/g, '(Math.PI)')
+      .replace(/sin\(/g, 'Math.sin(')
+      .replace(/cos\(/g, 'Math.cos(')
+      .replace(/tan\(/g, 'Math.tan(')
+      .replace(/log\(/g, 'Math.log10(')
+      .replace(/ln\(/g, 'Math.log(')
+      .replace(/sqrt\(/g, 'Math.sqrt(')
+      .replace(/×/g, '*')
+      .replace(/÷/g, '/')
+      .replace(/−/g, '-')
+      .replace(/\^/g, '**')
+      .replace(/(?:^|[^a-zA-Z])e(?![a-zA-Z])/g, m => m.replace('e', '(Math.E)'));
+    // Auto-close unmatched parens
+    const open = (js.match(/\(/g) || []).length;
+    const close = (js.match(/\)/g) || []).length;
+    if (open > close) js += ')'.repeat(open - close);
+    // whitelist
+    if (!/^[\d\s+\-*/().,%MathPIElog10sincostanqrtE_*]+$/.test(js)) {
+      state.calc.display = 'ERR';
+      flash('SYNTAX');
+      render();
+      return;
+    }
+    try {
+      const v = Function('"use strict";return (' + js + ');')();
+      if (typeof v !== 'number' || !isFinite(v)) throw new Error('range');
+      state.calc.display = formatNum(v);
+      state.calc.last = v;
+    } catch (e) {
+      state.calc.display = 'ERR';
+      flash('CALC ERR');
+    }
+    render();
+  }
+  function formatNum(n) {
+    if (Number.isInteger(n)) return String(n);
+    const s = n.toPrecision(12).replace(/\.?0+$/, '');
+    return s.length > 16 ? n.toExponential(8) : s;
+  }
+
+  /* =========================================================
+   * Speech
+   * ========================================================= */
+  let voices = [];
+  function loadVoices() {
+    if (!('speechSynthesis' in window)) return;
+    voices = speechSynthesis.getVoices() || [];
+    if (voices.length) updateVoiceStrip();
+  }
+  // Pick the best available voice for the requested BCP-47 lang tag.
+  // Preference: exact match → prefix match → language family fallback chain.
+  // Within a pool, prefer high-quality (default = first listed by the OS),
+  // tie-broken to native/local voices over network ones.
+  function voiceQuality(v) {
+    // Higher = better. Default voices and named "Premium/Enhanced/Neural" win.
+    let s = 0;
+    const n = (v.name || '').toLowerCase();
+    if (v.default)        s += 4;
+    if (v.localService)   s += 2;
+    if (/\b(premium|enhanced|neural|natural)\b/.test(n)) s += 3;
+    if (/\(enhanced\)/.test(n)) s += 3;
+    return s;
+  }
+  function bestOf(pool) {
+    if (!pool.length) return null;
+    return pool.slice().sort((a, b) => voiceQuality(b) - voiceQuality(a))[0];
+  }
+  // Hand-picked voice names per locale, best → worst.
+  // The picker tries these by name first; if none match, falls back to scoring.
+  const PREFERRED_VOICES = {
+    'en-us': [
+      'Samantha','Allison','Ava','Susan','Joelle','Tom','Alex',
+      'Microsoft Aria Online (Natural)','Microsoft Jenny Online (Natural)',
+      'Microsoft Aria','Microsoft Zira','Google US English'
+    ],
+    'zh-cn': [
+      'Tingting','Tian-Tian','Tian-Tian (Premium)','婷婷','天天',
+      'Microsoft Yaoyao','Microsoft Huihui','Microsoft Kangkang',
+      'Microsoft Xiaoxiao Online (Natural)',
+      'Google 普通话（中国大陆）','Mei-Jia'
+    ],
+    'zh-hk': [
+      'Sinji','Sin-ji','善怡',
+      'Microsoft Tracy','Microsoft Wanlung',
+      'Google 廣東話（香港）'
+    ],
+    'zh-tw': [
+      'Mei-Jia','美佳','Microsoft Hanhan','Microsoft Yating',
+      'Google 國語（臺灣）'
+    ]
+  };
+  function pickVoice(lang) {
+    if (!voices.length) loadVoices();
+    const lc = lang.toLowerCase();
+    const base = lc.split('-')[0];
+    const norm = v => v.lang.toLowerCase().replace('_', '-');
+
+    // 1) Exact-name preferences for this locale
+    const wishlist = PREFERRED_VOICES[lc] || [];
+    for (const name of wishlist) {
+      const v = voices.find(v => v.name === name);
+      if (v) return v;
+    }
+
+    // 2) BCP-47 fallback chain
+    let chain;
+    if (lc === 'zh-hk') chain = ['zh-hk','zh-yue','yue','zh-tw','zh-cn','zh'];
+    else if (lc === 'zh-cn') chain = ['zh-cn','zh','zh-tw','zh-hk'];
+    else if (base === 'zh') chain = [lc, 'zh-cn','zh-tw','zh'];
+    else chain = [lc, base];
+
+    for (const tag of chain) {
+      const exact = voices.filter(v => norm(v) === tag);
+      if (exact.length) return bestOf(exact);
+      const prefix = voices.filter(v => norm(v).startsWith(tag + '-'));
+      if (prefix.length) return bestOf(prefix);
+    }
+    // 3) Last resort: any voice whose family matches
+    const fam = voices.filter(v => norm(v).startsWith(base));
+    return bestOf(fam);
+  }
+  function updateVoiceStrip() {
+    if (!('speechSynthesis' in window)) { elVoiceStrip.textContent = 'NO TTS'; return; }
+    const en  = pickVoice('en-US');
+    const man = pickVoice('zh-CN');
+    const yue = pickVoice('zh-HK');
+    elVoiceStrip.textContent =
+      `VOICES ${voices.length}  EN${en?'✓':'✗'} 國${man?'✓':'✗'} 粵${yue?'✓':'✗'}`;
+  }
+  if ('speechSynthesis' in window) {
+    loadVoices();
+    speechSynthesis.onvoiceschanged = loadVoices;
+    let tries = 0;
+    const iv = setInterval(() => {
+      loadVoices();
+      if (voices.length || tries++ > 20) clearInterval(iv);
+    }, 250);
+  } else {
+    elVoiceStrip.textContent = 'NO TTS';
+  }
+  // Monotonic id used to invalidate in-flight speech when a new request lands.
+  let speechSeqId = 0;
+  function cancelSpeech() {
+    speechSeqId++;
+    try { speechSynthesis.cancel(); } catch (_) {}
+  }
+  function speak(text, lang) {
+    if (!('speechSynthesis' in window)) { flash('NO TTS'); return; }
+    if (!text) { flash('NO TEXT'); return; }
+    cancelSpeech();
+    const myId = speechSeqId;
+    setTimeout(() => {
+      if (myId !== speechSeqId) return;
+      const u = new SpeechSynthesisUtterance(text);
+      const v = pickVoice(lang);
+      if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = lang; }
+      u.rate = 0.95;
+      u.pitch = 1.0;
+      u.volume = 1.0;
+      let started = false;
+      u.onstart = () => {
+        started = true;
+        const name = v ? v.name : '(default)';
+        flash('▶ ' + (name.length > 14 ? name.slice(0,14) : name));
+      };
+      u.onerror = e => flash('TTS ERR ' + (e.error || ''));
+      try {
+        if (speechSynthesis.paused) speechSynthesis.resume();
+        speechSynthesis.speak(u);
+        // Retry only if speech never started (Safari sometimes silently drops
+        // an utterance right after cancel()). We use a fresh utterance to avoid
+        // playing twice when the first call actually worked.
+        setTimeout(() => {
+          if (started || myId !== speechSeqId) return;
+          if (!speechSynthesis.speaking && !speechSynthesis.pending) {
+            try {
+              const u2 = new SpeechSynthesisUtterance(text);
+              if (v) { u2.voice = v; u2.lang = v.lang; } else { u2.lang = lang; }
+              u2.rate = u.rate; u2.pitch = u.pitch; u2.volume = u.volume;
+              speechSynthesis.resume();
+              speechSynthesis.speak(u2);
+            } catch (_) {}
+          }
+        }, 600);
+      } catch (e) { flash('TTS THROW'); }
+    }, 60);
+  }
+
+  // Speak a sequence of items in order. Each item: { text, lang, onStart?, onEnd? }.
+  // onStart fires when the utterance begins; onEnd when it finishes (also when it
+  // errors out, so cleanup always runs).
+  function speakSequence(items) {
+    if (!('speechSynthesis' in window)) { flash('NO TTS'); return; }
+    cancelSpeech();
+    const myId = speechSeqId;
+    const playFrom = (i) => {
+      if (myId !== speechSeqId) return;
+      if (i >= items.length) return;
+      const item = items[i];
+      if (!item.text) { playFrom(i + 1); return; }
+      const u = new SpeechSynthesisUtterance(item.text);
+      const v = pickVoice(item.lang);
+      if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = item.lang; }
+      u.rate = 0.9;
+      u.pitch = 1.0;
+      u.volume = 1.0;
+      u.onstart = () => { if (myId === speechSeqId && item.onStart) item.onStart(); };
+      const finish = () => {
+        if (myId !== speechSeqId) return;
+        if (item.onEnd) item.onEnd();
+        playFrom(i + 1);
+      };
+      u.onend = finish;
+      u.onerror = finish;
+      try { speechSynthesis.speak(u); } catch (_) { finish(); }
+    };
+    setTimeout(() => { if (myId === speechSeqId) playFrom(0); }, 60);
+  }
+
+  // Resolve the speakable string + language for the currently-selected entry.
+  function resolveSpeak(forceLang) {
+    if (state.mode === 'calc') return { text: 'Result is ' + state.calc.display, lang: 'en-US' };
+    const sel = state.results[state.selected];
+    if (state.mode !== 'cndict' && !sel) return null;
+    if (state.mode === 'poem') {
+      const text = sel.title + '。' + sel.lines.join('，') + '。';
+      // Tang poetry has no English form — when ENG is selected, fall back to Cantonese.
+      const lang = forceLang || (state.voiceLang === 'en-US' ? 'zh-HK' : state.voiceLang);
+      return { text, lang };
+    }
+    if (state.mode === 'cndict') {
+      // 中辭 mode no longer keeps a flat results[]; pull the active char from
+      // state.cn (whichever view we're in).
+      let text = '';
+      if (state.cn.view === 'detail') text = state.cn.ch;
+      else if (state.cn.view === 'char-list') {
+        const list = state.cn.list
+          ? state.cn.list
+          : state.cn.rad
+            ? (CN_BY_RADICAL.get(state.cn.rad) || [])
+            : (CN_BY_STROKES.get(state.cn.stk) || []);
+        const cur = list[state.selected];
+        if (cur) text = cur.c;
+      }
+      if (!text) return null;
+      const lang = forceLang || (state.voiceLang === 'en-US' ? 'zh-CN' : state.voiceLang);
+      return { text, lang };
+    }
+    // dict mode (curated, ecdict, or cedict)
+    const e = sel.e || sel;
+    let cnText, enText;
+    if (sel.kind === 'cedict') {
+      cnText = e.t;
+      enText = ((e.d || '').split('/')[0] || '').replace(/^(to |a |an |the )/, '');
+    } else if (sel.kind === 'ecdict') {
+      cnText = ecdictPrimaryZh(e);
+      enText = e.w;
+    } else {
+      cnText = (e.zh || '').split(/[;,，；]/)[0];
+      enText = e.en;
+    }
+    const lang = forceLang || state.voiceLang;
+    return { text: lang === 'en-US' ? enText : cnText, lang };
+  }
+  function speakCurrent(forceLang) {
+    if (state.mode === 'poem') return speakPoemKaraoke(forceLang);
+    const r = resolveSpeak(forceLang);
+    if (!r) { flash('NO ENTRY'); return; }
+    speak(r.text, r.lang);
+  }
+
+  function speakPoemKaraoke(forceLang) {
+    const sel = state.results[state.selected];
+    if (!sel) { flash('NO ENTRY'); return; }
+    const lang = forceLang || (state.voiceLang === 'en-US' ? 'zh-HK' : state.voiceLang);
+    const items = [
+      { text: sel.title + '。', lang,
+        onStart: () => highlightPoemLine(-1, 'title'),
+        onEnd:   () => unhighlightPoemLine(-1, 'title') },
+      { text: (sel.dyn ? sel.dyn + '　' : '') + sel.author + '。', lang,
+        onStart: () => highlightPoemLine(-1, 'author'),
+        onEnd:   () => unhighlightPoemLine(-1, 'author') },
+    ];
+    sel.lines.forEach((line, i) => {
+      items.push({
+        text: line + '。',
+        lang,
+        onStart: () => highlightPoemLine(i),
+        onEnd:   () => unhighlightPoemLine(i),
+      });
+    });
+    speakSequence(items);
+  }
+  function highlightPoemLine(idx, kind) {
+    const root = $('#detail');
+    if (!root) return;
+    root.querySelectorAll('.is-speaking').forEach(el => el.classList.remove('is-speaking'));
+    let target;
+    if (kind === 'title')       target = root.querySelector('.title');
+    else if (kind === 'author') target = root.querySelector('.author');
+    else                        target = root.querySelectorAll('.line')[idx];
+    if (target) {
+      target.classList.add('is-speaking');
+      target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+  function unhighlightPoemLine(idx, kind) {
+    const root = $('#detail');
+    if (!root) return;
+    let target;
+    if (kind === 'title')       target = root.querySelector('.title');
+    else if (kind === 'author') target = root.querySelector('.author');
+    else                        target = root.querySelectorAll('.line')[idx];
+    if (target) target.classList.remove('is-speaking');
+  }
+
+  /* =========================================================
+   * Mode + direction
+   * ========================================================= */
+  function setMode(m) {
+    state.mode = m;
+    state.query = '';
+    state.imeBuf = '';
+    state.selected = 0;
+    state.pane = 'detail';
+    state.cn = { view: 'menu', rad: '', stk: 0, ch: '', list: null };
+    state.wikiCat = '';
+    if (m === 'game') state.game = { type: 'menu' };
+    if (m === 'poem') state.results = POEMS.slice();
+    else state.results = [];   // wiki/calc/cndict/dict all start empty
+    $$('.key--mode').forEach(k => k.classList.toggle('is-active', k.dataset.mode === m));
+    document.body.classList.toggle('is-calc-mode',    m === 'calc');
+    document.body.classList.toggle('is-game-mode',    m === 'game');
+    document.body.classList.toggle('is-menu-mode',    m === 'menu');
+    document.body.classList.toggle('is-welcome-mode', m === 'welcome');
+    document.body.classList.toggle('is-cndict-mode',  m === 'cndict');
+    document.body.classList.toggle('is-poem-mode',    m === 'poem');
+    flash(m.toUpperCase());
+    render();
+  }
+  function flipDir() {
+    if (state.mode !== 'dict') { setMode('dict'); return; }
+    state.direction = state.direction === 'en2zh' ? 'zh2en' : 'en2zh';
+    state.query = '';
+    refresh();
+    flash(state.direction === 'en2zh' ? 'ENG → 中' : '中 → ENG');
+  }
+
+  /* =========================================================
+   * Actions
+   * ========================================================= */
+  const ACTIONS = {
+    bs: backspace,
+    enter() {
+      if (state.mode === 'calc') return calcEval();
+      if (state.mode === 'game') {
+        const t = state.game && state.game.type;
+        if (t === 'anagram' && state.game.anagram && state.game.anagram.status === 'playing') {
+          return gameAnagramType('\n');
+        }
+        if (t && t !== 'menu') return gameNext();
+      }
+      flash('OK');
+    },
+    dir: flipDir,
+    'switch-dict'() {
+      const order = ['dict','cndict','poem','calc','wiki','game'];
+      const idx = order.indexOf(state.mode);
+      setMode(order[(idx + 1) % order.length]);
+    },
+    ime: () => imeCycle(),
+    mark: () => flash('MARKED'),
+    tab:  () => flash('TAB'),
+    caps(_, el) {
+      state.caps = !state.caps;
+      el.classList.toggle('is-on', !!state.caps);
+      flash(state.caps ? 'CAPS ON' : 'CAPS OFF');
+    },
+    shift(_, el) {
+      state.shift = !state.shift;
+      el.classList.toggle('is-on', state.shift);
+      flash(state.shift ? 'SHIFT ON' : 'SHIFT OFF');
+    },
+    inflect: () => flash('INFLECT'),
+    confuse: () => flash('CONFUSE'),
+    clear() {
+      // Universal clear: dict mode → clear query; calc mode → reset expression.
+      if (state.mode === 'calc') {
+        state.calc.expr = '';
+        state.calc.display = '0';
+        state.calc.last = null;
+        flash('CLR');
+        render();
+      } else {
+        clearAll();
+        flash('CLR');
+      }
+    },
+    syn()   { state.pane = 'syn';   render(); },
+    ant()   { state.pane = 'ant';   render(); },
+    ex()    { state.pane = 'ex';    render(); },
+    deriv() { state.pane = 'deriv'; render(); },
+    random() { pickRandom(); },
+    bookmark() { toggleBookmark(); },
+    history() { toggleHistory(); },
+    home() {
+      state.mode = 'menu';
+      state.query = '';
+      state.results = [];
+      state.selected = 0;
+      state.menuSel = 0;
+      state.showHistory = false;
+      $$('.key--mode').forEach(k => k.classList.remove('is-active'));
+      document.body.classList.remove('is-calc-mode','is-game-mode','is-cndict-mode','is-poem-mode','is-welcome-mode');
+      document.body.classList.add('is-menu-mode');
+      render();
+      flash('HOME');
+    },
+    // Context-aware back: peel one layer of state if possible, else go home.
+    back() { goBack(); },
+    up()    {
+      if (state.mode === 'menu') { const n = MENU_ITEMS.length; state.menuSel = ((state.menuSel || 0) - 1 + n) % n; render(); return; }
+      state.selected = Math.max(0, state.selected - 1); state.pane='detail'; render();
+    },
+    down()  {
+      if (state.mode === 'menu') { const n = MENU_ITEMS.length; state.menuSel = ((state.menuSel || 0) + 1) % n; render(); return; }
+      state.selected = Math.min(Math.max(state.results.length - 1, 0), state.selected + 1); state.pane='detail'; render();
+    },
+    'scroll-up'()   { ACTIONS.up(); },
+    'scroll-down'() { ACTIONS.down(); },
+    left()  {
+      if (state.mode === 'menu') { const n = MENU_ITEMS.length; state.menuSel = ((state.menuSel || 0) - 1 + n) % n; render(); return; }
+      backspace();
+    },
+    right() {
+      if (state.mode === 'menu') { const n = MENU_ITEMS.length; state.menuSel = ((state.menuSel || 0) + 1) % n; render(); return; }
+    },
+    mode(_, el) { setMode(el.dataset.mode); },
+    'stop-speak'() { cancelSpeech(); flash('STOP'); },
+    lang(_, el) {
+      $$('.key--lang:not(.key--mode)').forEach(k => k.classList.remove('is-active'));
+      el.classList.add('is-active');
+      const code = el.dataset.lang;
+      if (code === 'ENG')      state.voiceLang = 'en-US';
+      else if (code === 'MAN') state.voiceLang = 'zh-CN';
+      else if (code === 'CAN') state.voiceLang = 'zh-HK';
+      flash('VOICE ' + code);
+      if (state.results.length && (state.mode === 'dict' || state.mode === 'poem')) speakCurrent();
+    },
+    power() {
+      state.on = !state.on;
+      if (state.on) {
+        elScreen.classList.remove('is-off');
+        // Replay the boot splash → main menu transition.
+        state.mode = 'welcome';
+        document.body.classList.remove('is-menu-mode');
+        document.body.classList.add('is-welcome-mode');
+        render();
+        updateVoiceStrip();
+        setTimeout(() => {
+          if (state.mode === 'welcome') {
+            state.mode = 'menu';
+            document.body.classList.remove('is-welcome-mode');
+            document.body.classList.add('is-menu-mode');
+            render();
+          }
+        }, 2500);
+      } else { render(); }
+    }
+  };
+
+  /* =========================================================
+   * Click + key handlers
+   * ========================================================= */
+  document.addEventListener('click', e => {
+    const k = e.target.closest('.key');
+    if (!k) return;
+    if (!state.on && !k.matches('[data-action="power"]')) return;
+    k.classList.add('is-pressed');
+    setTimeout(() => k.classList.remove('is-pressed'), 90);
+    if (k.dataset.action) {
+      const fn = ACTIONS[k.dataset.action];
+      if (fn) fn(e, k);
+      return;
+    }
+    if (k.dataset.key !== undefined) typeChar(k.dataset.key);
+  });
+
+  // List item click via delegation (lcd-body is re-rendered, so listen on parent)
+  elLcdBody.addEventListener('click', e => {
+    // Click on a definition / explanation reads it aloud.
+    const speakEl = e.target.closest('[data-speak]');
+    if (speakEl) {
+      const text = speakEl.dataset.speak;
+      const elLang = speakEl.dataset.speakLang || 'en-US';
+      // Chinese text follows the user's MAN/CAN voice choice; English text always reads in English.
+      // For poems specifically, when ENG is selected we fall back to Cantonese (no English form exists).
+      let lang = elLang;
+      if (elLang.startsWith('zh')) {
+        if (state.voiceLang.startsWith('zh')) lang = state.voiceLang;
+        else if (state.mode === 'poem') lang = 'zh-HK';
+      }
+      speak(text, lang);
+      e.stopPropagation();
+      return;
+    }
+    const wikiVar = e.target.closest('[data-wiki-variant]');
+    if (wikiVar) {
+      state.wikiVariant = wikiVar.dataset.wikiVariant;
+      render();
+      return;
+    }
+    // Game-mode interactions
+    const gameStartEl = e.target.closest('[data-game-start]');
+    if (gameStartEl) { gameStart(gameStartEl.dataset.gameStart); return; }
+    const gameAct = e.target.closest('[data-game-action]');
+    if (gameAct) {
+      const a = gameAct.dataset.gameAction;
+      if (a === 'exit')  { state.game = { type: 'menu' }; render(); }
+      else if (a === 'new' || a === 'next') gameNext();
+      else if (a === 'reset') gameReset();
+      return;
+    }
+    const imePick = e.target.closest('[data-ime-pick]');
+    if (imePick) {
+      const cands = imeCandidates();
+      const c = cands[+imePick.dataset.imePick];
+      if (c) imeCommit(c.c);
+      return;
+    }
+    const gameOpt = e.target.closest('[data-game-opt]');
+    if (gameOpt) {
+      const i = +gameOpt.dataset.gameOpt;
+      if (state.game.type === 'match')  gameMatchPick(i);
+      else if (state.game.type === 'pinyin') gamePinyinPick(i);
+      return;
+    }
+    const menuRow = e.target.closest('[data-menu-n]');
+    if (menuRow) {
+      menuActivate(+menuRow.dataset.menuN);
+      return;
+    }
+    const menuCard = e.target.closest('[data-menu-mode]');
+    if (menuCard) {
+      setMode(menuCard.dataset.menuMode);
+      return;
+    }
+    const wikiCat = e.target.closest('[data-wiki-cat]');
+    if (wikiCat) {
+      state.wikiCat = wikiCat.dataset.wikiCat;
+      state.query = '';
+      state.selected = 0;
+      state.results = wikiSearch('');
+      render();
+      return;
+    }
+    const wikiAct = e.target.closest('[data-wiki-action]');
+    if (wikiAct) {
+      if (wikiAct.dataset.wikiAction === 'back') {
+        state.wikiCat = '';
+        state.query = '';
+        state.results = [];
+        state.selected = 0;
+        render();
+      }
+      return;
+    }
+    const histLi = e.target.closest('[data-hist]');
+    if (histLi) {
+      const h = state.history[+histLi.dataset.hist];
+      if (h) {
+        state.showHistory = false;
+        if (h.mode !== state.mode) setMode(h.mode);
+        state.query = h.query || '';
+        refresh();
+      }
+      return;
+    }
+    const bmLi = e.target.closest('[data-bm]');
+    if (bmLi) {
+      const key = bmLi.dataset.bm;
+      const [mode, ...rest] = key.split('|');
+      state.showHistory = false;
+      if (mode !== state.mode) setMode(mode);
+      // Best-effort restoration:
+      if (mode === 'cndict') {
+        state.cn = { view: 'detail', rad: '', stk: 0, ch: rest[0] || '', list: null };
+        render();
+      } else if (mode === 'poem') {
+        const [title, author] = rest;
+        const idx = POEMS.findIndex(p => p.title === title && p.author === author);
+        if (idx >= 0) { state.results = POEMS.slice(); state.selected = idx; render(); }
+      } else if (mode === 'dict') {
+        const head = rest.join('|');
+        const dirPrefix = head.startsWith('e:') ? 'en2zh' : 'zh2en';
+        state.direction = dirPrefix;
+        state.query = head.slice(2);
+        refresh();
+      }
+      return;
+    }
+    const sugg = e.target.closest('[data-suggest]');
+    if (sugg) {
+      state.query = sugg.dataset.suggest;
+      refresh();
+      return;
+    }
+    const chip = e.target.closest('[data-author]');
+    if (chip) {
+      const name = chip.dataset.author;
+      state.query = (state.query === name) ? '' : name;
+      refresh();
+      return;
+    }
+    // 中辭 navigation
+    const cnAction = e.target.closest('[data-cn-action]');
+    if (cnAction) {
+      const a = cnAction.dataset.cnAction;
+      if (a === 'goto-rad') { state.cn.view = 'rad-pick'; render(); return; }
+      if (a === 'goto-stk') { state.cn.view = 'stk-pick'; render(); return; }
+      if (a === 'back')     { cnGoBack(); return; }
+    }
+    const radEl = e.target.closest('[data-cn-rad]');
+    if (radEl) {
+      state.cn.view = 'char-list';
+      state.cn.rad = radEl.dataset.cnRad;
+      state.cn.stk = 0;
+      state.selected = 0;
+      render(); return;
+    }
+    const stkEl = e.target.closest('[data-cn-stk]');
+    if (stkEl) {
+      state.cn.view = 'char-list';
+      state.cn.stk = +stkEl.dataset.cnStk;
+      state.cn.rad = '';
+      state.selected = 0;
+      render(); return;
+    }
+    const cnCell = e.target.closest('[data-cn-i]');
+    if (cnCell) {
+      state.selected = +cnCell.dataset.cnI;
+      render(); return;
+    }
+    const li = e.target.closest('li[data-i]');
+    if (!li) return;
+    state.selected = +li.dataset.i;
+    state.pane = 'detail';
+    render();
+  });
+
+  function cnGoBack() {
+    const v = state.cn.view;
+    if (v === 'detail') {
+      state.cn.view = state.cn.list || state.cn.rad || state.cn.stk
+        ? 'char-list' : 'menu';
+    } else if (v === 'char-list') {
+      // From a search-result list, go to the menu; otherwise back to picker.
+      if (state.cn.list) {
+        state.query = '';
+        state.cn = { view: 'menu', rad: '', stk: 0, ch: '', list: null };
+      } else {
+        state.cn.view = state.cn.rad ? 'rad-pick' : 'stk-pick';
+      }
+    } else if (v === 'rad-pick' || v === 'stk-pick') {
+      state.cn.view = 'menu';
+    }
+    state.selected = 0;
+    render();
+  }
+
+  document.addEventListener('keydown', e => {
+    const k = e.key;
+    // Function-key mode shortcuts work regardless of modifiers.
+    if (state.on && /^F[1-6]$/.test(k)) {
+      e.preventDefault();
+      const map = { F1: 'dict', F2: 'cndict', F3: 'poem', F4: 'calc', F5: 'wiki', F6: 'game' };
+      const target = map[k];
+      const btn = document.querySelector(`.key--mode[data-mode="${target}"]`);
+      if (btn) { setMode(target); animatePress(btn); }
+      return;
+    }
+    // Alt+letter shortcuts for the new function buttons.
+    if (state.on && e.altKey && !e.metaKey && !e.ctrlKey) {
+      const lower = k.toLowerCase();
+      const altMap = { r: 'random', b: 'bookmark', h: 'history', m: 'home' };
+      if (altMap[lower]) {
+        e.preventDefault();
+        const btn = document.querySelector(`[data-action="${altMap[lower]}"]`);
+        ACTIONS[altMap[lower]](e, btn);
+        if (btn) animatePress(btn);
+        return;
+      }
+    }
+    // Plain Home key → main menu.
+    if (state.on && k === 'Home') {
+      e.preventDefault();
+      const btn = document.querySelector('[data-action="home"]');
+      ACTIONS.home();
+      if (btn) animatePress(btn);
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!state.on) {
+      if (k === 'Escape' || k === ' ') { ACTIONS.power(); e.preventDefault(); }
+      return;
+    }
+    // Menu mode: digit keys jump straight to the corresponding launcher entry;
+    // left/right move the highlight; Enter activates.
+    if (state.mode === 'menu') {
+      const total = MENU_ITEMS.length;   // 6
+      if (/^[1-6]$/.test(k))  { e.preventDefault(); menuActivate(+k); return; }
+      if (k === 'ArrowRight' || k === 'ArrowDown') { e.preventDefault(); state.menuSel = ((state.menuSel || 0) + 1) % total; render(); return; }
+      if (k === 'ArrowLeft'  || k === 'ArrowUp')   { e.preventDefault(); state.menuSel = ((state.menuSel || 0) - 1 + total) % total; render(); return; }
+      if (k === 'Enter')      { e.preventDefault(); menuActivate(MENU_ITEMS[state.menuSel || 0].n); return; }
+      if (k === 'Escape')     { /* stay */ return; }
+    }
+    let pressed = null;
+
+    // Calc-mode operator keys (live with the existing letter keys)
+    if (state.mode === 'calc') {
+      if (k === '=') { ACTIONS.enter(); e.preventDefault(); return; }
+      if (k === '+') { state.calc.expr += '+'; render(); pressed = document.querySelector('[data-key="a"]'); }
+      else if (k === '-') { state.calc.expr += '-'; render(); pressed = document.querySelector('[data-key="s"]'); }
+      else if (k === '*') { state.calc.expr += '*'; render(); pressed = document.querySelector('[data-key="d"]'); }
+      else if (k === '/') { state.calc.expr += '/'; render(); pressed = document.querySelector('[data-key="f"]'); e.preventDefault(); }
+      else if (k === '(') { state.calc.expr += '('; render(); pressed = document.querySelector('[data-key="g"]'); }
+      else if (k === ')') { state.calc.expr += ')'; render(); pressed = document.querySelector('[data-key="h"]'); }
+      if (pressed) { animatePress(pressed); return; }
+    }
+
+    // Game mode steals letter / digit / Enter / Backspace input.
+    if (state.mode === 'game') {
+      const t = state.game && state.game.type;
+      if (t === 'menu') {
+        if (/^[1-4]$/.test(k)) {
+          e.preventDefault();
+          const map = ['hangman','match','anagram','pinyin'];
+          gameStart(map[+k - 1]); return;
+        }
+      } else if (t === 'hangman') {
+        if (/^[a-zA-Z]$/.test(k)) { e.preventDefault(); gameHangmanGuess(k); return; }
+        if (k === 'Enter') { e.preventDefault(); gameNext(); return; }
+      } else if (t === 'anagram') {
+        if (/^[a-zA-Z]$/.test(k)) { e.preventDefault(); gameAnagramType(k.toLowerCase()); return; }
+        if (k === 'Backspace')    { e.preventDefault(); gameAnagramType('\b'); return; }
+        if (k === 'Enter')        { e.preventDefault();
+          if (state.game.anagram.status === 'playing') gameAnagramType('\n');
+          else gameNext();
+          return;
+        }
+      } else if (t === 'match' || t === 'pinyin') {
+        if (/^[1-4]$/.test(k)) {
+          e.preventDefault();
+          if (t === 'match')  gameMatchPick(+k - 1);
+          if (t === 'pinyin') gamePinyinPick(+k - 1);
+          return;
+        }
+        if (k === 'Enter') { e.preventDefault(); gameNext(); return; }
+      }
+    }
+    if (/^[a-zA-Z]$/.test(k)) {
+      typeChar(k.toLowerCase());
+      pressed = document.querySelector(`.key[data-key="${k.toLowerCase()}"]`);
+    } else if (/^[0-9]$/.test(k)) {
+      typeChar(k);
+      pressed = document.querySelector(`.key[data-key="${k}"]`);
+    } else if (k === '.') {
+      typeChar('.');
+      pressed = document.querySelector('[data-key="."]');
+    } else if (k === ' ') {
+      if (imeIsCN() && state.imeBuf && imeAvailable(state.ime)) {
+        const c = imeCandidates()[0];
+        if (c) { imeCommit(c.c); pressed = document.querySelector('.key--space'); e.preventDefault(); return; }
+      }
+      if (state.mode !== 'calc') typeChar(' ');
+      pressed = document.querySelector('.key--space'); e.preventDefault();
+    } else if (k === 'Backspace') {
+      backspace(); pressed = document.querySelector('[data-action="bs"]'); e.preventDefault();
+    } else if (k === 'Enter') {
+      ACTIONS.enter(); pressed = document.querySelector('[data-action="enter"]'); e.preventDefault();
+    } else if (k === 'Tab') {
+      // Tab cycles through modes (forward; Shift+Tab backward).
+      e.preventDefault();
+      const order = ['dict','cndict','poem','calc','wiki','game'];
+      const idx = order.indexOf(state.mode);
+      const next = e.shiftKey
+        ? order[(idx - 1 + order.length) % order.length]
+        : order[(idx + 1) % order.length];
+      setMode(next);
+    } else if (k === 'Shift') {
+      // toggle
+      const sk = document.querySelector('[data-action="shift"]');
+      ACTIONS.shift(null, sk); pressed = sk;
+    } else if (k === 'ArrowUp')   { ACTIONS.up();   pressed = document.querySelector('[data-action="up"]');   e.preventDefault(); }
+    else if (k === 'ArrowDown') { ACTIONS.down(); pressed = document.querySelector('[data-action="down"]'); e.preventDefault(); }
+    else if (k === 'ArrowLeft') { ACTIONS.left(); pressed = document.querySelector('[data-action="left"]'); e.preventDefault(); }
+    else if (k === 'ArrowRight'){ ACTIONS.right();pressed = document.querySelector('[data-action="right"]');e.preventDefault(); }
+    else if (k === 'Escape')    { goBack(); }
+
+    if (pressed) animatePress(pressed);
+  });
+  function animatePress(el) {
+    el.classList.add('is-pressed');
+    setTimeout(() => el.classList.remove('is-pressed'), 90);
+  }
+
+  /* =========================================================
+   * Boot
+   * ========================================================= */
+  function boot() {
+    loadStore();
+    document.querySelector('.key--lang[data-lang="ENG"]').classList.add('is-active');
+    state.mode = 'welcome';
+    document.body.classList.add('is-welcome-mode');
+    render();
+    updateVoiceStrip();
+    // Auto-advance: welcome splash → main menu after a short pause.
+    setTimeout(() => {
+      if (state.mode === 'welcome') {
+        state.mode = 'menu';
+        document.body.classList.remove('is-welcome-mode');
+        document.body.classList.add('is-menu-mode');
+        render();
+      }
+    }, 2800);
+  }
+  boot();
+
+  /* Responsive scaling: the device is designed at 720px wide. On narrower
+     viewports we transform-scale the whole device and crush the wrapper's
+     height so layout flow stays tight. */
+  function fitDevice() {
+    const fit = document.getElementById('device-fit');
+    const dev = fit && fit.firstElementChild;
+    if (!dev) return;
+    const margin = window.innerWidth < 740 ? 16 : 0;
+    const avail = window.innerWidth - margin;
+    const scale = Math.min(1, avail / 720);
+    dev.style.transform = scale < 1 ? `scale(${scale})` : '';
+    fit.style.width = scale < 1 ? (720 * scale) + 'px' : '';
+    // Set wrapper height = scaled device height so body layout matches what's visible.
+    fit.style.height = scale < 1 ? (dev.offsetHeight * scale) + 'px' : '';
+  }
+  window.addEventListener('resize', fitDevice);
+  // Run once now and again after a tick (fonts/data may grow content).
+  fitDevice();
+  setTimeout(fitDevice, 100);
+  setTimeout(fitDevice, 500);
+
+})();
+</script>
+</body>
+</html>

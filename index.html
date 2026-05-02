@@ -302,6 +302,19 @@
                 setTimeout(() => os.closeWindow(windowId), 100);
             }
         });
+
+        os.registerApp({
+            id: 'instant-dict',
+            name: 'Instant Dict',
+            icon: '通',
+            category: 'external',
+            isExternal: true,
+            url: 'instant-dict/index.html',
+            onLaunch(windowId) {
+                window.open(this.url, '_blank');
+                setTimeout(() => os.closeWindow(windowId), 100);
+            }
+        });
     </script>
 </body>
 </html>
