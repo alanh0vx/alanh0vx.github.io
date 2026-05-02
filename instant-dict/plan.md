@@ -46,7 +46,7 @@ Single-page, no build step. `dict.js` is loaded via a `<script>` tag so it's eas
 7. **Polish**
    - Soft inner shadow on the LCD for the look.
    - Press animation on keys (transform + box-shadow).
-   - Boot animation: brief `INSTANT-DICT EC4900H SUPER` splash on first paint.
+   - Boot animation: brief `萬能通 OMNI·DICT OD-2026 PRO` splash on first paint.
    - Subtle CRT-style scanlines? Skip — LCDs don't scanline. Just a faint pixel grid.
 
 ## Test plan

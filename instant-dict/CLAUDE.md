@@ -2,7 +2,7 @@
 
 ## What this is
 
-A single-page HTML5 fan recreation of the 快譯通 INSTANT-DICT EC4900H, renamed to fictional **萬能通 OMNI·DICT OD-2026 PRO**. See `README.md` for the user-facing description.
+A single-page HTML5 browser-based electronic dictionary device, the fictional **萬能通 OMNI·DICT OD-2026 PRO**. See `README.md` for the user-facing description.
 
 **No build step. No framework. No server.** Edit `index.html`, reload the browser. That's the loop.
 

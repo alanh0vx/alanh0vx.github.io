@@ -1,10 +1,10 @@
 # Instant-Dict (HTML5) — Requirements
 
-A browser-based recreation of the **快譯通 INSTANT-DICT EC4900H Super** (English-Chinese Talking Dictionary Plus PDA), playable as a single HTML5 page.
+A browser-based **萬能通 OMNI·DICT OD-2026 PRO** electronic dictionary device (English-Chinese Talking Dictionary Plus PDA), playable as a single HTML5 page.
 
 ## Goals
 
-- Visual homage to the EC4900H clamshell device — dark plastic body, monochrome LCD, QWERTY + 注音/倉頡 key legends, language row, function keys, speaker grille, stylus.
+- Vintage-style clamshell electronic dictionary device — dark plastic body, monochrome LCD, QWERTY + 注音/倉頡 key legends, language row, function keys, speaker grille, stylus.
 - Functional **English ⇄ Chinese** lookup with the device's signature *instant-as-you-type* search.
 - Talking: speak the looked-up word in English / 國語 (Mandarin) / 粵語 (Cantonese), best-effort, via the Web Speech API.
 - Works offline as a single static page (no build step). Opens with `open index.html`.
@@ -14,7 +14,7 @@ A browser-based recreation of the **快譯通 INSTANT-DICT EC4900H Super** (Engl
 1. **Device frame**
    - Hinged, two-panel layout (top: LCD; bottom: keyboard).
    - LCD area shows current entry and a results list.
-   - Speaker grille, brand marks (`快譯通`, `INSTANT-DICT`, `EC4900H SUPER`, `English Chinese Talking Dictionary Plus PDA`, `手寫識別`).
+   - Speaker grille, brand marks (`萬能通`, `OMNI·DICT`, `OD-2026 PRO`, `English Chinese Talking Dictionary Plus PDA`, `手寫識別`).
    - Subtle red felt/cloth backdrop matching the photo.
 
 2. **Keyboard**

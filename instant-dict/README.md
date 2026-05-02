@@ -1,6 +1,6 @@
 # 萬能通 OMNI·DICT OD-2026 PRO
 
-A single-page HTML5 fan recreation of the Hong Kong **快譯通 INSTANT-DICT EC4900H Super** electronic dictionary, renamed to the fictional **萬能通 OMNI·DICT OD-2026 PRO**.
+A single-page HTML5 browser-based electronic dictionary device, the fictional **萬能通 OMNI·DICT OD-2026 PRO**.
 
 No build step, no framework, no server. Open `index.html` in a browser.
 
@@ -96,4 +96,4 @@ No npm install, no bundler. Edit `index.html` and reload — that's the loop.
 
 ## License
 
-Project code: MIT-licensed for personal use; not affiliated with 快譯通 or any third party. Dictionary data carries the licenses listed above. This is a fan project — no commercial use of the original brand or device design is intended.
+Project code: MIT-licensed for personal use. Dictionary data carries the licenses listed above. Non-commercial fan project.
