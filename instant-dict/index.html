@@ -200,7 +200,19 @@
   .is-welcome-mode .lcd-input,
   .is-cndict-mode .lcd-input,
   .is-poem-mode .lcd-input,
-  .is-calc-mode .lcd-input { display: none; }
+  .is-calc-mode .lcd-input,
+  .is-ic-mode .lcd-input,
+  .is-sango-mode .lcd-input,
+  .is-travel-mode .lcd-input { display: none; }
+
+  /* Sango / IC modes: shift the LCD palette to the lighter pale-olive that
+     matches the bundled PNG art (sango_title.png, sango_map1.png, sango_characters_map.png)
+     so the embedded images blend into the screen instead of sitting as a bright box. */
+  .is-sango-mode, .is-ic-mode {
+    --lcd-bg:    #cfd7aa;
+    --lcd-bg-2:  #c2caa0;
+    --lcd-ghost: rgba(19, 24, 6, 0.22);
+  }
 
   /* Chinese IME bar (中辭 / 唐詩) */
   .ime-bar {
@@ -943,8 +955,644 @@
     font-family: "Menlo", monospace;
   }
   /* Hide voice strip on launcher screens where it overlaps cards. */
+  /* ====== EXT-IC card chooser ====== */
+  .ic-screen { display: flex; flex-direction: column; height: 100%; padding: 4px 6px; gap: 6px; }
+  .ic-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: 1; align-items: stretch; }
+  .ic-card {
+    border: 1px solid var(--lcd-ink);
+    border-radius: 3px;
+    padding: 4px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(19, 24, 6, 0.04);
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    transition: background 0.08s, color 0.08s;
+  }
+  .ic-card:hover { background: var(--lcd-bg-2); }
+  .ic-card.is-sel { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .ic-card-thumb {
+    width: 100%;
+    height: 56px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
+  }
+  .ic-card-name { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; }
+  .ic-card-meta { font-size: 8px; opacity: 0.65; letter-spacing: 0.04em; }
+  .ic-card.ic-empty {
+    cursor: default;
+    background: transparent;
+    border-style: dashed;
+    color: var(--lcd-ink);
+    opacity: 0.4;
+    justify-content: center;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+  }
+  .ic-card.ic-empty:hover { background: transparent; }
+  .ic-tip { text-align: center; font-size: 10px; opacity: 0.7; letter-spacing: 0.06em; }
+
+  /* ====== Sango (三國演義) IC card ====== */
+  .sango-screen { height: 100%; display: flex; flex-direction: column; image-rendering: pixelated; }
+  .sango-title {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 6px;
+  }
+  .sango-title-img {
+    max-width: 70%;
+    max-height: 56%;
+    image-rendering: pixelated;
+    object-fit: contain;
+  }
+  .sango-press {
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    margin-top: 8px;
+    animation: sango-blink 1s steps(2) infinite;
+  }
+  .sango-foot { font-size: 9px; opacity: 0.5; letter-spacing: 0.06em; }
+  @keyframes sango-blink { 50% { opacity: 0.25; } }
+
+  .sango-main { flex-direction: row; gap: 6px; padding: 2px; flex: 1; }
+  .sango-map {
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    border: 1px solid var(--lcd-ghost);
+    min-height: 0;
+  }
+  .sango-aside {
+    width: 110px;
+    display: flex; flex-direction: column; gap: 4px;
+    font-size: 11px;
+    padding: 2px 4px;
+    border-left: 1px dashed var(--lcd-ghost);
+  }
+  .sango-aside-title { font-size: 12px; font-weight: 700; letter-spacing: 0.16em; border-bottom: 1px solid var(--lcd-ghost); padding-bottom: 2px; }
+  .sango-aside-row { font-size: 11px; letter-spacing: 0.04em; }
+  .sango-aside-hint { margin-top: auto; font-size: 9px; opacity: 0.7; line-height: 1.3; }
+  .sango-fbar {
+    display: flex; justify-content: space-between;
+    font-size: 9px;
+    padding: 1px 4px;
+    border-top: 1px dashed var(--lcd-ghost);
+    letter-spacing: 0.04em;
+  }
+  .sango-fbar span { white-space: nowrap; }
+
+  .sango-grid { padding: 4px; }
+  .sango-grid-wrap {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 3px;
+    align-content: start;
+    justify-items: center;
+  }
+  .sango-cell {
+    text-align: center;
+    cursor: pointer;
+    padding: 1px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: border-color 0.05s, background 0.05s;
+  }
+  .sango-cell:hover { border-color: var(--lcd-ghost); }
+  .sango-cell.is-sel { border-color: var(--lcd-ink); background: var(--lcd-bg-2); }
+  .sango-portrait { margin: 0 auto; display: block; image-rendering: pixelated; }
+  .sango-cell-name { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; margin-top: 1px; }
+  .sango-grid-foot {
+    display: flex; justify-content: space-between;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-top: 1px dashed var(--lcd-ghost);
+    letter-spacing: 0.04em;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+
+  .sango-detail { flex-direction: row; gap: 8px; padding: 6px; align-items: stretch; flex: 1; min-height: 0; }
+  .sango-portrait-lg { border: 1px solid var(--lcd-ink); flex-shrink: 0; image-rendering: pixelated; }
+  .sango-detail-info { flex: 1; display: flex; flex-direction: column; gap: 3px; font-size: 12px; min-width: 0; }
+  .sango-detail-name { font-size: 16px; font-weight: 700; letter-spacing: 0.08em; }
+  .sango-detail-faction { font-size: 11px; opacity: 0.8; margin-bottom: 4px; }
+  .sango-stat-row { display: flex; gap: 6px; font-size: 11px; align-items: center; }
+  .sango-stat-l { width: 32px; font-weight: 700; }
+  .sango-stat-bar { font-family: "Menlo", monospace; flex: 1; font-size: 10px; letter-spacing: -1px; overflow: hidden; }
+  .sango-stat-v { width: 28px; text-align: right; font-family: "Menlo", monospace; font-size: 11px; }
+  .sango-detail-hint { margin-top: auto; font-size: 9px; opacity: 0.65; letter-spacing: 0.04em; line-height: 1.3; }
+
+  /* Lord-pick screen */
+  .sango-pick { padding: 6px; align-items: stretch; }
+  .sango-pick-title { text-align: center; font-size: 14px; font-weight: 700; letter-spacing: 0.6em; padding: 2px 0 4px; }
+  .sango-pick-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex: 1; }
+  .sango-lord {
+    border: 1px solid var(--lcd-ink);
+    border-radius: 3px;
+    padding: 4px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(19,24,6,0.04);
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    transition: background 0.08s;
+  }
+  .sango-lord:hover { background: var(--lcd-bg-2); }
+  .sango-lord.is-sel { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .sango-lord-name     { font-size: 14px; font-weight: 700; letter-spacing: 0.1em; margin-top: 2px; }
+  .sango-lord-faction  { font-size: 10px; opacity: 0.75; }
+  .sango-lord-stat     { font-size: 10px; letter-spacing: 0.04em; opacity: 0.85; }
+  .sango-pick-foot     { text-align: center; font-size: 10px; opacity: 0.7; padding-top: 4px; letter-spacing: 0.06em; }
+
+  /* Main game screen — extended status panel and action menu */
+  .sango-aside-port { margin: 0 auto; image-rendering: pixelated; border: 1px solid var(--lcd-ink); }
+  .sango-aside-name { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; }
+  .sango-aside-tag  { text-align: center; font-size: 10px; opacity: 0.75; letter-spacing: 0.04em; padding-bottom: 2px; border-bottom: 1px solid var(--lcd-ghost); }
+  .sango-stat-line { display: flex; justify-content: space-between; font-size: 11px; padding: 1px 1px; font-family: "Menlo", monospace; letter-spacing: 0.04em; }
+  .sango-stat-line span:first-child { font-family: inherit; font-weight: 700; }
+
+  .sango-side2 {
+    width: 110px;
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 2px 4px;
+    border-left: 1px dashed var(--lcd-ghost);
+    font-size: 11px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .sango-side2-h { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; padding-bottom: 2px; border-bottom: 1px solid var(--lcd-ghost); margin-bottom: 2px; }
+  .sango-act {
+    display: flex; gap: 6px; padding: 2px 4px; border-radius: 2px;
+    cursor: pointer; align-items: center; transition: background 0.06s;
+  }
+  .sango-act:hover { background: var(--lcd-bg-2); }
+  .sango-act.is-sel { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .sango-act-key { font-family: "Menlo", monospace; font-size: 11px; opacity: 0.65; width: 14px; text-align: center; }
+  .sango-act.is-sel .sango-act-key { opacity: 1; }
+  .sango-act-zh { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; }
+  .sango-act-end { margin-top: 2px; border-top: 1px dashed var(--lcd-ghost); padding-top: 4px; }
+
+  .sango-log {
+    margin-top: auto;
+    border-top: 1px dashed var(--lcd-ghost);
+    padding-top: 2px;
+    font-size: 9px;
+    line-height: 1.3;
+    font-family: "Menlo", monospace;
+    max-height: 60px;
+    overflow: hidden;
+  }
+  .sango-log-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Stub view (城池/內政/軍事) */
+  .sango-stub { align-items: center; justify-content: center; gap: 4px; text-align: center; }
+  .sango-stub-zh  { font-size: 24px; font-weight: 700; letter-spacing: 0.4em; }
+  .sango-stub-en  { font-size: 11px; opacity: 0.6; letter-spacing: 0.18em; }
+  .sango-stub-tbd { font-size: 13px; margin: 8px 0; opacity: 0.6; letter-spacing: 0.4em; }
+  .sango-stub-hint { font-size: 11px; opacity: 0.7; letter-spacing: 0.06em; }
+
+  /* Map dots overlay (main view) */
+  .sango-map { position: relative; }
+  .sango-dot {
+    position: absolute;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--lcd-ink);
+    color: var(--lcd-bg);
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 12px;
+    text-align: center;
+    border: 1px solid var(--lcd-ink);
+    z-index: 2;
+    cursor: default;
+    transition: transform 0.06s, box-shadow 0.06s;
+  }
+  .sango-dot.is-mine { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .sango-dot.is-enemy { background: transparent; color: var(--lcd-ink); }
+  .sango-dot.is-pickable { cursor: pointer; }
+  .sango-dot.is-pickable:hover { transform: translate(-50%, -50%) scale(1.2); }
+  .sango-dot.is-sel { box-shadow: 0 0 0 2px var(--lcd-bg-2), 0 0 0 4px var(--lcd-ink); transform: translate(-50%, -50%) scale(1.15); }
+  .sango-dot-mark { display: block; }
+  .sango-label {
+    position: absolute;
+    font-size: 9px;
+    font-weight: 700;
+    transform: translate(-50%, 0);
+    color: var(--lcd-ink);
+    pointer-events: none;
+    text-shadow:
+      1px 0 var(--lcd-bg), -1px 0 var(--lcd-bg),
+      0 1px var(--lcd-bg), 0 -1px var(--lcd-bg);
+    white-space: nowrap;
+    z-index: 1;
+  }
+
+  /* Submenu helpers */
+  .sango-hint { font-size: 9px; opacity: 0.7; line-height: 1.3; padding: 4px 0; letter-spacing: 0.04em; }
+  .sango-pick-info {
+    border: 1px dashed var(--lcd-ghost);
+    padding: 3px 5px;
+    margin: 1px 0;
+    font-size: 10px;
+    border-radius: 2px;
+    line-height: 1.35;
+  }
+  .sango-pick-info .sango-stat-line { font-size: 10px; padding: 0; }
+  .sango-pick-name { font-weight: 700; font-size: 11px; margin-bottom: 2px; letter-spacing: 0.04em; }
+
+  /* City list view */
+  .sango-cities { padding: 4px 6px; }
+  .sango-cities-h { font-size: 13px; font-weight: 700; letter-spacing: 0.16em; padding: 2px 0 4px; border-bottom: 1px solid var(--lcd-ghost); margin-bottom: 4px; }
+  .sango-cities-list { flex: 1; display: flex; flex-direction: column; gap: 1px; font-size: 11px; }
+  .sango-city-row {
+    display: flex; gap: 8px; padding: 2px 4px; border-radius: 2px;
+    font-family: "Menlo", monospace; align-items: center;
+  }
+  .sango-city-row.is-mine { background: rgba(19,24,6,0.06); }
+  .sango-city-row.is-sel { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .sango-city-mark {
+    width: 16px; text-align: center; font-weight: 700;
+    background: var(--lcd-ink); color: var(--lcd-bg); border-radius: 2px;
+    font-family: "Noto Serif TC", serif;
+  }
+  .sango-city-row.is-sel .sango-city-mark { background: var(--lcd-bg); color: var(--lcd-ink); }
+  .sango-city-name { font-family: "Noto Serif TC", serif; font-weight: 700; min-width: 36px; }
+  .sango-city-cell { font-size: 10px; opacity: 0.85; }
+  .sango-cities-foot { text-align: right; font-size: 10px; opacity: 0.7; padding: 4px 0 2px; letter-spacing: 0.06em; }
+
+  .sango-lord-gens { font-size: 9px; opacity: 0.75; line-height: 1.2; margin-top: 2px; min-height: 24px; }
+
+  /* AP bar in status panel */
+  .sango-ap { display: flex; justify-content: space-between; font-size: 11px; padding: 2px 1px 1px; font-family: "Menlo", monospace; }
+  .sango-ap span:first-child { font-family: inherit; font-weight: 700; }
+  .sango-ap-v { color: var(--lcd-ink); font-weight: 700; }
+  .sango-ap-track { height: 4px; background: rgba(19,24,6,0.15); border-radius: 1px; overflow: hidden; margin: 0 0 4px; }
+  .sango-ap-fill { height: 100%; background: var(--lcd-ink); transition: width 0.2s; }
+
+  /* Sub-action AP cost badge + disabled state */
+  .sango-act-cost { font-family: "Menlo", monospace; font-size: 10px; opacity: 0.55; margin-left: auto; padding-right: 2px; }
+  .sango-act.is-sel .sango-act-cost { opacity: 1; }
+  .sango-act.is-disabled { opacity: 0.45; cursor: not-allowed; }
+  .sango-act.is-disabled .sango-act-cost { text-decoration: line-through; }
+
+  /* Result alert (post-action summary) */
+  .sango-result-box {
+    border: 1px solid var(--lcd-ink);
+    border-radius: 2px;
+    padding: 5px 6px;
+    margin: 2px 0 4px;
+    font-size: 11px;
+    line-height: 1.55;
+    background: rgba(19,24,6,0.04);
+  }
+  .sango-result-line {
+    font-family: "Menlo", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 1px 0;
+  }
+  .sango-result-line:first-child {
+    font-family: "Noto Serif TC", serif;
+    font-size: 12px;
+    font-weight: 700;
+    border-bottom: 1px dashed var(--lcd-ghost);
+    margin-bottom: 2px;
+    padding-bottom: 2px;
+  }
+
+  /* Roster view (text list of all 70 武將) */
+  .sango-roster { padding: 4px 6px; }
+  .sango-roster-h { font-size: 13px; font-weight: 700; letter-spacing: 0.16em; padding: 2px 0 4px; border-bottom: 1px solid var(--lcd-ghost); margin-bottom: 4px; }
+  .sango-roster-list { flex: 1; display: flex; flex-direction: column; gap: 1px; font-size: 11px; min-height: 0; overflow: hidden; }
+  .sango-roster-row {
+    display: flex; gap: 8px; padding: 1px 4px; border-radius: 2px;
+    font-family: "Menlo", monospace; align-items: center;
+    font-size: 10.5px;
+  }
+  .sango-roster-row.is-mine { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .sango-roster-row.is-free { opacity: 0.7; font-style: italic; }
+  .sango-roster-name { font-family: "Noto Serif TC", serif; font-weight: 700; min-width: 48px; font-size: 12px; }
+  .sango-roster-zi { font-family: "Noto Serif TC", serif; min-width: 36px; opacity: 0.85; }
+  .sango-roster-fac { min-width: 32px; font-size: 10px; opacity: 0.85; }
+  .sango-roster-stat { font-size: 10px; opacity: 0.9; min-width: 38px; }
+  .sango-roster-owner { margin-left: auto; font-size: 10px; opacity: 0.95; min-width: 56px; text-align: right; }
+  .sango-roster-foot { text-align: right; font-size: 10px; opacity: 0.7; padding: 4px 0 2px; letter-spacing: 0.06em; }
+
+  /* Briefing screen — shown once between lord-pick and main view */
+  .sango-briefing { padding: 8px 12px; gap: 6px; align-items: stretch; }
+  .sango-briefing-h {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    text-align: center;
+    padding: 2px 0 4px;
+    border-bottom: 1px solid var(--lcd-ink);
+  }
+  .sango-briefing-body { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .sango-briefing-lead { font-size: 11px; line-height: 1.5; margin: 0; }
+  .sango-briefing-rules { display: flex; flex-direction: column; gap: 1px; font-size: 10.5px; }
+  .sango-briefing-row { display: flex; gap: 8px; padding: 1px 0; }
+  .sango-briefing-row span:first-child {
+    width: 64px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+  }
+  .sango-briefing-row span:last-child { flex: 1; opacity: 0.85; }
+  .sango-briefing-foot {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    padding: 4px;
+    margin-top: 4px;
+    border-top: 1px dashed var(--lcd-ghost);
+    cursor: pointer;
+    animation: sango-blink 1s steps(2) infinite;
+  }
+
+  /* In sango/ic mode, the title-row IME column is irrelevant — hide it */
+  .lcd:has(.sango-screen) .voice-strip,
+  .lcd:has(.ic-screen) .voice-strip,
+  .lcd:has(.travel-screen) .voice-strip,
   .lcd:has(.menu-screen) .voice-strip,
   .lcd:has(.boot-screen) .voice-strip { display: none; }
+  /* Body-class fallback (more reliable than :has() across browsers) */
+  .is-sango-mode .voice-strip,
+  .is-travel-mode .voice-strip,
+  .is-ic-mode .voice-strip,
+  .is-menu-mode .voice-strip,
+  .is-welcome-mode .voice-strip { display: none !important; }
+
+  /* ===== Travel IC card — 旅行會話 ===== */
+  .travel-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 4px 6px;
+    gap: 4px;
+    color: var(--lcd-ink);
+  }
+  /* Title / hub screen */
+  .travel-title { align-items: center; justify-content: center; gap: 4px; text-align: center; padding: 4px 8px 2px; }
+  .travel-title-zh {
+    font-family: "Noto Serif TC", serif;
+    font-size: 24px; font-weight: 700; letter-spacing: 0.4em;
+    padding-left: 0.4em;
+    line-height: 1.1;
+  }
+  .travel-title-en { font-size: 10px; letter-spacing: 0.4em; opacity: 0.7; }
+  .travel-title-langs { font-size: 11px; letter-spacing: 0.18em; opacity: 0.8; padding: 2px 0; }
+  .travel-title-buttons {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    width: 100%; padding: 4px 8px;
+  }
+  .travel-hub-btn {
+    display: grid;
+    grid-template-columns: 16px 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "key zh"
+      "key en"
+      "key meta";
+    align-items: baseline;
+    column-gap: 4px;
+    padding: 6px 10px;
+    border: 1px solid var(--lcd-ink);
+    border-radius: 2px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.05s;
+  }
+  .travel-hub-btn:hover  { background: var(--lcd-bg-2); }
+  .travel-hub-btn:active { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .travel-hub-key  { grid-area: key; font-family: "Menlo", monospace; font-size: 14px; font-weight: 700; align-self: center; text-align: center; }
+  .travel-hub-zh   { grid-area: zh;  font-family: "Noto Serif TC", serif; font-size: 16px; font-weight: 700; letter-spacing: 0.18em; }
+  .travel-hub-en   { grid-area: en;  font-size: 9px; letter-spacing: 0.22em; opacity: 0.65; }
+  .travel-hub-meta { grid-area: meta; font-family: "Menlo", monospace; font-size: 8px; opacity: 0.55; padding-top: 2px; letter-spacing: 0.04em; }
+  .travel-foot { font-size: 9px; opacity: 0.55; letter-spacing: 0.08em; margin-top: auto; padding-top: 4px; }
+
+  /* Categories grid */
+  .travel-cats { padding: 4px 8px; }
+  .travel-cats-h {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.16em;
+    padding: 1px 0 3px; border-bottom: 1px solid var(--lcd-ghost); margin-bottom: 3px;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .travel-cats-h-zh { font-family: "Noto Serif TC", serif; }
+  .travel-cats-h-en { flex: 1; font-size: 9px; letter-spacing: 0.18em; opacity: 0.55; font-weight: 400; text-align: right; }
+  .travel-cats-grid {
+    flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
+    align-content: start;
+  }
+  .travel-cat {
+    display: grid;
+    grid-template-columns: 14px auto 1fr auto;
+    align-items: baseline;
+    gap: 4px;
+    padding: 3px 8px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.05s;
+  }
+  .travel-cat:hover { background: var(--lcd-bg-2); }
+  .travel-cat.is-sel { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .travel-cat-key { font-family: "Menlo", monospace; font-size: 10px; opacity: 0.6; text-align: center; }
+  .travel-cat.is-sel .travel-cat-key { opacity: 1; }
+  .travel-cat-zh   { font-family: "Noto Serif TC", serif; font-weight: 700; font-size: 13px; letter-spacing: 0.08em; }
+  .travel-cat-en   { font-size: 9px; opacity: 0.55; letter-spacing: 0.04em; padding-left: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .travel-cat-n    { font-family: "Menlo", monospace; font-size: 9px; opacity: 0.5; min-width: 14px; text-align: right; }
+  .travel-cat.is-sel .travel-cat-en,
+  .travel-cat.is-sel .travel-cat-n { opacity: 0.9; }
+  .travel-foot-tip {
+    text-align: center; font-size: 9px; opacity: 0.65;
+    letter-spacing: 0.06em; padding: 2px 0 0;
+  }
+
+  /* Phrase rows */
+  .travel-phrases { padding: 3px 6px 2px; }
+  .travel-phrases-h {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+    padding: 1px 2px 3px; border-bottom: 1px solid var(--lcd-ghost);
+  }
+  .travel-phrases-cat { font-family: "Noto Serif TC", serif; flex: 1; }
+  .travel-phrases-pos { font-family: "Menlo", monospace; font-size: 10px; opacity: 0.7; }
+  .travel-menu-btn {
+    cursor: pointer; padding: 1px 8px;
+    border: 1px solid var(--lcd-ink); border-radius: 2px;
+    font-family: "Noto Serif TC", serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; line-height: 1.4;
+    user-select: none;
+  }
+  .travel-menu-btn:hover  { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .travel-menu-btn:active { background: var(--lcd-bg-2); color: var(--lcd-ink); }
+  .travel-home-btn {
+    cursor: pointer; padding: 1px 8px;
+    border: 1px solid var(--lcd-ink); border-radius: 2px;
+    font-family: "Noto Serif TC", serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; line-height: 1.4;
+    user-select: none;
+    background: var(--lcd-bg-2);
+  }
+  .travel-home-btn:hover  { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .travel-home-btn:active { background: var(--lcd-bg);  color: var(--lcd-ink); }
+  /* ----- Dialog (transcript) view ----- */
+  .travel-dialog { padding: 3px 6px 2px; gap: 0; }
+  .travel-dlg-h {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 2px 3px; border-bottom: 1px solid var(--lcd-ghost);
+  }
+  .travel-dlg-scn-title {
+    flex: 1;
+    font-family: "Noto Serif TC", serif; font-weight: 700;
+    font-size: 12px; letter-spacing: 0.06em;
+  }
+  .travel-dlg-meta {
+    font-family: "Menlo", monospace; font-size: 9px;
+    opacity: 0.6; letter-spacing: 0.04em;
+  }
+  /* Language tab strip */
+  .travel-dlg-langs {
+    display: grid; grid-template-columns: repeat(8, 1fr);
+    gap: 3px; padding: 3px 2px; border-bottom: 1px solid var(--lcd-ghost);
+  }
+  .travel-dlg-tab {
+    display: flex; align-items: baseline; justify-content: center; gap: 3px;
+    padding: 1px 0;
+    border: 1px solid var(--lcd-ghost);
+    border-radius: 2px; cursor: pointer;
+    font-size: 10px;
+    transition: background 0.06s;
+    user-select: none;
+  }
+  .travel-dlg-tab:hover { background: var(--lcd-bg-2); }
+  .travel-dlg-tab.is-active {
+    background: var(--lcd-ink); color: var(--lcd-bg); border-color: var(--lcd-ink);
+  }
+  .travel-dlg-tab-key { font-family: "Menlo", monospace; font-size: 8px; opacity: 0.6; }
+  .travel-dlg-tab.is-active .travel-dlg-tab-key { opacity: 0.9; }
+  .travel-dlg-tab-tag { font-family: "Noto Serif TC", serif; font-weight: 700; font-size: 11px; }
+  /* Transcript */
+  .travel-dlg-script {
+    flex: 1; overflow-y: auto; padding: 2px 0;
+    display: flex; flex-direction: column; gap: 1px;
+  }
+  .travel-dlg-row {
+    display: grid; grid-template-columns: 30px 1fr auto;
+    align-items: baseline; gap: 6px;
+    padding: 2px 4px;
+    border-radius: 2px;
+    cursor: pointer;
+    line-height: 1.25;
+    transition: background 0.06s;
+  }
+  .travel-dlg-row:hover  { background: var(--lcd-bg-2); }
+  .travel-dlg-row:active { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .travel-dlg-spk {
+    font-family: "Noto Serif TC", serif; font-size: 10px; font-weight: 700;
+    text-align: center; letter-spacing: 0.04em;
+    padding: 1px 0; border-radius: 2px;
+  }
+  .travel-dlg-row.is-me   .travel-dlg-spk { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .travel-dlg-row.is-them .travel-dlg-spk { border: 1px solid var(--lcd-ink); padding: 0; }
+  .travel-dlg-row.is-me   .travel-dlg-line { font-weight: 600; }
+  .travel-dlg-line {
+    font-size: 12px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .travel-dlg-pl { font-size: 9px; opacity: 0.45; }
+  .travel-dlg-row:hover .travel-dlg-pl { opacity: 1; }
+  /* Foot */
+  .travel-dlg-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 9px; opacity: 0.7; letter-spacing: 0.04em;
+    padding: 2px 4px 0; border-top: 1px solid var(--lcd-ghost); margin-top: 2px;
+  }
+  .travel-dlg-play {
+    cursor: pointer; padding: 1px 8px;
+    border: 1px solid var(--lcd-ink); border-radius: 2px;
+    font-family: "Noto Serif TC", serif; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; line-height: 1.4;
+    user-select: none;
+  }
+  .travel-dlg-play:hover  { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .travel-dlg-play:active { background: var(--lcd-bg-2); color: var(--lcd-ink); }
+  .travel-phrases-rows {
+    flex: 1; display: grid; grid-auto-rows: 1fr;
+    grid-template-rows: repeat(8, 1fr);
+    padding: 1px 0;
+  }
+  .travel-row {
+    display: grid;
+    grid-template-columns: 14px 22px 1fr auto;
+    align-items: center;
+    gap: 5px;
+    padding: 0 4px;
+    cursor: pointer;
+    border-radius: 2px;
+    border-bottom: 1px dashed rgba(19,24,6,0.07);
+    line-height: 1.15;
+    transition: background 0.06s;
+  }
+  .travel-row:last-child { border-bottom: 0; }
+  .travel-row:hover { background: var(--lcd-bg-2); }
+  .travel-row:active { background: var(--lcd-ink); color: var(--lcd-bg); }
+  .travel-row-key {
+    font-family: "Menlo", monospace; font-size: 9px; opacity: 0.55;
+    text-align: center;
+  }
+  .travel-row-tag {
+    font-family: "Noto Serif TC", serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: center;
+    opacity: 0.9;
+  }
+  .travel-row-text {
+    font-size: 13px; line-height: 1.2;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .travel-row-spk { font-size: 10px; opacity: 0.45; }
+  .travel-row:hover .travel-row-spk { opacity: 1; }
+
+  .travel-phrases-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 9px; opacity: 0.7; letter-spacing: 0.04em;
+    padding: 2px 4px 0;
+    border-top: 1px solid var(--lcd-ghost);
+    margin-top: 2px;
+  }
+  .travel-foot-mid { opacity: 0.65; }
+  .travel-nav {
+    cursor: pointer; padding: 1px 6px; border: 1px solid var(--lcd-ghost);
+    border-radius: 2px; font-family: "Menlo", monospace; font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .travel-nav:hover { background: var(--lcd-bg-2); }
+  .travel-nav.is-off { opacity: 0.3; cursor: default; }
+
+  /* IC chooser thumbnail (no image — pure CSS) */
+  .ic-card-thumb.travel-thumb {
+    background: linear-gradient(135deg, var(--lcd-bg-2) 0%, var(--lcd-bg) 100%);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 2px;
+    color: var(--lcd-ink);
+  }
+  .travel-thumb-glyph { font-size: 36px; font-family: "Noto Serif TC", serif; font-weight: 700; }
+  .travel-thumb-tag { font-size: 8px; letter-spacing: 0.18em; opacity: 0.7; }
 
   /* Base */
   .base {
@@ -1280,6 +1928,7 @@
           <div class="key key--lang key--mode" data-action="mode" data-mode="calc"   data-fkey="F4">計算</div>
           <div class="key key--lang key--mode" data-action="mode" data-mode="wiki"   data-fkey="F5">百科</div>
           <div class="key key--lang key--mode" data-action="mode" data-mode="game"   data-fkey="F6">遊戲</div>
+          <div class="key key--lang key--mode" data-action="mode" data-mode="ic"     data-fkey="F7">外接</div>
           <span class="gap"></span>
           <span class="label">VOICE</span>
           <div class="key key--lang" data-action="lang" data-lang="ENG"><span class="lang-mark">英</span>ENG</div>
@@ -1399,6 +2048,8 @@
 <script src="cnchars.js"></script>
 <script src="poems.js"></script>
 <script src="wiki.js"></script>
+<script src="sango/sango.js?v=8"></script>
+<script src="travel/travel.js?v=6"></script>
 <script>
 (() => {
   'use strict';
@@ -2066,6 +2717,9 @@
     if (state.mode === 'cndict')  return renderCnDict();
     if (state.mode === 'wiki')    return renderWiki();
     if (state.mode === 'game')    return renderGame();
+    if (state.mode === 'ic')      return renderExtIC();
+    if (state.mode === 'sango')   return renderSango();
+    if (state.mode === 'travel')  return renderTravel();
     return renderDict();
   }
   function modeLabel() {
@@ -2094,6 +2748,22 @@
     }
     if (state.mode === 'poem')   return '唐詩三百首';
     if (state.mode === 'calc')   return 'CALC';
+    if (state.mode === 'ic')     return '外接卡  IC CARDS';
+    if (state.mode === 'sango') {
+      const v = state.sango && state.sango.view;
+      if (v === 'main')             return '三國演義  形勢';
+      if (v === 'characters')       return '三國演義  武將';
+      if (v === 'character-detail') return '三國演義  武將';
+      return '三國演義  IC';
+    }
+    if (state.mode === 'travel') {
+      const v = state.travel && state.travel.view;
+      if (v === 'cats')      return '旅行會話  例句';
+      if (v === 'phrases')   return '旅行會話  例句';
+      if (v === 'scenarios') return '旅行會話  對話';
+      if (v === 'dialog')    return '旅行會話  對話';
+      return '旅行會話  IC';
+    }
     return '';
   }
 
@@ -2130,6 +2800,7 @@
     { n: 4, zh: '計算',  sub: 'Calculator',  en: 'Sci. Calc',      action: () => setMode('calc') },
     { n: 5, zh: '百科',  sub: 'Wikipedia',   en: 'Encyclopedia',   action: () => setMode('wiki') },
     { n: 6, zh: '遊戲',  sub: 'Word Games',  en: 'Mini Games',     action: () => setMode('game') },
+    { n: 7, zh: '外接',  sub: '插卡 IC',     en: 'External IC',    action: () => setMode('ic') },
   ];
   function menuActivate(n) {
     const item = MENU_ITEMS.find(it => it.n === n);
@@ -2822,6 +3493,76 @@
     if (g.type === 'pinyin')  return gameRenderPinyin();
   }
 
+  /* ----- External IC card chooser ----- */
+  // Available IC cards. Each loader is what runs when the card is "inserted".
+  // Easy to extend with more cards later — they just need a thumb + loader.
+  const IC_CARDS = [
+    {
+      id: 'sango', name: '三國演義', sub: 'Romance of the Three Kingdoms',
+      thumb: 'sango/sango_title.png',
+      loader: () => setMode('sango')
+    },
+    {
+      id: 'travel', name: '旅行會話', sub: 'Travel Phrasebook · 8 LANG',
+      thumbClass: 'travel-thumb',
+      thumbHTML: '<span class="travel-thumb-glyph">旅</span><span class="travel-thumb-tag">PHRASEBOOK</span>',
+      loader: () => setMode('travel')
+    },
+  ];
+
+  function renderExtIC() {
+    elEcho.textContent = '';
+    elCount.textContent = '';
+    elStatusMid.textContent = 'EXT  IC';
+    elLcdBody.classList.remove('cn-mode');
+    elLcdBody.classList.add('single');
+    if (state.icSel == null) state.icSel = 0;
+    state._icCards = IC_CARDS;
+    const items = IC_CARDS.map((c, i) => {
+      const thumbClass = c.thumbClass ? ' ' + c.thumbClass : '';
+      const thumbStyle = c.thumb ? ` style="background-image:url('${c.thumb}')"` : '';
+      const thumbHTML  = c.thumbHTML || '';
+      return `
+      <div class="ic-card${i === state.icSel ? ' is-sel' : ''}" data-ic-pick="${i}">
+        <div class="ic-card-thumb${thumbClass}"${thumbStyle}>${thumbHTML}</div>
+        <div class="ic-card-name">${escHtml(c.name)}</div>
+        <div class="ic-card-meta">${escHtml(c.sub || '')}</div>
+      </div>`;
+    }).join('');
+    const slots = Math.max(0, 3 - IC_CARDS.length);
+    let empties = '';
+    for (let i = 0; i < slots; i++) empties += '<div class="ic-card ic-empty">— SLOT EMPTY —</div>';
+    elLcdBody.innerHTML = `
+      <div class="ic-screen">
+        <div class="ic-grid">${items}${empties}</div>
+        <div class="ic-tip">▶ ENTER 載入卡帶　← → 選擇卡帶　◀ 返回</div>
+      </div>`;
+  }
+
+  function renderSango() {
+    elEcho.textContent = '';
+    elCount.textContent = '';
+    elStatusMid.textContent = '';
+    if (window.SANGO) {
+      window.SANGO.render(state, elLcdBody);
+    } else {
+      elLcdBody.classList.add('single');
+      elLcdBody.innerHTML = '<div class="ic-empty">SANGO IC FAULT — sango.js missing</div>';
+    }
+  }
+
+  function renderTravel() {
+    elEcho.textContent = '';
+    elCount.textContent = '';
+    elStatusMid.textContent = 'TRAVEL  IC';
+    if (window.TRAVEL) {
+      window.TRAVEL.render(state, elLcdBody);
+    } else {
+      elLcdBody.classList.add('single');
+      elLcdBody.innerHTML = '<div class="ic-empty">TRAVEL IC FAULT — travel.js missing</div>';
+    }
+  }
+
   function gameRenderMenu() {
     elStatusMid.textContent = 'GAMES';
     const cards = [
@@ -3081,6 +3822,15 @@
   }
   function typeChar(ch) {
     if (state.mode === 'calc') return calcType(ch);
+    if (state.mode === 'sango' && window.SANGO) {
+      if (/^[1-9]$/.test(ch) && window.SANGO.digit(state, +ch)) { render(); return; }
+      return;   // sango ignores all other typing
+    }
+    if (state.mode === 'travel' && window.TRAVEL) {
+      if (/^[0-9]$/.test(ch) && window.TRAVEL.digit(state, +ch)) { render(); return; }
+      return;   // travel ignores all other typing
+    }
+    if (state.mode === 'ic') return;   // IC chooser ignores typing
     // SPACE: when IME buffer is non-empty, commit the first candidate.
     if (ch === ' ' && imeIsCN() && state.imeBuf && imeAvailable(state.ime)) {
       const c = imeCandidates()[0];
@@ -3338,6 +4088,10 @@
       } catch (e) { flash('TTS THROW'); }
     }, 60);
   }
+  // Bridge for IC modules (travel, etc.) — they live outside this IIFE
+  // and can't see speak() / speakSequence() directly. Read-only handles.
+  window.OMNI_SPEAK = speak;
+  // OMNI_SPEAK_SEQ is hooked up after speakSequence is defined below.
 
   // Speak a sequence of items in order. Each item: { text, lang, onStart?, onEnd? }.
   // onStart fires when the utterance begins; onEnd when it finishes (also when it
@@ -3369,6 +4123,7 @@
     };
     setTimeout(() => { if (myId === speechSeqId) playFrom(0); }, 60);
   }
+  window.OMNI_SPEAK_SEQ = speakSequence;
 
   // Resolve the speakable string + language for the currently-selected entry.
   function resolveSpeak(forceLang) {
@@ -3479,6 +4234,9 @@
     state.cn = { view: 'menu', rad: '', stk: 0, ch: '', list: null };
     state.wikiCat = '';
     if (m === 'game') state.game = { type: 'menu' };
+    if (m === 'sango' && window.SANGO) window.SANGO.init(state);
+    if (m === 'travel' && window.TRAVEL) window.TRAVEL.init(state);
+    if (m === 'ic') state.icSel = 0;
     if (m === 'poem') state.results = POEMS.slice();
     else state.results = [];   // wiki/calc/cndict/dict all start empty
     $$('.key--mode').forEach(k => k.classList.toggle('is-active', k.dataset.mode === m));
@@ -3488,6 +4246,9 @@
     document.body.classList.toggle('is-welcome-mode', m === 'welcome');
     document.body.classList.toggle('is-cndict-mode',  m === 'cndict');
     document.body.classList.toggle('is-poem-mode',    m === 'poem');
+    document.body.classList.toggle('is-sango-mode',   m === 'sango');
+    document.body.classList.toggle('is-travel-mode',  m === 'travel');
+    document.body.classList.toggle('is-ic-mode',      m === 'ic');
     flash(m.toUpperCase());
     render();
   }
@@ -3505,6 +4266,17 @@
   const ACTIONS = {
     bs: backspace,
     enter() {
+      if (state.mode === 'sango' && window.SANGO) {
+        if (window.SANGO.onKey(state, 'enter')) { render(); return; }
+      }
+      if (state.mode === 'travel' && window.TRAVEL) {
+        if (window.TRAVEL.onKey(state, 'enter')) { render(); return; }
+      }
+      if (state.mode === 'ic') {
+        const cards = state._icCards;
+        if (cards && cards[state.icSel || 0]) cards[state.icSel || 0].loader();
+        return;
+      }
       if (state.mode === 'calc') return calcEval();
       if (state.mode === 'game') {
         const t = state.game && state.game.type;
@@ -3517,7 +4289,7 @@
     },
     dir: flipDir,
     'switch-dict'() {
-      const order = ['dict','cndict','poem','calc','wiki','game'];
+      const order = ['dict','cndict','poem','calc','wiki','game','ic'];
       const idx = order.indexOf(state.mode);
       setMode(order[(idx + 1) % order.length]);
     },
@@ -3570,22 +4342,47 @@
       flash('HOME');
     },
     // Context-aware back: peel one layer of state if possible, else go home.
-    back() { goBack(); },
+    back() {
+      if (state.mode === 'sango' && window.SANGO) {
+        const s = state.sango;
+        if (s && s.view === 'title') { setMode('ic'); return; }
+        if (window.SANGO.onKey(state, 'back')) { render(); return; }
+      }
+      if (state.mode === 'travel' && window.TRAVEL) {
+        const s = state.travel;
+        if (s && s.view === 'title') { setMode('ic'); return; }
+        if (window.TRAVEL.onKey(state, 'back')) { render(); return; }
+      }
+      if (state.mode === 'ic') { setMode('menu'); return; }
+      goBack();
+    },
     up()    {
+      if (state.mode === 'sango' && window.SANGO && window.SANGO.onKey(state, 'up')) { render(); return; }
+      if (state.mode === 'travel' && window.TRAVEL && window.TRAVEL.onKey(state, 'up')) { render(); return; }
+      if (state.mode === 'ic') { const c = state._icCards || []; if (c.length) state.icSel = ((state.icSel||0) - 1 + c.length) % c.length; render(); return; }
       if (state.mode === 'menu') { const n = MENU_ITEMS.length; state.menuSel = ((state.menuSel || 0) - 1 + n) % n; render(); return; }
       state.selected = Math.max(0, state.selected - 1); state.pane='detail'; render();
     },
     down()  {
+      if (state.mode === 'sango' && window.SANGO && window.SANGO.onKey(state, 'down')) { render(); return; }
+      if (state.mode === 'travel' && window.TRAVEL && window.TRAVEL.onKey(state, 'down')) { render(); return; }
+      if (state.mode === 'ic') { const c = state._icCards || []; if (c.length) state.icSel = ((state.icSel||0) + 1) % c.length; render(); return; }
       if (state.mode === 'menu') { const n = MENU_ITEMS.length; state.menuSel = ((state.menuSel || 0) + 1) % n; render(); return; }
       state.selected = Math.min(Math.max(state.results.length - 1, 0), state.selected + 1); state.pane='detail'; render();
     },
     'scroll-up'()   { ACTIONS.up(); },
     'scroll-down'() { ACTIONS.down(); },
     left()  {
+      if (state.mode === 'sango' && window.SANGO && window.SANGO.onKey(state, 'left')) { render(); return; }
+      if (state.mode === 'travel' && window.TRAVEL && window.TRAVEL.onKey(state, 'left')) { render(); return; }
+      if (state.mode === 'ic') { const c = state._icCards || []; if (c.length) state.icSel = ((state.icSel||0) - 1 + c.length) % c.length; render(); return; }
       if (state.mode === 'menu') { const n = MENU_ITEMS.length; state.menuSel = ((state.menuSel || 0) - 1 + n) % n; render(); return; }
       backspace();
     },
     right() {
+      if (state.mode === 'sango' && window.SANGO && window.SANGO.onKey(state, 'right')) { render(); return; }
+      if (state.mode === 'travel' && window.TRAVEL && window.TRAVEL.onKey(state, 'right')) { render(); return; }
+      if (state.mode === 'ic') { const c = state._icCards || []; if (c.length) state.icSel = ((state.icSel||0) + 1) % c.length; render(); return; }
       if (state.mode === 'menu') { const n = MENU_ITEMS.length; state.menuSel = ((state.menuSel || 0) + 1) % n; render(); return; }
     },
     mode(_, el) { setMode(el.dataset.mode); },
@@ -3648,8 +4445,9 @@
       const elLang = speakEl.dataset.speakLang || 'en-US';
       // Chinese text follows the user's MAN/CAN voice choice; English text always reads in English.
       // For poems specifically, when ENG is selected we fall back to Cantonese (no English form exists).
+      // For travel mode, every row carries its own true language tag — never reroute.
       let lang = elLang;
-      if (elLang.startsWith('zh')) {
+      if (state.mode !== 'travel' && elLang.startsWith('zh')) {
         if (state.voiceLang.startsWith('zh')) lang = state.voiceLang;
         else if (state.mode === 'poem') lang = 'zh-HK';
       }
@@ -3691,6 +4489,127 @@
     const menuRow = e.target.closest('[data-menu-n]');
     if (menuRow) {
       menuActivate(+menuRow.dataset.menuN);
+      return;
+    }
+    const icPick = e.target.closest('[data-ic-pick]');
+    if (icPick) {
+      const i = +icPick.dataset.icPick;
+      const cards = state._icCards;
+      if (cards && cards[i]) { state.icSel = i; cards[i].loader(); }
+      return;
+    }
+    const sangoPick = e.target.closest('[data-sango-pick]');
+    if (sangoPick && window.SANGO) {
+      window.SANGO.pick(state, +sangoPick.dataset.sangoPick);
+      render();
+      return;
+    }
+    const sangoLord = e.target.closest('[data-sango-lord]');
+    if (sangoLord && window.SANGO) {
+      window.SANGO.pickLord(state, +sangoLord.dataset.sangoLord);
+      render();
+      return;
+    }
+    const sangoAct = e.target.closest('[data-sango-act]');
+    if (sangoAct && window.SANGO) {
+      window.SANGO.pickAction(state, sangoAct.dataset.sangoAct);
+      render();
+      return;
+    }
+    const sangoSub = e.target.closest('[data-sango-sub]');
+    if (sangoSub && window.SANGO) {
+      window.SANGO.pickSub(state, sangoSub.dataset.sangoSub);
+      render();
+      return;
+    }
+    const sangoCity = e.target.closest('[data-sango-city]');
+    if (sangoCity && window.SANGO) {
+      window.SANGO.pickCity(state, sangoCity.dataset.sangoCity);
+      render();
+      return;
+    }
+    const sangoCancel = e.target.closest('[data-sango-cancel]');
+    if (sangoCancel && window.SANGO) {
+      window.SANGO.cancel(state);
+      render();
+      return;
+    }
+    const sangoRestart = e.target.closest('[data-sango-restart]');
+    if (sangoRestart && window.SANGO) {
+      window.SANGO.restart(state);
+      render();
+      return;
+    }
+    const sangoBrief = e.target.closest('[data-sango-briefing-go]');
+    if (sangoBrief && window.SANGO) {
+      window.SANGO.onKey(state, 'enter');
+      render();
+      return;
+    }
+    const sangoResultOk = e.target.closest('[data-sango-result-ok]');
+    if (sangoResultOk && window.SANGO) {
+      window.SANGO.onKey(state, 'enter');
+      render();
+      return;
+    }
+    // ----- Travel IC clicks -----
+    const travelEnter = e.target.closest('[data-travel-enter]');
+    if (travelEnter && window.TRAVEL) {
+      window.TRAVEL.pickEnter(state);
+      render();
+      return;
+    }
+    const travelHub = e.target.closest('[data-travel-hub]');
+    if (travelHub && window.TRAVEL) {
+      window.TRAVEL.pickHub(state, travelHub.dataset.travelHub);
+      render();
+      return;
+    }
+    const travelMenu = e.target.closest('[data-travel-menu]');
+    if (travelMenu && window.TRAVEL) {
+      window.TRAVEL.pickMenu(state);
+      render();
+      return;
+    }
+    const travelHome = e.target.closest('[data-travel-home]');
+    if (travelHome && window.TRAVEL) {
+      window.TRAVEL.pickHome(state);
+      render();
+      return;
+    }
+    const travelCat = e.target.closest('[data-travel-cat]');
+    if (travelCat && window.TRAVEL) {
+      window.TRAVEL.pickCat(state, travelCat.dataset.travelCat);
+      render();
+      return;
+    }
+    const travelScn = e.target.closest('[data-travel-scn]');
+    if (travelScn && window.TRAVEL) {
+      window.TRAVEL.pickScn(state, travelScn.dataset.travelScn);
+      render();
+      return;
+    }
+    const travelLang = e.target.closest('[data-travel-lang]');
+    if (travelLang && window.TRAVEL) {
+      window.TRAVEL.pickLang(state, travelLang.dataset.travelLang);
+      render();
+      return;
+    }
+    const travelPlay = e.target.closest('[data-travel-play]');
+    if (travelPlay && window.TRAVEL) {
+      window.TRAVEL.pickPlayAll(state);
+      return;
+    }
+    const travelPrev = e.target.closest('[data-travel-prev]');
+    if (travelPrev && window.TRAVEL) {
+      window.TRAVEL.pickPrev(state);
+      render();
+      return;
+    }
+    const travelNext = e.target.closest('[data-travel-next]');
+    if (travelNext && window.TRAVEL) {
+      window.TRAVEL.pickNext(state);
+      render();
       return;
     }
     const menuCard = e.target.closest('[data-menu-mode]');
@@ -3860,8 +4779,8 @@
     // Menu mode: digit keys jump straight to the corresponding launcher entry;
     // left/right move the highlight; Enter activates.
     if (state.mode === 'menu') {
-      const total = MENU_ITEMS.length;   // 6
-      if (/^[1-6]$/.test(k))  { e.preventDefault(); menuActivate(+k); return; }
+      const total = MENU_ITEMS.length;
+      if (/^[1-9]$/.test(k) && +k <= total) { e.preventDefault(); menuActivate(+k); return; }
       if (k === 'ArrowRight' || k === 'ArrowDown') { e.preventDefault(); state.menuSel = ((state.menuSel || 0) + 1) % total; render(); return; }
       if (k === 'ArrowLeft'  || k === 'ArrowUp')   { e.preventDefault(); state.menuSel = ((state.menuSel || 0) - 1 + total) % total; render(); return; }
       if (k === 'Enter')      { e.preventDefault(); menuActivate(MENU_ITEMS[state.menuSel || 0].n); return; }
@@ -3934,7 +4853,7 @@
     } else if (k === 'Tab') {
       // Tab cycles through modes (forward; Shift+Tab backward).
       e.preventDefault();
-      const order = ['dict','cndict','poem','calc','wiki','game'];
+      const order = ['dict','cndict','poem','calc','wiki','game','ic'];
       const idx = order.indexOf(state.mode);
       const next = e.shiftKey
         ? order[(idx - 1 + order.length) % order.length]
