@@ -1,2 +1,6 @@
 # Claude AI conversation files
 .claude
+
+# planning / working docs (not shipped)
+virtual-shopping/cate-image-gen.md
+virtual-shopping/plan.md
