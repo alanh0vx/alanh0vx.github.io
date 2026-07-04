@@ -2,208 +2,136 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🏇 Elite Horse Racing Championship</title>
-  <meta property="og:title" content="Horse Racing - Alan's OS">
-  <meta property="og:description" content="Elite Horse Racing Championship game. Part of Alan's OS - a web-based operating system.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#101418">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>🏇 Thunder Downs — Horse Racing</title>
+  <meta property="og:title" content="Thunder Downs Horse Racing">
+  <meta property="og:description" content="Realistic horse race betting game — study the form, read the going, beat the bookies. Part of Alan's OS.">
   <meta property="og:image" content="https://alanh0vx.github.io/horses/title.jpg">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://alanh0vx.github.io/horses/horses.html">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://alanh0vx.github.io/horses/title.jpg">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="horses.css" rel="stylesheet">
 </head>
-<body>
-  <button onclick="window.close()" class="back-btn">✕ Close App</button>
-  
-  <div class="header">
-    <h1>🏇 Elite Horse Racing Championship</h1>
-    <div class="player-info" id="playerInfo">
-      <div class="balance">
-        <i class="fas fa-coins"></i>
-        Balance: $<span id="playerBalance">1000</span>
-      </div>
-      <div class="total-winnings">
-        <i class="fas fa-trophy"></i>
-        Total Winnings: $<span id="totalWinnings">0</span>
-      </div>
+<body data-mode="lobby">
+
+  <header class="topbar">
+    <div class="brand">🏇 <b>THUNDER</b> DOWNS</div>
+    <nav class="tier-tabs" id="tierTabs" aria-label="Race class"></nav>
+    <div class="wallet">
+      <div class="wallet-item"><span>Balance</span><b>$<span id="balanceVal">1,000</span></b></div>
+      <div class="wallet-item"><span>Career P/L</span><b id="winningsVal">+0</b></div>
+      <button class="icon-btn" id="soundBtn" title="Toggle sound">🔊</button>
+      <button class="icon-btn" id="closeBtn" title="Leave the track">✕</button>
     </div>
+  </header>
+
+  <div class="bailout hidden" id="bailout">
+    You're down to your last few dollars… a track sponsor offers a helping hand.
+    <button class="btn btn-primary" id="bailoutBtn">Accept $500 sponsorship</button>
   </div>
 
-  <div class="main-container">
-    <!-- Title Section -->
-    <div class="title-section">
-      <h2 id="raceTitle">🏆 Championship Stakes</h2>
-      <div class="race-distance">1200m Athletics Track</div>
-    </div>
+  <main class="wrap">
 
-    <!-- Instructions Section -->
-    <div class="instructions-section">
-      <div class="instructions-header" onclick="toggleInstructions()">
-        <span>📋 How to Play</span>
-        <div class="instructions-toggle" id="instructionsToggle">▼</div>
+    <section class="race-strip">
+      <div class="rs-left">
+        <h1 id="raceName">Race 1</h1>
+        <div class="race-meta" id="raceMeta"></div>
       </div>
-      <div class="instructions-content" id="instructionsContent">
-        <div class="instruction-item">
-          <strong>1. Study the Horses:</strong> Click on horse thumbnails to view detailed stats, recent form, and preferences.
-        </div>
-        <div class="instruction-item">
-          <strong>2. Analyze Conditions:</strong> Weather and track conditions affect performance. Horses have preferences!
-        </div>
-        <div class="instruction-item">
-          <strong>3. Place Your Bets:</strong> Click on horses to bet. Win (1st), Place (1st-2nd), or Show (1st-3rd) all pay out.
-        </div>
-        <div class="instruction-item">
-          <strong>4. Watch the Race:</strong> Horses race around the oval track with realistic physics and weather effects.
-        </div>
-        <div class="instruction-item">
-          <strong>5. Collect Winnings:</strong> Payouts are based on odds. Study form and conditions to maximize profits!
-        </div>
+      <div class="rs-right">
+        <button class="btn btn-ghost" id="newRaceBtn" title="Draw a fresh field">↻ New Race</button>
       </div>
-    </div>
+    </section>
 
-    <!-- Four Column Row -->
-    <div class="four-column-row">
-      <!-- Race Conditions -->
-      <div class="race-conditions-small">
-        <h4><i class="fas fa-cloud-sun"></i> Race Conditions</h4>
-        <div class="weather-info">
-          <div class="weather-item">
-            <span class="weather-icon" id="weatherIcon">☀️</span>
-            <span id="weatherCondition">Sunny</span>
+    <section class="stage">
+      <canvas id="trackCanvas"></canvas>
+      <div class="pos-tower hidden" id="posTower" aria-live="off"></div>
+      <div class="race-clock hidden" id="raceClock"></div>
+      <div class="commentary" id="commentary">Welcome to Thunder Downs.</div>
+      <div class="photo-finish hidden" id="photoFinish"><span>📸 PHOTO FINISH</span></div>
+    </section>
+
+    <section class="panels">
+      <div class="card race-card-wrap">
+        <h2>📋 Race Card <small>tap a runner for form &amp; betting</small></h2>
+        <div id="raceCard"></div>
+      </div>
+
+      <aside class="card bet-slip">
+        <h2>🎫 Bet Slip</h2>
+        <div id="slipEntries"></div>
+
+        <div class="exotic-box hidden" id="exoticBox">
+          <h3>Exotics</h3>
+          <div class="exotic-row">
+            <select id="exoticType" aria-label="Exotic bet type">
+              <option value="exacta">Exacta (1st → 2nd exact)</option>
+              <option value="quinella">Quinella (top 2, any order)</option>
+            </select>
           </div>
-          <div class="weather-item">
-            <span class="weather-icon">🌡️</span>
-            <span id="temperature">25°C</span>
+          <div class="exotic-row">
+            <select id="exoticA" aria-label="First horse"></select>
+            <select id="exoticB" aria-label="Second horse"></select>
           </div>
-          <div class="weather-item">
-            <span class="weather-icon">🏁</span>
-            <span id="trackCondition">Fast</span>
-          </div>
-          <div class="weather-item">
-            <span class="weather-icon">💨</span>
-            <span id="windSpeed">15 km/h</span>
+          <div class="exotic-row">
+            <input type="number" inputmode="numeric" id="exoticStake" value="20" min="10" step="5" aria-label="Exotic stake">
+            <span class="exotic-odds" id="exoticOdds">—</span>
+            <button class="btn btn-add" id="exoticAdd">Add</button>
           </div>
         </div>
-      </div>
 
-      <!-- Live Odds -->
-      <div class="odds-panel-small">
-        <h4><i class="fas fa-chart-line"></i> Live Odds</h4>
-        <div class="odds-list" id="oddsList">
-          <!-- Odds will be populated here -->
-        </div>
-      </div>
+        <div class="slip-totals" id="slipTotals"></div>
+        <button class="btn btn-primary btn-start" id="startRaceBtn">Start Race</button>
+        <button class="btn btn-danger btn-reset" id="resetBtn">Reset progress</button>
+      </aside>
+    </section>
 
-      <!-- Commentary -->
-      <div class="commentary-box-small">
-        <h4><i class="fas fa-microphone"></i> Race Commentary</h4>
-        <div class="commentary-text" id="commentaryText">
-          Welcome to Elite Horse Racing! Generate a new race to begin.
-        </div>
-      </div>
+    <details class="card howto">
+      <summary>❓ How to play</summary>
+      <ol>
+        <li><b>Read the card.</b> Tap a runner to see speed, stamina, acceleration and consistency, plus its preferred distance, going and weather. Green ✓ badges mean today's conditions suit it.</li>
+        <li><b>Find value.</b> Odds are set by the bookmaker with a margin. A horse whose preferences all line up may be better than its price.</li>
+        <li><b>Bet.</b> Win pays if your horse is 1st; Place covers 1st–2nd; Show covers 1st–3rd. In higher classes, Exacta &amp; Quinella pay big for predicting the top two.</li>
+        <li><b>Watch the race.</b> Front-runners burn early, closers finish fast — stamina decides the home straight. Rain slows the track; wide runs cost ground in the turns.</li>
+        <li><b>Climb the classes.</b> Grow your bank to unlock the Handicap, the Cup and the Championship with bigger fields and bigger limits.</li>
+      </ol>
+    </details>
 
-      <!-- Horse Thumbnails -->
-      <div class="horse-thumbnails-small">
-        <h4><i class="fas fa-horse"></i> Today's Runners</h4>
-        <div class="thumbnails-grid" id="horseThumbnails">
-          <!-- Horse thumbnails will be populated here -->
-        </div>
-      </div>
-    </div>
+    <section class="card history">
+      <h2>📜 Recent Races <small id="careerStats"></small></h2>
+      <div id="historyList"></div>
+    </section>
 
-    <!-- Game Control Panel (Above Track) -->
-    <div class="game-control-panel">
-      <!-- Betting Section -->
-      <div class="betting-section">
-        <div class="selected-bets">
-          <h3><i class="fas fa-ticket-alt"></i> Your Bets</h3>
-          <div class="bets-container" id="selectedBets">
-            <div class="no-bets">
-              <i class="fas fa-info-circle"></i>
-              Click on horses above to place bets
-            </div>
-          </div>
-        </div>
-      </div>
+  </main>
 
-      <!-- Control Buttons -->
-      <div class="start-game-section">
-        <h3><i class="fas fa-flag-checkered"></i> Race Controls</h3>
-        <div class="controls">
-          <button id="newRaceBtn" class="btn btn-secondary">
-            <i class="fas fa-sync-alt"></i> New Race
-          </button>
-          <button id="startRaceBtn" class="btn btn-primary" disabled>
-            <i class="fas fa-flag-checkered"></i> Start Race
-          </button>
-          <button id="resetGameBtn" class="btn btn-danger">
-            <i class="fas fa-undo"></i> Reset Game
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Track Container -->
-    <div class="track-container" id="track">
-      <div class="track-wrapper">
-        <div class="racetrack">
-          <div class="track-inner"></div>
-          <div class="track-center">
-            <div class="center-logo">
-              <div class="track-name">THUNDER DOWNS</div>
-              <div class="track-subtitle">Championship Track</div>
-            </div>
-          </div>
-          <div class="finish-line"></div>
-          <div class="starting-gate"></div>
-          <div class="horses-container" id="horsesContainer">
-            <!-- Horses will be positioned here during race -->
-          </div>
-        </div>
-      </div>
-      <div class="track-legend" id="trackLegend">
-        <!-- Legend will be populated with horse colors -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Horse Details Modal -->
-  <div class="modal horse-details-modal" id="horseDetailsModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Horse Details</h2>
-        <button class="close-btn" onclick="game.closeHorseDetails()">&times;</button>
-      </div>
-      <div class="modal-body" id="horseDetailsContent">
-        <!-- Horse details will be populated here -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Race Results Modal -->
   <div class="modal" id="resultsModal">
     <div class="modal-content">
-      <div class="modal-header">
-        <h2><i class="fas fa-trophy"></i> Race Results</h2>
-        <button class="close-btn" onclick="game.closeResultsModal()">&times;</button>
-      </div>
+      <div class="modal-header"><h2 id="resultsTitle">🏁 Race Result</h2></div>
       <div class="modal-body">
-        <div class="podium" id="podium">
-          <!-- Results will be shown here -->
-        </div>
-        <div class="betting-results" id="bettingResults">
-          <!-- Betting results will be shown here -->
-        </div>
+        <div class="podium" id="podium"></div>
+        <div class="full-order" id="fullOrder"></div>
+        <div class="bet-results" id="betResults"></div>
+        <div class="net-result" id="netResult"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" id="continueBtn" onclick="game.closeResultsModal()">Continue Racing</button>
+        <button class="btn btn-primary" id="nextRaceBtn">Next Race →</button>
       </div>
     </div>
   </div>
 
-  <script src="horses.js"></script>
+  <div class="mobile-bar" id="mobileBar">
+    <button class="mb-summary" id="mobileSummary">No bets yet</button>
+    <button class="btn btn-primary" id="startRaceBtnM">Start Race</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/engine.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/game.js"></script>
 </body>
 </html>
