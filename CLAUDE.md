@@ -53,7 +53,9 @@ All state (virtual file system, settings, chat history, custom apps) is stored i
 
 ### Standalone Games
 
-Separate from SimpleOS, these are self-contained HTML files in their own directories: `snake/`, `horses/`, `tic/` (only `tic3.html` is live), `tetris/`, `solar_system/`, `star_glazing/`, plus `chinese-chess/`, `virtual-shopping/`, `instant-dict/`, `villainhitting/` (`villianhitting/` is a redirect stub for the old misspelled URL — keep it).
+Separate from SimpleOS, these are self-contained HTML files in their own directories: `snake/`, `horses/`, `tic/` (only `tic3.html` is live), `tetris/`, `solar_system/`, `star_glazing/`, plus `chinese-chess/`, `virtual-shopping/`, `instant-dict/`, `escape-room/`, `villainhitting/` (`villianhitting/` is a redirect stub for the old misspelled URL — keep it).
+
+`escape-room/` (Escape Room 3D) is a procedurally generated escape game: ES modules + three.js 0.160 via CDN importmap. `js/generator.js` + `js/rng.js` + `js/themes.js` are pure (no DOM/three) and headlessly testable in node — `generateRoom(seed)` is deterministic and self-validates via `solveRoom()`; the room JSON doubles as the export/import format (`escapeRoom_save_v1` in localStorage stores the full room + progress). Bilingual via `js/i18n.js` (same pattern as horses). Nothing localized is drawn into 3D CanvasTextures — only language-neutral clock hands, counts, and symbols — so language switching never touches the scene. Debug: `?seed=x` deep-links a room, `?debug=1` dumps the solution path, `window.__er` exposes game/room/scene.
 
 `horses/` (Thunder Downs) is the quality bar. New/updated game pages should follow its mobile checklist:
 

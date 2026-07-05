@@ -291,6 +291,19 @@
         });
 
         os.registerApp({
+            id: 'escape-room',
+            name: 'Escape Room 3D',
+            icon: '🚪',
+            category: 'external',
+            isExternal: true,
+            url: 'escape-room/index.html',
+            onLaunch(windowId) {
+                window.open(this.url, '_blank');
+                setTimeout(() => os.closeWindow(windowId), 100);
+            }
+        });
+
+        os.registerApp({
             id: 'instant-dict',
             name: 'Instant Dict',
             icon: '通',

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#101418">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>🚪 Escape Room 3D</title>
+  <meta property="og:title" content="Escape Room 3D">
+  <meta property="og:description" content="A procedurally generated 3D escape room — every game is a new room, a new story, a new chain of clues. Part of Alan's OS.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://alanh0vx.github.io/escape-room/index.html">
+  <meta name="twitter:card" content="summary">
+  <link href="css/base.css" rel="stylesheet">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- landing menu -->
+  <div id="menu" class="menu">
+    <button class="icon-btn menu-back" id="menuBackBtn" data-i18n-title="title.back" title="Leave">✕</button>
+    <button class="icon-btn menu-lang" id="menuLangBtn" data-i18n-title="title.lang" title="中文 / English">中</button>
+    <div class="menu-inner">
+      <h1 class="menu-title">🚪 <span data-i18n="menu.title">ESCAPE ROOM</span> <em>3D</em></h1>
+      <p class="menu-sub" data-i18n="menu.sub">Every room is different. Find the clues. Open the door.</p>
+      <div class="menu-btns">
+        <button class="btn btn-primary btn-big" id="newBtn" data-i18n="menu.new">🎲 New Room</button>
+        <button class="btn btn-big hidden" id="continueBtn" data-i18n="menu.continue">▶ Continue</button>
+        <button class="btn btn-big" id="importBtn" data-i18n="menu.import">📥 Import Room</button>
+        <button class="btn btn-big" id="howtoBtn" data-i18n="menu.howto">❓ How to Play</button>
+      </div>
+      <label class="seed-row">
+        <span data-i18n="menu.seed">Room code (optional — same code, same room)</span>
+        <input id="seedInput" type="text" maxlength="32" autocomplete="off"
+               data-i18n-ph="menu.seed.ph" placeholder="e.g. tiger-42">
+      </label>
+    </div>
+  </div>
+
+  <!-- game -->
+  <div id="gameLayer" class="game-layer hidden">
+    <div id="scene" class="scene"></div>
+
+    <header class="hud">
+      <button class="icon-btn" id="backBtn" data-i18n-title="title.back" title="Leave the room">✕</button>
+      <button class="icon-btn" id="menuBtn" data-i18n-title="title.menu" title="Menu">☰</button>
+      <span class="hud-chip" id="lockCounter">🔒 0/0</span>
+      <span class="hud-chip" id="timer">00:00</span>
+      <span class="hud-spacer"></span>
+      <button class="icon-btn" id="journalBtn" data-i18n-title="title.journal" title="Journal">📖</button>
+      <button class="icon-btn" id="hintBtn" data-i18n-title="title.hint" title="Hint">💡</button>
+      <button class="icon-btn" id="soundBtn" data-i18n-title="title.sound" title="Toggle sound">🔊</button>
+      <button class="icon-btn" id="langBtn" data-i18n-title="title.lang" title="中文 / English">中</button>
+    </header>
+
+    <div class="inv-bar" id="invBar" aria-live="polite"></div>
+
+    <aside class="panel" id="panel" role="dialog" aria-labelledby="panelTitle">
+      <div class="panel-head">
+        <h2 id="panelTitle"></h2>
+        <button class="icon-btn" id="panelClose" data-i18n-title="btn.close" title="Close">✕</button>
+      </div>
+      <p class="panel-desc" id="panelDesc"></p>
+      <div class="panel-body" id="panelBody"></div>
+      <div class="panel-actions" id="panelActions"></div>
+    </aside>
+  </div>
+
+  <!-- shared modal + toast -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal-box" id="modalBox"></div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
