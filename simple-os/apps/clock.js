@@ -132,6 +132,7 @@ os.registerApp({
     },
 
     startClock() {
+        if (this.clockInterval) clearInterval(this.clockInterval);
         this.updateClock();
         this.clockInterval = setInterval(() => this.updateClock(), 1000);
     },
@@ -175,9 +176,11 @@ os.registerApp({
             this.timerSeconds--;
 
             const display = document.getElementById('timer-display');
-            const mins = Math.floor(this.timerSeconds / 60);
-            const secs = this.timerSeconds % 60;
-            display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            if (display) {
+                const mins = Math.floor(this.timerSeconds / 60);
+                const secs = this.timerSeconds % 60;
+                display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
 
             if (this.timerSeconds <= 0) {
                 clearInterval(this.timerInterval);
@@ -212,10 +215,12 @@ os.registerApp({
             this.stopwatchSeconds++;
 
             const display = document.getElementById('stopwatch-display');
-            const hours = Math.floor(this.stopwatchSeconds / 3600);
-            const minutes = Math.floor((this.stopwatchSeconds % 3600) / 60);
-            const seconds = this.stopwatchSeconds % 60;
-            display.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            if (display) {
+                const hours = Math.floor(this.stopwatchSeconds / 3600);
+                const minutes = Math.floor((this.stopwatchSeconds % 3600) / 60);
+                const seconds = this.stopwatchSeconds % 60;
+                display.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
         }, 1000);
 
         this.switchMode('stopwatch');
@@ -265,5 +270,11 @@ os.registerApp({
         const statusEl = document.getElementById('alarm-status');
         statusEl.textContent = `✅ Alarm set for ${alarmTime}`;
         statusEl.style.color = '#27ae60';
+    },
+
+    onClose() {
+        [this.clockInterval, this.timerInterval, this.stopwatchInterval]
+            .forEach(interval => interval && clearInterval(interval));
+        this.clockInterval = this.timerInterval = this.stopwatchInterval = null;
     }
 });

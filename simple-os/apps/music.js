@@ -10,6 +10,7 @@ os.registerApp({
         this.playlist = this.loadPlaylist();
         this.currentIndex = 0;
         this.isPlaying = false;
+        this.volume = 50;
         this.audio = new Audio();
 
         this.audio.onended = () => this.next();
@@ -20,8 +21,7 @@ os.registerApp({
     },
 
     loadPlaylist() {
-        const saved = localStorage.getItem('simpleOS_playlist');
-        return saved ? JSON.parse(saved) : [];
+        return os.safeGet('simpleOS_playlist', []);
     },
 
     savePlaylist() {
@@ -38,8 +38,8 @@ os.registerApp({
                 </div>
 
                 <div class="music-info">
-                    <div class="music-title">${currentSong.name}</div>
-                    <div class="music-artist">${currentSong.artist || 'Unknown Artist'}</div>
+                    <div class="music-title">${os.ui.escapeHtml(currentSong.name)}</div>
+                    <div class="music-artist">${os.ui.escapeHtml(currentSong.artist || 'Unknown Artist')}</div>
                 </div>
 
                 <div class="music-progress">
@@ -59,8 +59,8 @@ os.registerApp({
 
                 <div class="music-volume">
                     <span>🔊</span>
-                    <input type="range" id="volume-slider" min="0" max="100" value="50"
-                           onchange="os.apps['music'].setVolume(this.value)">
+                    <input type="range" id="volume-slider" min="0" max="100" value="${this.volume}"
+                           oninput="os.apps['music'].setVolume(this.value)">
                 </div>
 
                 <div class="music-playlist-header">
@@ -75,7 +75,7 @@ os.registerApp({
         `;
 
         // Set initial volume
-        this.audio.volume = 0.5;
+        this.audio.volume = this.volume / 100;
     },
 
     renderPlaylist() {
@@ -87,8 +87,8 @@ os.registerApp({
             <div class="playlist-item ${index === this.currentIndex ? 'active' : ''}"
                  onclick="os.apps['music'].playSong(${index})">
                 <div class="playlist-item-info">
-                    <div class="playlist-item-name">${song.name}</div>
-                    <div class="playlist-item-artist">${song.artist || 'Unknown Artist'}</div>
+                    <div class="playlist-item-name">${os.ui.escapeHtml(song.name)}</div>
+                    <div class="playlist-item-artist">${os.ui.escapeHtml(song.artist || 'Unknown Artist')}</div>
                 </div>
                 <button onclick="event.stopPropagation(); os.apps['music'].removeSong(${index})"
                         class="playlist-item-remove">🗑️</button>
@@ -183,7 +183,8 @@ os.registerApp({
     },
 
     setVolume(value) {
-        this.audio.volume = value / 100;
+        this.volume = parseInt(value, 10);
+        this.audio.volume = this.volume / 100;
     },
 
     updateProgress() {
@@ -208,9 +209,18 @@ os.registerApp({
         return `${mins}:${String(secs).padStart(2, '0')}`;
     },
 
+    // Update only the parts that change, so slider/progress state survives
     updateUI() {
-        const content = os.getWindowContent(this.windowId);
-        this.render(content);
+        const playBtn = document.getElementById('play-pause-btn');
+        if (playBtn) playBtn.textContent = this.isPlaying ? '⏸️' : '▶️';
+
+        const song = this.playlist[this.currentIndex];
+        const titleEl = document.querySelector('.music-title');
+        const artistEl = document.querySelector('.music-artist');
+        if (titleEl) titleEl.textContent = song ? song.name : 'No song loaded';
+        if (artistEl) artistEl.textContent = song ? (song.artist || 'Unknown Artist') : '';
+
+        this.updatePlaylistUI();
     },
 
     updatePlaylistUI() {
@@ -218,5 +228,11 @@ os.registerApp({
         if (playlistEl) {
             playlistEl.innerHTML = this.renderPlaylist();
         }
+    },
+
+    onClose() {
+        this.audio.pause();
+        this.audio.src = '';
+        this.isPlaying = false;
     }
 });

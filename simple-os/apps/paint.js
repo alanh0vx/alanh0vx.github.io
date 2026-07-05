@@ -22,11 +22,11 @@ os.registerApp({
             <div class="paint-app">
                 <div class="paint-toolbar">
                     <div class="paint-tools">
-                        <button class="paint-tool ${this.currentTool === 'pen' ? 'active' : ''}"
+                        <button class="paint-tool ${this.currentTool === 'pen' ? 'active' : ''}" data-tool="pen"
                                 onclick="os.apps['paint'].setTool('pen')" title="Pen">✏️</button>
-                        <button class="paint-tool ${this.currentTool === 'eraser' ? 'active' : ''}"
+                        <button class="paint-tool ${this.currentTool === 'eraser' ? 'active' : ''}" data-tool="eraser"
                                 onclick="os.apps['paint'].setTool('eraser')" title="Eraser">🧹</button>
-                        <button class="paint-tool ${this.currentTool === 'fill' ? 'active' : ''}"
+                        <button class="paint-tool ${this.currentTool === 'fill' ? 'active' : ''}" data-tool="fill"
                                 onclick="os.apps['paint'].setTool('fill')" title="Fill">🪣</button>
                     </div>
 
@@ -108,11 +108,19 @@ os.registerApp({
         };
     },
 
+    // Map pointer position to canvas pixels (the canvas is CSS-scaled on
+    // small windows, so client coordinates must be scaled to the bitmap)
+    getCanvasPoint(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+            x: (e.clientX - rect.left) * (this.canvas.width / rect.width),
+            y: (e.clientY - rect.top) * (this.canvas.height / rect.height)
+        };
+    },
+
     startDrawing(e) {
         this.isDrawing = true;
-        const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const { x, y } = this.getCanvasPoint(e);
 
         if (this.currentTool === 'fill') {
             this.fillArea(x, y);
@@ -126,9 +134,7 @@ os.registerApp({
     draw(e) {
         if (!this.isDrawing) return;
 
-        const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const { x, y } = this.getCanvasPoint(e);
 
         this.ctx.lineWidth = this.lineWidth;
         this.ctx.lineCap = 'round';
@@ -151,10 +157,11 @@ os.registerApp({
     },
 
     setTool(tool) {
+        // Only update the toolbar state — re-rendering would wipe the canvas
         this.currentTool = tool;
-        const content = os.getWindowContent(this.windowId);
-        this.render(content);
-        this.initCanvas();
+        document.querySelectorAll('.paint-tool').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tool === tool);
+        });
     },
 
     setColor(color) {
@@ -173,9 +180,47 @@ os.registerApp({
         }
     },
 
+    // Flood fill from the clicked pixel outward
     fillArea(x, y) {
-        this.ctx.fillStyle = this.currentColor;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        const { width, height } = this.canvas;
+        const startX = Math.floor(x);
+        const startY = Math.floor(y);
+        if (startX < 0 || startY < 0 || startX >= width || startY >= height) return;
+
+        const imageData = this.ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+
+        const hex = this.currentColor.replace('#', '');
+        const fill = [
+            parseInt(hex.slice(0, 2), 16),
+            parseInt(hex.slice(2, 4), 16),
+            parseInt(hex.slice(4, 6), 16),
+            255
+        ];
+
+        const startIdx = (startY * width + startX) * 4;
+        const target = data.slice(startIdx, startIdx + 4);
+        if (target[0] === fill[0] && target[1] === fill[1] && target[2] === fill[2] && target[3] === fill[3]) return;
+
+        const matches = (idx) =>
+            data[idx] === target[0] && data[idx + 1] === target[1] &&
+            data[idx + 2] === target[2] && data[idx + 3] === target[3];
+
+        const stack = [[startX, startY]];
+        while (stack.length) {
+            const [px, py] = stack.pop();
+            const idx = (py * width + px) * 4;
+            if (px < 0 || py < 0 || px >= width || py >= height || !matches(idx)) continue;
+
+            data[idx] = fill[0];
+            data[idx + 1] = fill[1];
+            data[idx + 2] = fill[2];
+            data[idx + 3] = fill[3];
+
+            stack.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
+        }
+
+        this.ctx.putImageData(imageData, 0, 0);
     },
 
     async clearCanvas() {

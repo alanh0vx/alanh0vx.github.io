@@ -54,8 +54,7 @@ os.registerApp({
     },
 
     loadChatHistory() {
-        const history = localStorage.getItem('ai_chat_history');
-        return history ? JSON.parse(history) : [];
+        return os.safeGet('ai_chat_history', []);
     },
 
     saveChatHistory() {
@@ -349,8 +348,9 @@ os.registerApp({
     },
 
     formatMessage(text) {
-        // Basic markdown-like formatting
-        return text
+        // Escape first so message content can never inject HTML,
+        // then apply basic markdown-like formatting
+        return os.ui.escapeHtml(text)
             .replace(/\n/g, '<br>')
             .replace(/`([^`]+)`/g, '<code>$1</code>')
             .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
@@ -492,11 +492,12 @@ os.registerApp({
             headers: {
                 'Content-Type': 'application/json',
                 'x-api-key': this.apiKey,
-                'anthropic-version': '2023-06-01'
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify({
                 model: this.model,
-                max_tokens: 1024,
+                max_tokens: 4096,
                 messages: conversationHistory.map(m => ({ role: m.role, content: m.content }))
             })
         });
@@ -541,7 +542,7 @@ os.registerApp({
 
     async callGoogle(message) {
         let url = this.getEffectiveBaseUrl();
-        
+
         // If using default URL structure, append model and endpoint
         if (!this.baseUrl || this.baseUrl === '') {
             url = `${url}/${this.model}:generateContent?key=${this.apiKey}`;
@@ -552,16 +553,22 @@ os.registerApp({
                 url += `?key=${this.apiKey}`;
             }
         }
-        
+
+        // Send the full conversation, not just the latest message,
+        // so Gemini keeps context like the other providers
+        const maxTokens = this.getModelTokenLimit();
+        const conversationHistory = this.trimConversationHistory(maxTokens);
+
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: message }]
-                }]
+                contents: conversationHistory.map(m => ({
+                    role: m.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: m.content }]
+                }))
             })
         });
 

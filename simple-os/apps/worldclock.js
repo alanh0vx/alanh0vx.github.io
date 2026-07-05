@@ -16,9 +16,9 @@ os.registerApp({
     },
 
     loadSavedTimezones() {
-        const saved = localStorage.getItem('worldclock_timezones');
+        const saved = os.safeGet('worldclock_timezones');
         if (saved) {
-            return JSON.parse(saved);
+            return saved;
         }
         // Default timezones
         return [

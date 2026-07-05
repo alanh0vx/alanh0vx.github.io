@@ -42,10 +42,11 @@ os.registerApp({
             itemEl.className = 'file-item';
             itemEl.innerHTML = `
                 <div class="file-item-icon">${item.type === 'folder' ? '📁' : '📄'}</div>
-                <div class="file-item-name">${name}</div>
+                <div class="file-item-name">${os.ui.escapeHtml(name)}</div>
+                <button class="file-item-actions" title="Actions">⋯</button>
             `;
 
-            itemEl.ondblclick = () => {
+            const open = () => {
                 if (item.type === 'folder') {
                     this.openFolder(name);
                 } else {
@@ -53,13 +54,36 @@ os.registerApp({
                 }
             };
 
+            itemEl.ondblclick = open;
+
+            // Phones/tablets: single tap opens (double-tap is awkward on touch)
+            itemEl.onclick = (e) => {
+                if (e.target.classList.contains('file-item-actions')) return;
+                if (os.deviceMode !== 'desktop') open();
+            };
+
+            itemEl.querySelector('.file-item-actions').onclick = (e) => {
+                e.stopPropagation();
+                this.showItemMenu(e.clientX, e.clientY, name, open);
+            };
+
             itemEl.oncontextmenu = (e) => {
                 e.preventDefault();
-                this.showContextMenu(e, name);
+                this.showItemMenu(e.clientX, e.clientY, name, open);
             };
 
             container.appendChild(itemEl);
         }
+    },
+
+    async showItemMenu(x, y, name, open) {
+        const action = await os.ui.menu([
+            { label: '📂 Open', value: 'open' },
+            { label: '🗑️ Delete', value: 'delete', danger: true }
+        ], { x, y });
+
+        if (action === 'open') open();
+        if (action === 'delete') this.deleteItem(name);
     },
 
     getFolder(path) {
@@ -134,28 +158,6 @@ os.registerApp({
                 os.apps['notepad'].loadFile(fullPath, item.content);
             }
         }, 100);
-    },
-
-    showContextMenu(e, name) {
-        const existing = document.getElementById('context-menu');
-        if (existing) existing.remove();
-
-        const menu = document.createElement('div');
-        menu.id = 'context-menu';
-        menu.className = 'context-menu';
-        menu.style.left = e.clientX + 'px';
-        menu.style.top = e.clientY + 'px';
-        menu.innerHTML = `
-            <div class="context-menu-item" onclick="os.apps['file-manager'].deleteItem('${name}')">Delete</div>
-        `;
-        document.body.appendChild(menu);
-
-        setTimeout(() => {
-            document.addEventListener('click', function removeMenu() {
-                menu.remove();
-                document.removeEventListener('click', removeMenu);
-            });
-        }, 10);
     },
 
     async deleteItem(name) {

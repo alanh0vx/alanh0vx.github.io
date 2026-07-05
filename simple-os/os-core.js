@@ -5,6 +5,7 @@ class SimpleOS {
         this.apps = {};
         this.zIndexCounter = 100;
         this.activeWindowId = null;
+        this.windowResources = {};
         this.fileSystem = this.initFileSystem();
         this.deviceMode = this.detectDeviceMode();
         this.isMobile = this.deviceMode === 'phone';
@@ -955,9 +956,38 @@ class SimpleOS {
         const window = this.windows.find(w => w.id === windowId);
         if (!window) return;
 
+        if (typeof window.app.onClose === 'function') {
+            try {
+                window.app.onClose(windowId);
+            } catch (e) {
+                console.warn(`SimpleOS: onClose for "${window.app.id}" failed`, e);
+            }
+        }
+        this.cleanupWindowResources(windowId);
+
         window.element.remove();
         this.removeFromTaskbar(windowId);
         this.windows = this.windows.filter(w => w.id !== windowId);
+    }
+
+    // Intervals/listeners registered through these helpers are cleaned up
+    // automatically when the window closes.
+    setWindowInterval(windowId, fn, ms) {
+        const id = setInterval(fn, ms);
+        (this.windowResources[windowId] = this.windowResources[windowId] || [])
+            .push(() => clearInterval(id));
+        return id;
+    }
+
+    addWindowListener(windowId, target, event, fn, options) {
+        target.addEventListener(event, fn, options);
+        (this.windowResources[windowId] = this.windowResources[windowId] || [])
+            .push(() => target.removeEventListener(event, fn, options));
+    }
+
+    cleanupWindowResources(windowId) {
+        (this.windowResources[windowId] || []).forEach(dispose => dispose());
+        delete this.windowResources[windowId];
     }
 
     minimizeWindow(windowId) {

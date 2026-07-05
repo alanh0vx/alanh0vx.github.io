@@ -54,7 +54,8 @@ os.registerApp({
     },
 
     setupControls() {
-        document.addEventListener('keydown', (e) => {
+        // Registered per-window so the listener is removed when the window closes
+        os.addWindowListener(this.windowId, document, 'keydown', (e) => {
             if (!this.gameLoop) return;
 
             switch(e.key) {
@@ -223,5 +224,12 @@ os.registerApp({
 
         const startBtn = document.getElementById('snake-start-btn');
         if (startBtn) startBtn.disabled = false;
+    },
+
+    onClose() {
+        if (this.gameLoop) {
+            clearInterval(this.gameLoop);
+            this.gameLoop = null;
+        }
     }
 });

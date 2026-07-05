@@ -14,6 +14,7 @@ os.registerApp({
         this.revealed = [];
         this.flagged = [];
         this.gameOver = false;
+        this.flagMode = false;
 
         const content = os.getWindowContent(windowId);
         this.render(content);
@@ -25,11 +26,20 @@ os.registerApp({
             <div class="minesweeper">
                 <div class="mine-toolbar">
                     <button onclick="os.apps['minesweeper'].reset()">🔄 New Game</button>
+                    <button id="mine-flag-toggle" class="${this.flagMode ? 'active' : ''}"
+                            onclick="os.apps['minesweeper'].toggleFlagMode()"
+                            title="Tap cells to flag instead of reveal">🚩 Flag mode</button>
                     <span id="mine-status">Mines: ${this.mines}</span>
                 </div>
                 <div id="mine-board" class="mine-board"></div>
             </div>
         `;
+    },
+
+    toggleFlagMode() {
+        this.flagMode = !this.flagMode;
+        const btn = document.getElementById('mine-flag-toggle');
+        if (btn) btn.classList.toggle('active', this.flagMode);
     },
 
     initBoard() {
@@ -87,7 +97,13 @@ os.registerApp({
                     cell.textContent = '🚩';
                 }
 
-                cell.onclick = () => this.revealCell(r, c);
+                cell.onclick = () => {
+                    if (this.flagMode) {
+                        this.toggleFlag(r, c);
+                    } else {
+                        this.revealCell(r, c);
+                    }
+                };
                 cell.oncontextmenu = (e) => {
                     e.preventDefault();
                     this.toggleFlag(r, c);

@@ -492,6 +492,7 @@ body[data-device="tablet"] .window-btn {
 }
 
 .file-item {
+    position: relative;
     text-align: center;
     cursor: pointer;
     padding: 10px;
@@ -501,6 +502,33 @@ body[data-device="tablet"] .window-btn {
 
 .file-item:hover {
     background: var(--surface-3);
+}
+
+.file-item-actions {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+}
+
+.file-item:hover .file-item-actions,
+body[data-device="phone"] .file-item-actions,
+body[data-device="tablet"] .file-item-actions {
+    opacity: 1;
+}
+
+.file-item-actions:hover {
+    background: var(--surface-2);
 }
 
 .file-item-icon {
@@ -700,6 +728,12 @@ body[data-device="tablet"] .window-btn {
 
 .mine-toolbar button:hover {
     background: var(--surface-3);
+}
+
+#mine-flag-toggle.active {
+    background: var(--gradient-accent);
+    color: white;
+    border-color: transparent;
 }
 
 .mine-board {
@@ -1643,6 +1677,9 @@ body[data-device="tablet"] .window-btn {
     background: white;
     cursor: crosshair;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    height: auto;
+    touch-action: none;
 }
 
 /* Music Player */
@@ -3277,4 +3314,109 @@ code {
 
 .os-ui-menu-item.danger {
     color: var(--danger);
+}
+
+/* ===== Mobile coverage for previously unstyled apps ===== */
+@media (max-width: 768px) {
+    .paint-toolbar {
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .paint-tool {
+        width: 44px;
+        height: 44px;
+    }
+
+    .color-swatch {
+        width: 34px;
+        height: 34px;
+    }
+
+    .paint-canvas-container {
+        padding: 8px;
+    }
+
+    .music-player {
+        padding: 16px;
+    }
+
+    .music-artwork {
+        width: 120px;
+        height: 120px;
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .music-title {
+        font-size: 18px;
+    }
+
+    .music-info,
+    .music-progress,
+    .music-controls,
+    .music-volume {
+        margin-bottom: 16px;
+    }
+
+    .clock-time {
+        font-size: 44px;
+    }
+
+    .clock-date {
+        font-size: 18px;
+    }
+
+    .timer-display,
+    .stopwatch-display {
+        font-size: 44px;
+    }
+
+    .timer-controls {
+        flex-wrap: wrap;
+    }
+
+    .timer-buttons button,
+    .stopwatch-buttons button,
+    .alarm-controls button {
+        min-height: var(--tap-min);
+    }
+
+    .clock-display-container {
+        padding: 20px;
+    }
+
+    .ai-chat-input-container {
+        padding: 10px;
+    }
+
+    .ai-chat-input-container textarea {
+        font-size: 16px; /* prevents iOS zoom-on-focus */
+    }
+
+    .ai-send-btn {
+        min-height: var(--tap-min);
+    }
+
+    .notepad-textarea {
+        font-size: 16px;
+    }
+
+    .os-dialog-input {
+        font-size: 16px;
+    }
+
+    .mine-toolbar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .mine-toolbar button {
+        min-height: var(--tap-min);
+    }
+
+    .snake-mobile-controls button {
+        width: 56px;
+        height: 56px;
+    }
 }
