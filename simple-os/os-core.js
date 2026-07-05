@@ -239,77 +239,60 @@ class SimpleOS {
         iconsContainer.appendChild(folderIcon);
     }
 
-    openFolder(category, position = null) {
+    openFolder(category) {
         const apps = this.categoryApps[category] || [];
         if (apps.length === 0) return;
 
-        // Check if folder is already open
-        const folderId = `folder-${category}`;
-        const existingFolder = document.getElementById(folderId);
-        if (existingFolder) {
-            this.focusWindow(folderId);
+        // Focus (and restore) the folder window if it is already open
+        const existing = this.windows.find(w => w.app.id === `folder-${category}`);
+        if (existing) {
+            if (existing.minimized) this.minimizeWindow(existing.id);
+            this.focusWindow(existing.id);
             return;
         }
 
-        // Create a temporary window to show folder contents
-        const windowEl = document.createElement('div');
-        windowEl.className = 'window folder-window';
-        windowEl.id = folderId;
-        windowEl.style.zIndex = this.zIndexCounter++;
-        windowEl.style.width = '400px';
-        windowEl.style.height = '500px';
+        // Folder windows are ordinary windows, so they get the taskbar,
+        // focus handling and lifecycle for free
+        const folderApp = {
+            id: `folder-${category}`,
+            name: this.getCategoryLabel(category).replace(/^.+?\s/, ''),
+            icon: this.getCategoryIcon(category),
+            category,
+            windowSize: { width: '400px', height: '500px' },
+            onLaunch: (windowId) => {
+                const grid = document.createElement('div');
+                grid.className = 'folder-icons';
 
-        // Use provided position or default
-        if (position) {
-            windowEl.style.left = position.x + 'px';
-            windowEl.style.top = position.y + 'px';
-        } else {
-            windowEl.style.left = '100px';
-            windowEl.style.top = '100px';
-        }
+                apps.forEach(app => {
+                    const icon = document.createElement('div');
+                    icon.className = 'folder-icon';
+                    icon.innerHTML = `
+                        <div class="folder-icon-image">${app.icon}</div>
+                        <div class="folder-icon-label">${app.name}</div>
+                    `;
+                    const open = () => {
+                        this.launchApp(app.id);
+                        this.closeWindow(windowId);
+                    };
+                    icon.ondblclick = open;
+                    icon.onclick = () => {
+                        if (this.deviceMode !== 'desktop') open();
+                    };
+                    this.makeAccessible(icon, open);
+                    grid.appendChild(icon);
+                });
 
-        windowEl.innerHTML = `
-            <div class="window-titlebar">
-                <span class="window-title">📁 ${this.getCategoryLabel(category)}</span>
-                <div class="window-controls">
-                    <button class="window-btn minimize">−</button>
-                    <button class="window-btn maximize">□</button>
-                    <button class="window-btn close">×</button>
-                </div>
-            </div>
-            <div class="window-content folder-content" id="${folderId}-content">
-                <div class="folder-icons">
-                    ${apps.map(app => `
-                        <div class="folder-icon" ondblclick="os.launchApp('${app.id}'); document.getElementById('${folderId}').remove();">
-                            <div class="folder-icon-image">${app.icon}</div>
-                            <div class="folder-icon-label">${app.name}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
+                const wrap = document.createElement('div');
+                wrap.className = 'folder-content';
+                wrap.appendChild(grid);
 
-        document.getElementById('desktop').appendChild(windowEl);
-
-        // Make folder window draggable
-        this.makeWindowDraggable(windowEl);
-        this.makeWindowResizable(windowEl);
-
-        // Window controls
-        windowEl.querySelector('.close').onclick = (e) => {
-            e.stopPropagation();
-            windowEl.remove();
-        };
-        windowEl.querySelector('.minimize').onclick = (e) => {
-            e.stopPropagation();
-            windowEl.classList.toggle('minimized');
-        };
-        windowEl.querySelector('.maximize').onclick = (e) => {
-            e.stopPropagation();
-            windowEl.classList.toggle('maximized');
+                const content = this.getWindowContent(windowId);
+                content.appendChild(wrap);
+            }
         };
 
-        windowEl.querySelector('.window-titlebar').onclick = () => this.focusWindow(folderId);
+        const windowId = this.createWindow(folderApp);
+        folderApp.onLaunch(windowId);
     }
 
     setupTaskbar() {
@@ -429,40 +412,6 @@ class SimpleOS {
         contextMenu.style.display = 'block';
 
         e.stopPropagation();
-    }
-
-    autoOpenCategoryFolders() {
-        if (!this.categoryApps) return;
-
-        const categories = Object.keys(this.categoryApps);
-        const padding = 20;
-        const folderWidth = 400;
-        const folderHeight = 500;
-
-        // Calculate how many columns can fit on screen
-        const availableWidth = window.innerWidth - padding * 2;
-        const availableHeight = window.innerHeight - 40 - padding * 2; // 40 for taskbar
-        const maxCols = Math.floor(availableWidth / (folderWidth + padding));
-        const cols = Math.min(maxCols, 3); // Max 3 columns
-
-        categories.forEach((category, index) => {
-            const col = index % cols;
-            const row = Math.floor(index / cols);
-
-            const position = {
-                x: padding + col * (folderWidth + padding),
-                y: padding + row * (folderHeight + padding)
-            };
-
-            // Only open if position is within visible area
-            if (position.y + folderHeight < availableHeight) {
-                this.openFolder(category, position);
-            } else {
-                // If it doesn't fit, cascade from top
-                const cascadeOffset = (index - (cols * Math.floor(availableHeight / (folderHeight + padding)))) * 30;
-                this.openFolder(category, { x: padding + cascadeOffset, y: padding + cascadeOffset });
-            }
-        });
     }
 
     setupMobileLayout() {
@@ -1040,6 +989,23 @@ class SimpleOS {
     cleanupWindowResources(windowId) {
         (this.windowResources[windowId] || []).forEach(dispose => dispose());
         delete this.windowResources[windowId];
+    }
+
+    async clearAllData() {
+        const confirmed = await this.ui.confirm(
+            'This will clear ALL cookies and localStorage data, including:\n\n• Custom apps\n• AI chat settings\n• File system data\n• Settings and preferences\n\nThis action cannot be undone. Continue?',
+            { title: '⚠️ Clear All Data', danger: true, confirmLabel: 'Clear Everything' }
+        );
+        if (!confirmed) return;
+
+        localStorage.clear();
+
+        document.cookie.split(';').forEach(cookie => {
+            const name = cookie.split('=')[0].trim();
+            document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+        });
+
+        location.reload();
     }
 
     minimizeWindow(windowId) {

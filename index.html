@@ -120,8 +120,7 @@
         <div class="splash-content">
             <h1>💻 Welcome to Alan's OS</h1>
             <p>Your personal web-based operating system</p>
-            <div class="splash-timer">Starting in <span id="timer">5</span> seconds...</div>
-            <button class="splash-skip-btn" onclick="closeSplash()">Skip & Start Now ▶️</button>
+            <div class="splash-timer">Tap anywhere to start</div>
         </div>
     </div>
 
@@ -172,48 +171,27 @@
 
     <!-- Splash Screen & Utility Functions -->
     <script>
-        // Splash screen timer
-        let countdown = 5;
-        let timerInterval = setInterval(() => {
-            countdown--;
-            const timerEl = document.getElementById('timer');
-            if (timerEl) {
-                timerEl.textContent = countdown;
-            }
-            if (countdown <= 0) {
-                closeSplash();
-            }
-        }, 1000);
-
+        // Splash screen: auto-dismiss quickly, or skip with tap/keypress
+        let splashClosed = false;
         function closeSplash() {
-            clearInterval(timerInterval);
+            if (splashClosed) return;
+            splashClosed = true;
             const splash = document.getElementById('splash-screen');
             if (splash) {
-                splash.style.animation = 'fadeOut 0.5s';
+                splash.style.animation = 'fadeOut 0.4s';
                 setTimeout(() => {
                     splash.style.display = 'none';
-                }, 500);
+                }, 400);
             }
         }
 
-        // Clear all data function
-        async function clearAllData() {
-            const confirmed = await os.ui.confirm(
-                'This will clear ALL cookies and localStorage data, including:\n\n• Custom apps\n• AI chat settings\n• File system data\n• Settings and preferences\n\nThis action cannot be undone. Continue?',
-                { title: '⚠️ Clear All Data', danger: true, confirmLabel: 'Clear Everything' }
-            );
-            if (!confirmed) return;
+        setTimeout(closeSplash, 1200);
+        document.getElementById('splash-screen').addEventListener('click', closeSplash);
+        document.addEventListener('keydown', closeSplash, { once: true });
 
-            // Clear localStorage
-            localStorage.clear();
-
-            // Clear cookies
-            document.cookie.split(";").forEach(cookie => {
-                const name = cookie.split("=")[0].trim();
-                document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-            });
-
-            location.reload();
+        // Taskbar Clear Data button — the logic lives in os.clearAllData()
+        function clearAllData() {
+            os.clearAllData();
         }
     </script>
 

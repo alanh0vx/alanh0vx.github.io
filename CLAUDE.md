@@ -21,8 +21,9 @@ Live at: https://alanh0vx.github.io/
 
 The core of the site is a simulated desktop OS rendered in the browser.
 
-- **`os-core.js`** — The OS kernel: window management (drag, resize, minimize, maximize, close), application registry, virtual file system (localStorage-backed), taskbar, start menu, and mobile/desktop detection.
-- **`styles.css`** — All OS styling including window chrome, taskbar, mobile-responsive layout (breakpoint at 768px).
+- **`os-core.js`** — The OS kernel: window management (drag, resize, minimize, maximize, close, with mouse + touch support), application registry, virtual file system (localStorage-backed via `os.safeGet()`), taskbar, start menu, and responsive device modes (`phone` / `tablet` / `desktop`, re-evaluated on resize; set as `body[data-device]`). Windows support an optional `onClose(windowId)` lifecycle hook; use `os.setWindowInterval()` / `os.addWindowListener()` for resources that should be cleaned up when the window closes.
+- **`ui-kit.js`** — Shared UI primitives on `os.ui`: promise-based `alert` / `confirm` / `prompt` / `form` / `dialog`, plus `toast`, `menu` (context/long-press), and `escapeHtml`. Never use native `alert()` / `confirm()` / `prompt()` in apps.
+- **`styles.css`** — All OS styling. Design tokens live in the `:root` block at the top (`--accent-1`, `--surface`, `--text`, `--border`, …); dark mode overrides them via `body[data-theme="dark"]` and `prefers-color-scheme`. Use `var()` tokens instead of hard-coded colors so theming keeps working. Mobile breakpoint at 768px; safe-area insets (`env(safe-area-inset-*)`) are applied to the shell.
 - **`apps/`** — Each app is a self-contained JS module that registers itself via `os.registerApp()`.
 
 ### Application Registration Pattern

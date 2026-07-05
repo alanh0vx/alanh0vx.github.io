@@ -241,12 +241,8 @@ os.registerApp({
         body.style.fontSize = fontSizes[this.settings.fontSize];
     },
 
-    async clearStorage() {
-        if (!await os.ui.confirm('Clear all data? This cannot be undone.', { title: 'Clear All Data', danger: true, confirmLabel: 'Clear Data' })) return;
-
-        localStorage.removeItem('simpleOS_fileSystem');
-        localStorage.removeItem('simpleOS_settings');
-        location.reload();
+    clearStorage() {
+        os.clearAllData();
     },
 
     exportData() {
