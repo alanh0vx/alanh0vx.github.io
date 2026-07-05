@@ -72,6 +72,18 @@ class SimpleOS {
         }
     }
 
+    // Make a div behave like a button for keyboard and screen-reader users
+    makeAccessible(el, activate, role = 'button') {
+        el.setAttribute('role', role);
+        el.tabIndex = 0;
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                activate();
+            }
+        });
+    }
+
     safeGet(key, fallback = null) {
         try {
             const raw = localStorage.getItem(key);
@@ -150,10 +162,12 @@ class SimpleOS {
         const item = document.createElement('div');
         item.className = 'start-menu-item';
         item.innerHTML = `<span class="app-icon">${app.icon}</span>${app.name}`;
-        item.onclick = () => {
+        const launch = () => {
             this.launchApp(app.id);
             this.hideStartMenu();
         };
+        item.onclick = launch;
+        this.makeAccessible(item, launch, 'menuitem');
         categoryItems.appendChild(item);
     }
 
@@ -221,6 +235,7 @@ class SimpleOS {
             e.preventDefault();
             this.showContextMenu(e, 'folder', category);
         };
+        this.makeAccessible(folderIcon, () => this.openFolder(category));
         iconsContainer.appendChild(folderIcon);
     }
 
@@ -300,6 +315,8 @@ class SimpleOS {
     setupTaskbar() {
         const startButton = document.getElementById('start-button');
         startButton.onclick = () => this.toggleStartMenu();
+        this.makeAccessible(startButton, () => this.toggleStartMenu());
+        startButton.setAttribute('aria-haspopup', 'menu');
     }
 
     toggleStartMenu() {
@@ -318,6 +335,34 @@ class SimpleOS {
             const startButton = document.getElementById('start-button');
             if (!startMenu.contains(e.target) && !startButton.contains(e.target)) {
                 this.hideStartMenu();
+            }
+        });
+
+        // Keyboard: Escape closes menus, arrows move through start-menu items
+        document.addEventListener('keydown', (e) => {
+            const startMenu = document.getElementById('start-menu');
+            const menuOpen = !startMenu.classList.contains('hidden');
+
+            if (e.key === 'Escape') {
+                const contextMenu = document.getElementById('os-context-menu');
+                if (contextMenu && contextMenu.style.display !== 'none') {
+                    contextMenu.style.display = 'none';
+                } else if (menuOpen) {
+                    this.hideStartMenu();
+                    document.getElementById('start-button').focus();
+                }
+                return;
+            }
+
+            if (menuOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+                e.preventDefault();
+                const items = Array.from(startMenu.querySelectorAll('.start-menu-item'));
+                if (items.length === 0) return;
+                const current = items.indexOf(document.activeElement);
+                const next = e.key === 'ArrowDown'
+                    ? (current + 1) % items.length
+                    : (current - 1 + items.length) % items.length;
+                items[next].focus();
             }
         });
     }
@@ -359,19 +404,23 @@ class SimpleOS {
             ];
         }
 
-        // Build menu HTML
-        contextMenu.innerHTML = menuItems.map(item =>
-            `<div class="context-menu-item" onclick="event.stopPropagation(); this.clickHandler()">${item.label}</div>`
-        ).join('');
-
-        // Attach click handlers
-        const items = contextMenu.querySelectorAll('.context-menu-item');
-        items.forEach((item, index) => {
-            item.clickHandler = () => {
-                menuItems[index].action();
+        // Build menu items
+        contextMenu.innerHTML = '';
+        contextMenu.setAttribute('role', 'menu');
+        menuItems.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'context-menu-item';
+            el.textContent = item.label;
+            const activate = () => {
+                item.action();
                 contextMenu.style.display = 'none';
             };
-            item.onclick = () => item.clickHandler();
+            el.onclick = (ev) => {
+                ev.stopPropagation();
+                activate();
+            };
+            this.makeAccessible(el, activate, 'menuitem');
+            contextMenu.appendChild(el);
         });
 
         // Position and show menu
@@ -457,6 +506,7 @@ class SimpleOS {
                     <div class="mobile-app-icon-label">${app.name}</div>
                 `;
                 appIcon.onclick = () => this.launchApp(app.id);
+                this.makeAccessible(appIcon, () => this.launchApp(app.id));
                 page.appendChild(appIcon);
             }
 
@@ -658,6 +708,8 @@ class SimpleOS {
         const windowEl = document.createElement('div');
         windowEl.className = 'window';
         windowEl.id = windowId;
+        windowEl.setAttribute('role', 'dialog');
+        windowEl.setAttribute('aria-label', app.name);
         windowEl.style.zIndex = this.zIndexCounter++;
 
         // Mobile: Open apps fullscreen
@@ -1017,13 +1069,15 @@ class SimpleOS {
         item.className = 'taskbar-item';
         item.id = `taskbar-${windowId}`;
         item.innerHTML = `${app.icon} ${app.name}`;
-        item.onclick = () => {
+        const activate = () => {
             const window = this.windows.find(w => w.id === windowId);
             if (window.minimized) {
                 this.minimizeWindow(windowId);
             }
             this.focusWindow(windowId);
         };
+        item.onclick = activate;
+        this.makeAccessible(item, activate);
         taskbarApps.appendChild(item);
     }
 
