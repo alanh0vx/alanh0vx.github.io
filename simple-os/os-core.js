@@ -4,24 +4,37 @@ class SimpleOS {
         this.windows = [];
         this.apps = {};
         this.zIndexCounter = 100;
+        this.activeWindowId = null;
         this.fileSystem = this.initFileSystem();
-        this.isMobile = this.detectMobile();
+        this.deviceMode = this.detectDeviceMode();
+        this.isMobile = this.deviceMode === 'phone';
         this.init();
     }
 
-    detectMobile() {
-        // Check if device is mobile based on screen width and touch capability
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        const isSmallScreen = window.innerWidth <= 768;
-        return isTouchDevice && isSmallScreen;
+    detectDeviceMode() {
+        const isTouchDevice = window.matchMedia('(pointer: coarse)').matches ||
+            'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (isTouchDevice && window.innerWidth <= 768) return 'phone';
+        if (isTouchDevice) return 'tablet';
+        return 'desktop';
     }
 
     init() {
+        document.body.dataset.device = this.deviceMode;
         this.setupTaskbar();
         this.setupStartMenu();
         this.setupContextMenu();
         this.updateTime();
         setInterval(() => this.updateTime(), 1000);
+
+        // Re-evaluate device mode when the viewport changes (rotation, resize)
+        let resizeTimer;
+        const onViewportChange = () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => this.updateDeviceMode(), 250);
+        };
+        window.addEventListener('resize', onViewportChange);
+        window.addEventListener('orientationchange', onViewportChange);
 
         // Mobile mode: Show app grid
         if (this.isMobile) {
@@ -30,10 +43,48 @@ class SimpleOS {
         // Desktop mode: Category folders are on desktop, user can double-click to open
     }
 
+    updateDeviceMode() {
+        const mode = this.detectDeviceMode();
+        if (mode === this.deviceMode) return;
+        this.deviceMode = mode;
+        this.isMobile = mode === 'phone';
+        document.body.dataset.device = mode;
+        this.renderHomeScreen();
+
+        // Entering phone mode: open windows become fullscreen
+        if (this.isMobile) {
+            this.windows.forEach(w => {
+                w.element.classList.add('maximized');
+                w.maximized = true;
+            });
+        }
+    }
+
+    renderHomeScreen() {
+        const iconsContainer = document.getElementById('icons-container');
+        iconsContainer.innerHTML = '';
+        if (this.isMobile) {
+            this.setupMobileLayout();
+        } else {
+            iconsContainer.className = '';
+            Object.keys(this.categoryApps || {}).forEach(category => this.createDesktopFolderIcon(category));
+        }
+    }
+
+    safeGet(key, fallback = null) {
+        try {
+            const raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : fallback;
+        } catch (e) {
+            console.warn(`SimpleOS: ignoring corrupt localStorage entry "${key}"`, e);
+            return fallback;
+        }
+    }
+
     initFileSystem() {
-        const fs = localStorage.getItem('simpleOS_fileSystem');
+        const fs = this.safeGet('simpleOS_fileSystem');
         if (fs) {
-            return JSON.parse(fs);
+            return fs;
         }
 
         // Default file system
@@ -134,8 +185,6 @@ class SimpleOS {
     }
 
     addDesktopIcon(app) {
-        const iconsContainer = document.getElementById('icons-container');
-
         // Track apps by category for folders
         if (!this.categoryApps) {
             this.categoryApps = {};
@@ -150,23 +199,28 @@ class SimpleOS {
             return;
         }
 
-        // Desktop: Create folder icon for category (only once per category)
-        const folderId = `desktop-folder-${app.category}`;
-        if (!document.getElementById(folderId)) {
-            const folderIcon = document.createElement('div');
-            folderIcon.id = folderId;
-            folderIcon.className = 'desktop-icon desktop-folder';
-            folderIcon.innerHTML = `
-                <div class="desktop-icon-image">${this.getCategoryIcon(app.category)}</div>
-                <div class="desktop-icon-label">${this.getCategoryLabel(app.category).replace(/^.+?\s/, '')}</div>
-            `;
-            folderIcon.ondblclick = () => this.openFolder(app.category);
-            folderIcon.oncontextmenu = (e) => {
-                e.preventDefault();
-                this.showContextMenu(e, 'folder', app.category);
-            };
-            iconsContainer.appendChild(folderIcon);
-        }
+        this.createDesktopFolderIcon(app.category);
+    }
+
+    // Desktop: Create folder icon for category (only once per category)
+    createDesktopFolderIcon(category) {
+        const iconsContainer = document.getElementById('icons-container');
+        const folderId = `desktop-folder-${category}`;
+        if (document.getElementById(folderId)) return;
+
+        const folderIcon = document.createElement('div');
+        folderIcon.id = folderId;
+        folderIcon.className = 'desktop-icon desktop-folder';
+        folderIcon.innerHTML = `
+            <div class="desktop-icon-image">${this.getCategoryIcon(category)}</div>
+            <div class="desktop-icon-label">${this.getCategoryLabel(category).replace(/^.+?\s/, '')}</div>
+        `;
+        folderIcon.ondblclick = () => this.openFolder(category);
+        folderIcon.oncontextmenu = (e) => {
+            e.preventDefault();
+            this.showContextMenu(e, 'folder', category);
+        };
+        iconsContainer.appendChild(folderIcon);
     }
 
     openFolder(category, position = null) {
@@ -609,16 +663,18 @@ class SimpleOS {
         if (this.isMobile) {
             windowEl.classList.add('maximized');
         } else {
-            // Desktop: Set window size based on app preferences
+            // Desktop: Set window size based on app preferences, clamped to viewport
             const windowSize = this.getWindowSize(app);
-            windowEl.style.width = windowSize.width;
-            windowEl.style.height = windowSize.height;
+            const width = Math.min(parseInt(windowSize.width), window.innerWidth - 20);
+            const height = Math.min(parseInt(windowSize.height), window.innerHeight - 60);
+            windowEl.style.width = width + 'px';
+            windowEl.style.height = height + 'px';
 
             // Center window on screen
-            const centerX = (window.innerWidth - parseInt(windowSize.width)) / 2;
-            const centerY = (window.innerHeight - parseInt(windowSize.height) - 40) / 2; // 40 for taskbar
-            windowEl.style.left = Math.max(20, centerX) + 'px';
-            windowEl.style.top = Math.max(20, centerY) + 'px';
+            const centerX = (window.innerWidth - width) / 2;
+            const centerY = (window.innerHeight - height - 40) / 2; // 40 for taskbar
+            windowEl.style.left = Math.max(10, centerX) + 'px';
+            windowEl.style.top = Math.max(10, centerY) + 'px';
         }
 
         windowEl.innerHTML = `
@@ -655,13 +711,14 @@ class SimpleOS {
             this.toggleMaximize(windowId);
         };
 
-        // Focus on click (only on titlebar or window frame, not content)
-        windowEl.querySelector('.window-titlebar').onclick = () => this.focusWindow(windowId);
+        // Raise the window when any part of it is pressed (capture phase, no preventDefault)
+        windowEl.addEventListener('pointerdown', () => this.focusWindow(windowId), true);
 
         // Add to taskbar
         this.addToTaskbar(windowId, app);
 
-        this.windows.push({ id: windowId, app, element: windowEl, minimized: false, maximized: false });
+        this.windows.push({ id: windowId, app, element: windowEl, minimized: false, maximized: this.isMobile });
+        this.focusWindow(windowId);
 
         return windowId;
     }
@@ -671,12 +728,25 @@ class SimpleOS {
         let isDragging = false;
         let currentX, currentY, initialX, initialY;
 
+        // Keep at least part of the titlebar reachable on screen
+        const clampToViewport = (x, y) => {
+            const minVisible = 60;
+            const maxX = window.innerWidth - minVisible;
+            const minX = minVisible - windowEl.offsetWidth;
+            const maxY = window.innerHeight - 90; // titlebar stays above the taskbar
+            return {
+                x: Math.min(Math.max(x, minX), maxX),
+                y: Math.min(Math.max(y, 0), maxY)
+            };
+        };
+
         const handleMouseMove = (e) => {
             if (!isDragging) return;
 
             e.preventDefault();
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
+            const pos = clampToViewport(e.clientX - initialX, e.clientY - initialY);
+            currentX = pos.x;
+            currentY = pos.y;
 
             windowEl.style.left = currentX + 'px';
             windowEl.style.top = currentY + 'px';
@@ -703,14 +773,15 @@ class SimpleOS {
 
         titlebar.addEventListener('mousedown', handleMouseDown);
 
-        // Touch support for mobile
+        // Touch support for phones/tablets
         const handleTouchMove = (e) => {
             if (!isDragging) return;
 
             e.preventDefault();
             const touch = e.touches[0];
-            currentX = touch.clientX - initialX;
-            currentY = touch.clientY - initialY;
+            const pos = clampToViewport(touch.clientX - initialX, touch.clientY - initialY);
+            currentX = pos.x;
+            currentY = pos.y;
 
             windowEl.style.left = currentX + 'px';
             windowEl.style.top = currentY + 'px';
@@ -732,7 +803,8 @@ class SimpleOS {
             initialX = touch.clientX - windowEl.offsetLeft;
             initialY = touch.clientY - windowEl.offsetTop;
 
-            document.addEventListener('touchmove', handleTouchMove);
+            // passive: false so preventDefault can stop page scrolling during the drag
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
             document.addEventListener('touchend', handleTouchEnd);
         };
 
@@ -806,10 +878,11 @@ class SimpleOS {
                 document.addEventListener('mouseup', handleMouseUp);
             });
 
-            // Touch support for mobile
+            // Touch support for phones/tablets
             const handleTouchMove = (e) => {
                 if (!isResizing) return;
 
+                e.preventDefault();
                 const touch = e.touches[0];
                 const deltaX = touch.clientX - startX;
                 const deltaY = touch.clientY - startY;
@@ -858,7 +931,8 @@ class SimpleOS {
 
                 e.stopPropagation();
 
-                document.addEventListener('touchmove', handleTouchMove);
+                // passive: false so preventDefault can stop page scrolling during the resize
+                document.addEventListener('touchmove', handleTouchMove, { passive: false });
                 document.addEventListener('touchend', handleTouchEnd);
             });
         });
@@ -866,9 +940,15 @@ class SimpleOS {
 
     focusWindow(windowId) {
         const windowEl = document.getElementById(windowId);
-        if (windowEl) {
-            windowEl.style.zIndex = this.zIndexCounter++;
-        }
+        if (!windowEl) return;
+
+        windowEl.style.zIndex = this.zIndexCounter++;
+        this.activeWindowId = windowId;
+
+        // Highlight the matching taskbar item
+        document.querySelectorAll('.taskbar-item.active').forEach(el => el.classList.remove('active'));
+        const taskbarItem = document.getElementById(`taskbar-${windowId}`);
+        if (taskbarItem) taskbarItem.classList.add('active');
     }
 
     closeWindow(windowId) {
@@ -886,6 +966,11 @@ class SimpleOS {
 
         window.element.classList.toggle('minimized');
         window.minimized = !window.minimized;
+
+        if (window.minimized) {
+            const item = document.getElementById(`taskbar-${windowId}`);
+            if (item) item.classList.remove('active');
+        }
     }
 
     toggleMaximize(windowId) {

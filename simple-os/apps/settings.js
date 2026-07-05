@@ -13,12 +13,13 @@ os.registerApp({
     },
 
     loadSettings() {
-        const saved = localStorage.getItem('simpleOS_settings');
-        return saved ? JSON.parse(saved) : {
+        const defaults = {
             theme: 'purple',
             wallpaper: 'gradient',
-            fontSize: 'medium'
+            fontSize: 'medium',
+            appearance: 'system'
         };
+        return { ...defaults, ...os.safeGet('simpleOS_settings', {}) };
     },
 
     saveSettings() {
@@ -71,6 +72,15 @@ os.registerApp({
         return `
             <div class="settings-section">
                 <h2>Appearance</h2>
+
+                <div class="settings-group">
+                    <label>Appearance</label>
+                    <select id="appearance-select" onchange="os.apps['settings'].changeAppearance(this.value)">
+                        <option value="system" ${this.settings.appearance === 'system' ? 'selected' : ''}>System</option>
+                        <option value="light" ${this.settings.appearance === 'light' ? 'selected' : ''}>Light</option>
+                        <option value="dark" ${this.settings.appearance === 'dark' ? 'selected' : ''}>Dark</option>
+                    </select>
+                </div>
 
                 <div class="settings-group">
                     <label>Theme Color</label>
@@ -167,6 +177,11 @@ os.registerApp({
         `;
     },
 
+    changeAppearance(appearance) {
+        this.settings.appearance = appearance;
+        this.saveSettings();
+    },
+
     changeTheme(theme) {
         this.settings.theme = theme;
         this.saveSettings();
@@ -183,33 +198,46 @@ os.registerApp({
     },
 
     applySettings() {
-        const desktop = document.getElementById('desktop');
         const body = document.body;
+        const root = document.documentElement;
 
-        // Apply theme
-        const themes = {
-            purple: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            blue: 'linear-gradient(135deg, #667eea 0%, #2193b0 100%)',
-            green: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-            red: 'linear-gradient(135deg, #eb3349 0%, #f45c43 100%)',
-            orange: 'linear-gradient(135deg, #f46b45 0%, #eea849 100%)'
+        // Theme color drives the accent design tokens, so window chrome,
+        // buttons and highlights all follow the chosen theme
+        const accents = {
+            purple: ['#667eea', '#764ba2'],
+            blue: ['#2193b0', '#6dd5ed'],
+            green: ['#11998e', '#38ef7d'],
+            red: ['#eb3349', '#f45c43'],
+            orange: ['#f46b45', '#eea849']
         };
+        const [accent1, accent2] = accents[this.settings.theme] || accents.purple;
+        root.style.setProperty('--accent-1', accent1);
+        root.style.setProperty('--accent-2', accent2);
 
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) themeColorMeta.setAttribute('content', accent1);
+
+        // Light / dark appearance via data-theme (system = no attribute)
+        if (this.settings.appearance === 'light' || this.settings.appearance === 'dark') {
+            body.dataset.theme = this.settings.appearance;
+        } else {
+            delete body.dataset.theme;
+        }
+
+        // Wallpaper
         const wallpapers = {
-            gradient: themes[this.settings.theme],
-            solid: this.settings.theme === 'purple' ? '#764ba2' : '#2193b0',
+            gradient: 'var(--gradient-accent)',
+            solid: accent2,
             dark: '#1a1a2e'
         };
+        body.style.background = wallpapers[this.settings.wallpaper] || wallpapers.gradient;
 
-        body.style.background = wallpapers[this.settings.wallpaper];
-
-        // Apply font size
+        // Font size
         const fontSizes = {
             small: '13px',
             medium: '14px',
             large: '16px'
         };
-
         body.style.fontSize = fontSizes[this.settings.fontSize];
     },
 
