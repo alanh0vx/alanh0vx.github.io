@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000011">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Star Glazing - Interactive Cosmos</title>
     <meta property="og:title" content="Star Glazing - Alan's OS">
     <meta property="og:description" content="Interactive cosmos visualization. Part of Alan's OS - a web-based operating system.">
@@ -25,6 +28,8 @@
         #canvas-container {
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
+            touch-action: none;
         }
         #info {
             position: absolute;
@@ -182,7 +187,19 @@
     </style>
 </head>
 <body>
-    <button onclick="window.close()" id="back-home">✕ Close App</button>
+    <button onclick="goBack()" id="back-home">✕ Close App</button>
+    <script>
+        // Works when the page was opened directly, not just from SimpleOS
+        function goBack() {
+            if (history.length > 1) {
+                history.back();
+            } else if (window.opener) {
+                window.close();
+            } else {
+                location.href = '/';
+            }
+        }
+    </script>
 
     <div id="canvas-container"></div>
 

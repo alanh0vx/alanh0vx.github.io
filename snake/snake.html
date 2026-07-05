@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<meta name="theme-color" content="#1a1a1a">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	<title>🐍 Greedy Snake Game</title>
 	<meta property="og:title" content="Greedy Snake Game - Alan's OS">
 	<meta property="og:description" content="Classic snake game built with vanilla JavaScript. Part of Alan's OS - a web-based operating system.">
@@ -19,12 +22,15 @@
 			color: white;
 			text-align: center;
 			margin: 0;
-			padding: 20px;
+			padding: calc(20px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
 			min-height: 100vh;
+			min-height: 100dvh;
+			box-sizing: border-box;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			justify-content: center;
+			touch-action: manipulation;
 		}
 
 		h1 {
@@ -50,6 +56,9 @@
 			border-radius: 10px;
 			background: #2a2a2a;
 			box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+			max-width: 100%;
+			height: auto;
+			touch-action: none;
 		}
 
 		.score {
@@ -123,20 +132,111 @@
 			color: white;
 			text-decoration: none;
 		}
+
+		.pause-btn {
+			background: transparent;
+			border: 2px solid #ff6b35;
+			color: #ff6b35;
+			padding: 8px 20px;
+			border-radius: 20px;
+			font-family: inherit;
+			font-weight: 600;
+			font-size: 0.95rem;
+			cursor: pointer;
+			margin-left: 12px;
+			min-height: 44px;
+			transition: all 0.2s ease;
+		}
+
+		.pause-btn:hover {
+			background: #ff6b35;
+			color: white;
+		}
+
+		.dpad {
+			display: none;
+			flex-direction: column;
+			align-items: center;
+			gap: 8px;
+			margin-top: 18px;
+			user-select: none;
+			-webkit-user-select: none;
+		}
+
+		.dpad .dpad-row {
+			display: flex;
+			gap: 8px;
+		}
+
+		.dpad button {
+			width: 60px;
+			height: 60px;
+			border: none;
+			border-radius: 14px;
+			background: rgba(255, 107, 53, 0.85);
+			color: #1a1a1a;
+			font-size: 24px;
+			font-weight: 700;
+			cursor: pointer;
+			touch-action: manipulation;
+		}
+
+		.dpad button:active {
+			background: #ff8c42;
+			transform: scale(0.95);
+		}
+
+		@media (pointer: coarse) {
+			.dpad {
+				display: flex;
+			}
+
+			.keyboard-hint {
+				display: none;
+			}
+		}
+
+		@media (max-width: 520px) {
+			h1 {
+				font-size: 1.6rem;
+				margin-top: 44px;
+			}
+
+			.game-container {
+				padding: 14px;
+			}
+
+			.score {
+				font-size: 1.1rem;
+				margin: 10px 0;
+			}
+
+			.controls {
+				font-size: 0.85rem;
+			}
+		}
 	</style>
 </head>
 <body>
-	<button onclick="window.close()" class="back-btn">✕ Close App</button>
-	
+	<button onclick="goBack()" class="back-btn">✕ Close App</button>
+
 	<h1>🐍 Greedy Snake Game</h1>
-	
+
 	<div class="game-container">
-		<div class="score">Score: <span id="score">0</span></div>
+		<div class="score">Score: <span id="score">0</span> &nbsp;·&nbsp; Best: <span id="highScore">0</span><button class="pause-btn" id="pauseBtn" onclick="togglePause()">⏸ Pause</button></div>
 		<canvas id="canvas" width="400" height="400"></canvas>
 		<div class="controls">
-			<p>🎮 Use arrow keys to control the snake</p>
+			<p class="keyboard-hint">🎮 Use arrow keys to control the snake</p>
 			<p>📈 Eat red food to grow and increase your score</p>
 			<p>⚠️ Don't hit the walls or yourself!</p>
+		</div>
+		<div class="dpad" id="dpad">
+			<button data-dir="up" aria-label="Up">▲</button>
+			<div class="dpad-row">
+				<button data-dir="left" aria-label="Left">◀</button>
+				<button data-dir="down" aria-label="Down">▼</button>
+				<button data-dir="right" aria-label="Right">▶</button>
+			</div>
 		</div>
 	</div>
 
@@ -153,9 +253,30 @@ const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const gameOverDiv = document.getElementById('gameOver');
 const finalScoreElement = document.getElementById('finalScore');
+const highScoreElement = document.getElementById('highScore');
 
 let score = 0;
 let gameRunning = true;
+let paused = false;
+let highScore = parseInt(localStorage.getItem('snakeHighScore'), 10) || 0;
+highScoreElement.textContent = highScore;
+
+// Works when the page was opened directly, not just from SimpleOS
+function goBack() {
+  if (history.length > 1) {
+    history.back();
+  } else if (window.opener) {
+    window.close();
+  } else {
+    location.href = '/';
+  }
+}
+
+function togglePause() {
+  if (!gameRunning) return;
+  paused = !paused;
+  document.getElementById('pauseBtn').textContent = paused ? '▶ Resume' : '⏸ Pause';
+}
 
 // Define the snake object
 let snake = {
@@ -197,7 +318,7 @@ function generateFood() {
 
 // Define the game loop
 function loop() {
-  if (!gameRunning) return;
+  if (!gameRunning || paused) return;
   
   // Move the snake
   snake.x += snake.dx;
@@ -265,6 +386,13 @@ function loop() {
 function gameOver() {
   gameRunning = false;
   finalScoreElement.textContent = score;
+
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('snakeHighScore', highScore);
+    highScoreElement.textContent = highScore;
+  }
+
   gameOverDiv.style.display = 'block';
 }
 
@@ -272,6 +400,8 @@ function restartGame() {
   // Reset game state
   score = 0;
   gameRunning = true;
+  paused = false;
+  document.getElementById('pauseBtn').textContent = '⏸ Pause';
   scoreElement.textContent = score;
   gameOverDiv.style.display = 'none';
   
@@ -290,22 +420,62 @@ function restartGame() {
   generateFood();
 }
 
-// Set up the keyboard controls
-document.addEventListener('keydown', function(event) {
-  if (!gameRunning) return;
-  
-  if (event.key === 'ArrowLeft' && snake.dx === 0) {
+function setDirection(dir) {
+  if (!gameRunning || paused) return;
+
+  if (dir === 'left' && snake.dx === 0) {
     snake.dx = -10;
     snake.dy = 0;
-  } else if (event.key === 'ArrowRight' && snake.dx === 0) {
+  } else if (dir === 'right' && snake.dx === 0) {
     snake.dx = 10;
     snake.dy = 0;
-  } else if (event.key === 'ArrowUp' && snake.dy === 0) {
+  } else if (dir === 'up' && snake.dy === 0) {
     snake.dx = 0;
     snake.dy = -10;
-  } else if (event.key === 'ArrowDown' && snake.dy === 0) {
+  } else if (dir === 'down' && snake.dy === 0) {
     snake.dx = 0;
     snake.dy = 10;
+  }
+}
+
+// Keyboard controls
+document.addEventListener('keydown', function(event) {
+  const dirs = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
+  if (dirs[event.key]) {
+    event.preventDefault();
+    setDirection(dirs[event.key]);
+  } else if (event.key === ' ' || event.key === 'p' || event.key === 'P') {
+    event.preventDefault();
+    togglePause();
+  }
+});
+
+// On-screen d-pad (shown on touch devices)
+document.querySelectorAll('.dpad button').forEach(function(btn) {
+  const press = function(e) {
+    e.preventDefault();
+    setDirection(btn.dataset.dir);
+  };
+  btn.addEventListener('touchstart', press, { passive: false });
+  btn.addEventListener('mousedown', press);
+});
+
+// Swipe controls on the canvas
+let touchStartX = 0, touchStartY = 0;
+canvas.addEventListener('touchstart', function(e) {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+canvas.addEventListener('touchend', function(e) {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) < 24 && Math.abs(dy) < 24) return; // too short to be a swipe
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    setDirection(dx > 0 ? 'right' : 'left');
+  } else {
+    setDirection(dy > 0 ? 'down' : 'up');
   }
 });
 

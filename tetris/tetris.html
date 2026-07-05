@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>🧩 Tetris</title>
     <meta property="og:title" content="Tetris - Alan's OS">
     <meta property="og:description" content="Classic Tetris game built with vanilla JavaScript. Part of Alan's OS - a web-based operating system.">
@@ -18,11 +21,14 @@
             background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 50%, #ff6b35 100%);
             color: white;
             margin: 0;
-            padding: 20px;
+            padding: calc(20px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
             min-height: 100vh;
+            min-height: 100dvh;
+            box-sizing: border-box;
             display: flex;
             justify-content: center;
             align-items: center;
+            touch-action: manipulation;
         }
 
         .back-btn {
@@ -87,6 +93,38 @@
             border-radius: 10px;
             background: linear-gradient(135deg, #1f1f1f 0%, #0a0a0a 100%);
             box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+            max-width: 100%;
+            height: auto;
+        }
+
+        #tetris {
+            touch-action: none;
+        }
+
+        .touch-controls {
+            display: none;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .touch-controls button {
+            width: 62px;
+            height: 62px;
+            padding: 0;
+            margin: 0;
+            border-radius: 14px;
+            font-size: 24px;
+        }
+
+        @media (pointer: coarse) {
+            .touch-controls {
+                display: flex;
+            }
+
+            .instructions {
+                display: none;
+            }
         }
 
         .game-info {
@@ -285,21 +323,28 @@
         }
     </style>
 </head>
-<<body>
-    <button onclick="window.close()" class="back-btn">✕ Close App</button>
+<body>
+    <button onclick="goBack()" class="back-btn">✕ Close App</button>
     
     <div class="game-container">
         <h1>🧩 Tetris</h1>
         
         <div class="main-content">
             <div class="game-board">
-                <canvas id="tetris" width="240" height="400" tabindex="0"></canvas>
+                <canvas id="tetris" width="240" height="400"></canvas>
+                <div class="touch-controls">
+                    <button id="touchLeft" aria-label="Move left">◀</button>
+                    <button id="touchRotate" aria-label="Rotate">⟳</button>
+                    <button id="touchDown" aria-label="Soft drop">▼</button>
+                    <button id="touchRight" aria-label="Move right">▶</button>
+                </div>
             </div>
-            
+
             <div class="game-info">
                 <div class="score-panel">
                     <h3>📊 Score</h3>
                     <div class="score-value" id="scoreValue">0</div>
+                    <div style="color: #b0b0b0; font-size: 0.9rem; margin-top: 6px;">Best: <span id="highScoreValue">0</span></div>
                 </div>
                 
                 <div class="next-piece-panel">
@@ -533,10 +578,31 @@
             draw();
         }
 
+        let highScore = parseInt(localStorage.getItem('tetrisHighScore'), 10) || 0;
+        document.getElementById('highScoreValue').textContent = highScore;
+
+        // Works when the page was opened directly, not just from SimpleOS
+        function goBack() {
+            if (history.length > 1) {
+                history.back();
+            } else if (window.opener) {
+                window.close();
+            } else {
+                location.href = '/';
+            }
+        }
+
         function gameOver() {
             isGameRunning = false;
             clearInterval(gameInterval);
             finalScoreEl.textContent = score;
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('tetrisHighScore', highScore);
+                document.getElementById('highScoreValue').textContent = highScore;
+            }
+
             gameOverEl.style.display = 'block';
             startButton.textContent = '🚀 Start Game';
         }
@@ -610,55 +676,105 @@
             }
         });
 
-        canvas.addEventListener('keydown', event => {
+        function moveLeft() {
+            piece.position.x--;
+            if (collision()) piece.position.x++;
+        }
+
+        function moveRight() {
+            piece.position.x++;
+            if (collision()) piece.position.x--;
+        }
+
+        // Returns false when the drop ended the game
+        function softDrop() {
+            piece.position.y++;
+            if (collision()) {
+                piece.position.y--;
+                merge();
+                clearLines();
+
+                // Create new piece
+                piece = nextPiece;
+                piece.position = {x: 5, y: 0};
+
+                if (collision()) {
+                    gameOver();
+                    return false;
+                }
+
+                const randomIndex = Math.floor(Math.random() * tetrominoes.length);
+                nextPiece = {
+                    shape: tetrominoes[randomIndex],
+                    colorIndex: randomIndex + 1,
+                    position: {x: 0, y: 0}
+                };
+                drawNextPiece();
+            }
+            return true;
+        }
+
+        function handleAction(action) {
             if (!isGameRunning) return;
 
-            event.preventDefault();
-            
-            if (event.key === 'ArrowLeft') {
-                piece.position.x--;
-                if (collision()) {
-                    piece.position.x++;
-                }
-            } else if (event.key === 'ArrowRight') {
-                piece.position.x++;
-                if (collision()) {
-                    piece.position.x--;
-                }
-            } else if (event.key === 'ArrowDown') {
-                piece.position.y++;
-                if (collision()) {
-                    piece.position.y--;
-                    merge();
-                    clearLines();
-                    
-                    // Create new piece
-                    piece = nextPiece;
-                    piece.position = {x: 5, y: 0};
-                    
-                    if (collision()) {
-                        gameOver();
-                        return;
-                    }
-                    
-                    const randomIndex = Math.floor(Math.random() * tetrominoes.length);
-                    nextPiece = {
-                        shape: tetrominoes[randomIndex],
-                        colorIndex: randomIndex + 1,
-                        position: {x: 0, y: 0}
-                    };
-                    drawNextPiece();
-                }
-            } else if (event.key === 'ArrowUp') {
-                rotate();
-            }
-            
+            if (action === 'left') moveLeft();
+            else if (action === 'right') moveRight();
+            else if (action === 'down') { if (!softDrop()) return; }
+            else if (action === 'rotate') rotate();
+
             draw();
+        }
+
+        // Keyboard controls — on document, no canvas-focus hack needed
+        document.addEventListener('keydown', event => {
+            const actions = { ArrowLeft: 'left', ArrowRight: 'right', ArrowDown: 'down', ArrowUp: 'rotate' };
+            if (actions[event.key]) {
+                event.preventDefault();
+                handleAction(actions[event.key]);
+            }
         });
 
-        // Make canvas focusable and focus it
-        canvas.focus();
-        
+        // Touch buttons (shown on coarse pointers)
+        [['touchLeft', 'left'], ['touchRight', 'right'], ['touchDown', 'down'], ['touchRotate', 'rotate']].forEach(([id, action]) => {
+            const btn = document.getElementById(id);
+            const press = (e) => {
+                e.preventDefault();
+                handleAction(action);
+            };
+            btn.addEventListener('touchstart', press, { passive: false });
+            btn.addEventListener('mousedown', press);
+        });
+
+        // Gestures on the board: swipe to move/drop, tap to rotate
+        let touchStartX = 0, touchStartY = 0;
+        canvas.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', e => {
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+
+            if (Math.abs(dx) < 24 && Math.abs(dy) < 24) {
+                handleAction('rotate'); // tap
+            } else if (Math.abs(dx) > Math.abs(dy)) {
+                handleAction(dx > 0 ? 'right' : 'left');
+            } else if (dy > 0) {
+                // Swipe down: drop the piece to the bottom
+                if (!isGameRunning) return;
+                let dropping = true;
+                while (dropping) {
+                    piece.position.y++;
+                    if (collision()) {
+                        piece.position.y--;
+                        dropping = false;
+                    }
+                }
+                handleAction('down'); // lock the piece via the normal path
+            }
+        });
+
         // Initial draw
         context.clearRect(0, 0, canvas.width, canvas.height);
     </script>

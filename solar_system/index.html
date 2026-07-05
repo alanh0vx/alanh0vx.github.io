@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Solar System - Three.js</title>
 
     <!-- Open Graph / Social Media Meta Tags -->
@@ -22,6 +25,10 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        canvas {
+            touch-action: none;
         }
 
         body {
@@ -229,7 +236,7 @@
         <p>📱 Touch: 1 finger to rotate</p>
         <p>📱 Touch: 2 fingers to pan</p>
         <p>📱 Pinch: Zoom in/out</p>
-        <p><button onclick="window.close()" style="color: #4CAF50; background: transparent; border: 1px solid #4CAF50; padding: 8px 16px; border-radius: 4px; cursor: pointer; text-decoration: none;">✕ Close App</button></p>
+        <p><button onclick="if (history.length > 1) { history.back(); } else if (window.opener) { window.close(); } else { location.href = '/'; }" style="color: #4CAF50; background: transparent; border: 1px solid #4CAF50; padding: 8px 16px; border-radius: 4px; cursor: pointer; text-decoration: none;">✕ Close App</button></p>
     </div>
 
     <div id="focused-planet">
