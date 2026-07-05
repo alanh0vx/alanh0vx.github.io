@@ -96,25 +96,26 @@ os.registerApp({
         `).join('');
     },
 
-    addSongUrl() {
-        const url = prompt('Enter audio URL (mp3, wav, ogg):');
-        if (!url) return;
-
-        const name = prompt('Song name:', 'Untitled');
-        const artist = prompt('Artist name:', 'Unknown Artist');
+    async addSongUrl() {
+        const song = await os.ui.form([
+            { name: 'url', label: 'Audio URL (mp3, wav, ogg)', type: 'url', placeholder: 'https://…', required: true },
+            { name: 'name', label: 'Song name', value: '', placeholder: 'Untitled' },
+            { name: 'artist', label: 'Artist', value: '', placeholder: 'Unknown Artist' }
+        ], { title: 'Add Song', submitLabel: 'Add' });
+        if (!song) return;
 
         this.playlist.push({
-            url: url,
-            name: name || 'Untitled',
-            artist: artist || 'Unknown Artist'
+            url: song.url,
+            name: song.name || 'Untitled',
+            artist: song.artist || 'Unknown Artist'
         });
 
         this.savePlaylist();
         this.updatePlaylistUI();
     },
 
-    removeSong(index) {
-        if (!confirm('Remove this song from playlist?')) return;
+    async removeSong(index) {
+        if (!await os.ui.confirm('Remove this song from the playlist?', { title: 'Remove Song', danger: true, confirmLabel: 'Remove' })) return;
 
         this.playlist.splice(index, 1);
 
@@ -137,13 +138,13 @@ os.registerApp({
             this.isPlaying = true;
             this.updateUI();
         }).catch(err => {
-            alert('Error playing song: ' + err.message);
+            os.ui.toast('Error playing song: ' + err.message, { type: 'error', duration: 4000 });
         });
     },
 
     togglePlay() {
         if (this.playlist.length === 0) {
-            alert('Please add songs to the playlist first');
+            os.ui.toast('Add songs to the playlist first');
             return;
         }
 

@@ -126,22 +126,22 @@ os.registerApp({
         const description = document.getElementById('ext-app-desc').value.trim();
 
         if (!name) {
-            alert('Please enter an app name');
+            os.ui.toast('Enter an app name', { type: 'error' });
             return;
         }
 
         if (!icon) {
-            alert('Please enter an app icon (emoji)');
+            os.ui.toast('Enter an app icon (emoji)', { type: 'error' });
             return;
         }
 
         if (!url) {
-            alert('Please enter an app URL');
+            os.ui.toast('Enter an app URL', { type: 'error' });
             return;
         }
 
         if (!this.validateUrl(url)) {
-            alert('Please enter a valid HTTP or HTTPS URL');
+            os.ui.toast('Enter a valid HTTP or HTTPS URL', { type: 'error' });
             return;
         }
 
@@ -165,7 +165,7 @@ os.registerApp({
         // Refresh list
         document.getElementById('custom-ext-apps-list').innerHTML = this.renderAppsList();
 
-        alert(`✨ App "${name}" added successfully!`);
+        os.ui.toast(`App "${name}" added`, { type: 'success' });
     },
 
     launchCustomApp(index) {
@@ -176,9 +176,9 @@ os.registerApp({
         window.open(app.url, '_blank');
     },
 
-    deleteApp(index) {
+    async deleteApp(index) {
         const app = this.customApps[index];
-        if (!confirm(`Are you sure you want to delete "${app.name}"?`)) {
+        if (!await os.ui.confirm(`Delete "${app.name}"?`, { title: 'Delete App', danger: true })) {
             return;
         }
 

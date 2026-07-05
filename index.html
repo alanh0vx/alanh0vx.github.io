@@ -148,6 +148,7 @@
     </div>
 
     <script src="simple-os/os-core.js"></script>
+    <script src="simple-os/ui-kit.js"></script>
     <script src="simple-os/apps/file-manager.js"></script>
     <script src="simple-os/apps/notepad.js"></script>
     <script src="simple-os/apps/calculator.js"></script>
@@ -196,20 +197,23 @@
         }
 
         // Clear all data function
-        function clearAllData() {
-            if (confirm('⚠️ WARNING: This will clear ALL cookies and localStorage data, including:\n\n• Custom apps\n• AI chat settings\n• File system data\n• Settings and preferences\n\nThis action cannot be undone. Continue?')) {
-                // Clear localStorage
-                localStorage.clear();
+        async function clearAllData() {
+            const confirmed = await os.ui.confirm(
+                'This will clear ALL cookies and localStorage data, including:\n\n• Custom apps\n• AI chat settings\n• File system data\n• Settings and preferences\n\nThis action cannot be undone. Continue?',
+                { title: '⚠️ Clear All Data', danger: true, confirmLabel: 'Clear Everything' }
+            );
+            if (!confirmed) return;
 
-                // Clear cookies
-                document.cookie.split(";").forEach(cookie => {
-                    const name = cookie.split("=")[0].trim();
-                    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-                });
+            // Clear localStorage
+            localStorage.clear();
 
-                alert('✅ All data cleared successfully! The page will now reload.');
-                location.reload();
-            }
+            // Clear cookies
+            document.cookie.split(";").forEach(cookie => {
+                const name = cookie.split("=")[0].trim();
+                document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+            });
+
+            location.reload();
         }
     </script>
 

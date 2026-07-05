@@ -3069,3 +3069,212 @@ code {
         grid-template-columns: 1fr;
     }
 }
+
+/* ===== UI Kit: dialogs, toasts, menus ===== */
+.os-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    animation: os-fade-in 0.15s ease-out;
+}
+
+@keyframes os-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.os-dialog {
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 10px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 420px;
+    max-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: os-dialog-in 0.18s ease-out;
+}
+
+@keyframes os-dialog-in {
+    from { transform: translateY(12px) scale(0.97); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+
+.os-dialog-title {
+    background: var(--gradient-accent);
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 12px 16px;
+}
+
+.os-dialog-body {
+    padding: 18px 16px;
+    overflow-y: auto;
+    white-space: pre-line;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.os-dialog-label {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    margin: 10px 0 6px;
+    color: var(--text);
+}
+
+.os-dialog-label:first-child {
+    margin-top: 0;
+}
+
+.os-dialog-note {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.os-dialog-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text);
+}
+
+.os-dialog-input:focus {
+    outline: none;
+    border-color: var(--accent-1);
+}
+
+.os-dialog-input.invalid {
+    border-color: var(--danger);
+}
+
+.os-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+}
+
+.os-dialog-btn {
+    min-height: var(--tap-min);
+    min-width: 80px;
+    padding: 8px 18px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.os-dialog-btn:hover {
+    background: var(--surface-3);
+}
+
+.os-dialog-btn.primary {
+    background: var(--gradient-accent);
+    color: white;
+    border: none;
+}
+
+.os-dialog-btn.primary:hover {
+    filter: brightness(1.08);
+}
+
+.os-dialog-btn.danger {
+    background: var(--danger);
+    color: white;
+    border: none;
+}
+
+.os-dialog-btn.danger:hover {
+    filter: brightness(1.08);
+}
+
+#os-toast-container {
+    position: fixed;
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    max-width: min(90vw, 420px);
+}
+
+.os-toast {
+    background: var(--menu-bg);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    animation: os-toast-in 0.25s ease-out;
+    text-align: center;
+}
+
+.os-toast-success {
+    background: #1e8e5a;
+}
+
+.os-toast-error {
+    background: var(--danger);
+}
+
+.os-toast-out {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+@keyframes os-toast-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+}
+
+.os-ui-menu {
+    position: fixed;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    min-width: 160px;
+    padding: 4px;
+    overflow: hidden;
+}
+
+.os-ui-menu-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+    color: var(--text);
+    transition: background 0.15s;
+    user-select: none;
+}
+
+.os-ui-menu-item:hover,
+.os-ui-menu-item:focus-visible {
+    background: var(--surface-3);
+}
+
+.os-ui-menu-item.danger {
+    color: var(--danger);
+}

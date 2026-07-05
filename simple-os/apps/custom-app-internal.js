@@ -134,17 +134,17 @@ os.registerApp({
         const css = document.getElementById('app-css').value.trim();
 
         if (!name) {
-            alert('Please enter an app name');
+            os.ui.toast('Enter an app name', { type: 'error' });
             return;
         }
 
         if (!icon) {
-            alert('Please enter an app icon (emoji)');
+            os.ui.toast('Enter an app icon (emoji)', { type: 'error' });
             return;
         }
 
         if (!html) {
-            alert('Please enter HTML content');
+            os.ui.toast('Enter HTML content', { type: 'error' });
             return;
         }
 
@@ -172,7 +172,7 @@ os.registerApp({
         // Refresh list
         document.getElementById('custom-apps-list').innerHTML = this.renderAppsList();
 
-        alert(`✨ App "${name}" created successfully!`);
+        os.ui.toast(`App "${name}" created`, { type: 'success' });
     },
 
     launchCustomApp(index) {
@@ -203,9 +203,9 @@ os.registerApp({
         `;
     },
 
-    deleteApp(index) {
+    async deleteApp(index) {
         const app = this.customApps[index];
-        if (!confirm(`Are you sure you want to delete "${app.name}"?`)) {
+        if (!await os.ui.confirm(`Delete "${app.name}"?`, { title: 'Delete App', danger: true })) {
             return;
         }
 

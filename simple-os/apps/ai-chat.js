@@ -62,8 +62,8 @@ os.registerApp({
         localStorage.setItem('ai_chat_history', JSON.stringify(this.messages));
     },
 
-    clearChatHistory() {
-        if (this.messages.length > 0 && confirm('Are you sure you want to clear all chat history? This cannot be undone.')) {
+    async clearChatHistory() {
+        if (this.messages.length > 0 && await os.ui.confirm('Clear all chat history? This cannot be undone.', { title: 'Clear History', danger: true, confirmLabel: 'Clear' })) {
             localStorage.removeItem('ai_chat_history');
             this.messages = [];
             this.updateMessages();
@@ -274,7 +274,7 @@ os.registerApp({
         const customModel = document.getElementById('ai-custom-model')?.value.trim();
 
         if (!apiKey) {
-            alert('Please enter an API key');
+            os.ui.toast('Enter an API key first', { type: 'error' });
             return;
         }
 
@@ -390,9 +390,10 @@ os.registerApp({
             const tokenLimit = this.getModelTokenLimit();
             
             if (currentTokens + newMessageTokens > tokenLimit * 0.8) {
-                const shouldContinue = confirm(
-                    `Warning: You're approaching the token limit (${currentTokens + newMessageTokens}/${tokenLimit}). ` +
-                    'Older messages will be automatically removed to fit. Continue?'
+                const shouldContinue = await os.ui.confirm(
+                    `You're approaching the token limit (${currentTokens + newMessageTokens}/${tokenLimit}). ` +
+                    'Older messages will be automatically removed to fit. Continue?',
+                    { title: 'Token Limit', confirmLabel: 'Continue' }
                 );
                 if (!shouldContinue) {
                     // Re-enable send button and return

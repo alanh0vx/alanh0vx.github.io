@@ -89,13 +89,13 @@ os.registerApp({
         this.render(content);
     },
 
-    newFolder() {
-        const name = prompt('Folder name:');
+    async newFolder() {
+        const name = await os.ui.prompt('Folder name:', { title: 'New Folder' });
         if (!name) return;
 
         const folder = this.getFolder(this.currentPath);
         if (folder.children[name]) {
-            alert('Item already exists!');
+            os.ui.toast('Item already exists', { type: 'error' });
             return;
         }
 
@@ -105,13 +105,13 @@ os.registerApp({
         this.render(content);
     },
 
-    newFile() {
-        const name = prompt('File name:');
+    async newFile() {
+        const name = await os.ui.prompt('File name:', { title: 'New File' });
         if (!name) return;
 
         const folder = this.getFolder(this.currentPath);
         if (folder.children[name]) {
-            alert('Item already exists!');
+            os.ui.toast('Item already exists', { type: 'error' });
             return;
         }
 
@@ -158,8 +158,8 @@ os.registerApp({
         }, 10);
     },
 
-    deleteItem(name) {
-        if (!confirm(`Delete ${name}?`)) return;
+    async deleteItem(name) {
+        if (!await os.ui.confirm(`Delete "${name}"?`, { title: 'Delete', danger: true })) return;
 
         const folder = this.getFolder(this.currentPath);
         delete folder.children[name];

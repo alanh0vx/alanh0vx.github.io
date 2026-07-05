@@ -208,7 +208,7 @@ os.registerApp({
         const startBtn = document.getElementById('snake-start-btn');
         if (startBtn) startBtn.disabled = false;
 
-        alert(`Game Over! Your score: ${this.score}`);
+        os.ui.alert(`Your score: ${this.score}`, { title: '🐍 Game Over' });
     },
 
     resetGame() {

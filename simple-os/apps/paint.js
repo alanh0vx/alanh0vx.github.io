@@ -178,16 +178,16 @@ os.registerApp({
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     },
 
-    clearCanvas() {
-        if (!confirm('Clear the entire canvas?')) return;
+    async clearCanvas() {
+        if (!await os.ui.confirm('Clear the entire canvas?', { title: 'Paint', danger: true, confirmLabel: 'Clear' })) return;
 
         this.ctx.fillStyle = 'white';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     },
 
-    saveDrawing() {
+    async saveDrawing() {
         const dataURL = this.canvas.toDataURL();
-        const filename = prompt('Save as:', 'drawing.png');
+        const filename = await os.ui.prompt('Save as:', { title: 'Save Drawing', value: 'drawing.png' });
 
         if (!filename) return;
 
@@ -198,7 +198,7 @@ os.registerApp({
         };
 
         os.saveFileSystem();
-        alert('Drawing saved to file system!');
+        os.ui.toast('Drawing saved to file system', { type: 'success' });
     },
 
     downloadImage() {

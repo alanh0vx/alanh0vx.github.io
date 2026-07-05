@@ -112,7 +112,7 @@ os.registerApp({
             this.gameOver = true;
             this.revealAll();
             this.renderBoard();
-            setTimeout(() => alert('Game Over! You hit a mine!'), 100);
+            setTimeout(() => os.ui.alert('You hit a mine! Better luck next time.', { title: '💥 Game Over' }), 100);
             return;
         }
 
@@ -167,7 +167,7 @@ os.registerApp({
 
         if (revealedCount === this.rows * this.cols - this.mines) {
             this.gameOver = true;
-            setTimeout(() => alert('Congratulations! You won!'), 100);
+            setTimeout(() => os.ui.alert('You cleared the minefield!', { title: '🎉 You Won' }), 100);
         }
     },
 

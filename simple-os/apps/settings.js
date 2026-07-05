@@ -241,12 +241,11 @@ os.registerApp({
         body.style.fontSize = fontSizes[this.settings.fontSize];
     },
 
-    clearStorage() {
-        if (!confirm('Are you sure you want to clear all data? This cannot be undone.')) return;
+    async clearStorage() {
+        if (!await os.ui.confirm('Clear all data? This cannot be undone.', { title: 'Clear All Data', danger: true, confirmLabel: 'Clear Data' })) return;
 
         localStorage.removeItem('simpleOS_fileSystem');
         localStorage.removeItem('simpleOS_settings');
-        alert('All data cleared. Please reload the page.');
         location.reload();
     },
 
@@ -289,10 +288,10 @@ os.registerApp({
                         this.saveSettings();
                     }
 
-                    alert('Data imported successfully! Please reload the page.');
-                    location.reload();
+                    os.ui.toast('Data imported — reloading…', { type: 'success' });
+                    setTimeout(() => location.reload(), 800);
                 } catch (error) {
-                    alert('Error importing data: ' + error.message);
+                    os.ui.alert('Error importing data: ' + error.message, { title: 'Import Failed' });
                 }
             };
 

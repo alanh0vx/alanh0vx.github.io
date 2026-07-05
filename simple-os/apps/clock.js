@@ -167,7 +167,7 @@ os.registerApp({
         this.timerSeconds = minutes * 60 + seconds;
 
         if (this.timerSeconds === 0) {
-            alert('Please set a timer duration');
+            os.ui.toast('Set a timer duration first', { type: 'error' });
             return;
         }
 
@@ -182,7 +182,7 @@ os.registerApp({
             if (this.timerSeconds <= 0) {
                 clearInterval(this.timerInterval);
                 this.timerInterval = null;
-                alert('⏰ Timer finished!');
+                os.ui.alert('Time is up!', { title: '⏰ Timer' });
                 this.switchMode('timer');
             }
         }, 1000);
@@ -243,7 +243,7 @@ os.registerApp({
         const alarmTime = timeInput.value;
 
         if (!alarmTime) {
-            alert('Please select a time');
+            os.ui.toast('Select a time first', { type: 'error' });
             return;
         }
 
@@ -259,7 +259,7 @@ os.registerApp({
         const timeUntilAlarm = alarm - now;
 
         setTimeout(() => {
-            alert(`⏰ Alarm! It's ${alarmTime}`);
+            os.ui.alert(`It's ${alarmTime}`, { title: '⏰ Alarm' });
         }, timeUntilAlarm);
 
         const statusEl = document.getElementById('alarm-status');

@@ -83,7 +83,7 @@ os.registerApp({
 
                 if (this.matched.length === this.cards.length) {
                     setTimeout(() => {
-                        alert(`🎉 Congratulations! You won in ${this.moves} moves!`);
+                        os.ui.alert(`You won in ${this.moves} moves!`, { title: '🎉 Congratulations' });
                     }, 300);
                 }
             } else {

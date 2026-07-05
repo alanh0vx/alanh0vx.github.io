@@ -115,13 +115,13 @@ os.registerApp({
         const selectedZone = select.value;
         
         if (!selectedZone) {
-            alert('Please select a timezone to add');
+            os.ui.toast('Select a timezone to add', { type: 'error' });
             return;
         }
 
         // Check if already added
         if (this.selectedTimezones.some(tz => tz.timezone === selectedZone)) {
-            alert('This timezone is already added');
+            os.ui.toast('This timezone is already added');
             return;
         }
 
@@ -142,7 +142,7 @@ os.registerApp({
 
     removeTimezone(index) {
         if (this.selectedTimezones.length <= 1) {
-            alert('You must keep at least one timezone');
+            os.ui.toast('Keep at least one timezone', { type: 'error' });
             return;
         }
 

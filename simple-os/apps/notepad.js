@@ -61,13 +61,13 @@ os.registerApp({
 
         current.children[filename] = { type: 'file', content };
         os.saveFileSystem();
-        alert('File saved!');
+        os.ui.toast('File saved', { type: 'success' });
     },
 
-    saveAs() {
+    async saveAs() {
         const textarea = document.getElementById('notepad-content');
         const content = textarea.value;
-        const filename = prompt('Enter filename:');
+        const filename = await os.ui.prompt('Enter filename:', { title: 'Save As', placeholder: 'notes.txt' });
 
         if (!filename) return;
 
@@ -81,11 +81,11 @@ os.registerApp({
             filenameEl.textContent = `File: ${this.currentPath}`;
         }
 
-        alert('File saved!');
+        os.ui.toast('File saved', { type: 'success' });
     },
 
-    clear() {
-        if (!confirm('Clear all text?')) return;
+    async clear() {
+        if (!await os.ui.confirm('Clear all text?', { title: 'Notepad', danger: true, confirmLabel: 'Clear' })) return;
         const textarea = document.getElementById('notepad-content');
         textarea.value = '';
         this.currentFile = null;
