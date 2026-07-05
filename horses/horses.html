@@ -19,19 +19,20 @@
 <body data-mode="lobby">
 
   <header class="topbar">
-    <div class="brand">🏇 <b>THUNDER</b> DOWNS</div>
-    <nav class="tier-tabs" id="tierTabs" aria-label="Race class"></nav>
+    <div class="brand" data-i18n-html="brand.html">🏇 <b>THUNDER</b> DOWNS</div>
+    <nav class="tier-tabs" id="tierTabs" data-i18n-label="aria.raceClass" aria-label="Race class"></nav>
     <div class="wallet">
-      <div class="wallet-item"><span>Balance</span><b>$<span id="balanceVal">1,000</span></b></div>
-      <div class="wallet-item"><span>Career P/L</span><b id="winningsVal">+0</b></div>
-      <button class="icon-btn" id="soundBtn" title="Toggle sound">🔊</button>
-      <button class="icon-btn" id="closeBtn" title="Leave the track">✕</button>
+      <div class="wallet-item"><span data-i18n="wallet.balance">Balance</span><b>$<span id="balanceVal">1,000</span></b></div>
+      <div class="wallet-item"><span data-i18n="wallet.pl">Career P/L</span><b id="winningsVal">+0</b></div>
+      <button class="icon-btn" id="langBtn" title="中文 / English">中</button>
+      <button class="icon-btn" id="soundBtn" data-i18n-title="title.sound" title="Toggle sound">🔊</button>
+      <button class="icon-btn" id="closeBtn" data-i18n-title="title.close" title="Leave the track">✕</button>
     </div>
   </header>
 
   <div class="bailout hidden" id="bailout">
-    You're down to your last few dollars… a track sponsor offers a helping hand.
-    <button class="btn btn-primary" id="bailoutBtn">Accept $500 sponsorship</button>
+    <span data-i18n="bailout.text">You're down to your last few dollars… a track sponsor offers a helping hand.</span>
+    <button class="btn btn-primary" id="bailoutBtn" data-i18n="bailout.btn">Accept $500 sponsorship</button>
   </div>
 
   <main class="wrap">
@@ -42,7 +43,7 @@
         <div class="race-meta" id="raceMeta"></div>
       </div>
       <div class="rs-right">
-        <button class="btn btn-ghost" id="newRaceBtn" title="Draw a fresh field">↻ New Race</button>
+        <button class="btn btn-ghost" id="newRaceBtn" data-i18n="btn.newRace" data-i18n-title="title.newRace" title="Draw a fresh field">↻ New Race</button>
       </div>
     </section>
 
@@ -50,58 +51,58 @@
       <canvas id="trackCanvas"></canvas>
       <div class="pos-tower hidden" id="posTower" aria-live="off"></div>
       <div class="race-clock hidden" id="raceClock"></div>
-      <div class="commentary" id="commentary">Welcome to Thunder Downs.</div>
-      <div class="photo-finish hidden" id="photoFinish"><span>📸 PHOTO FINISH</span></div>
+      <div class="commentary" id="commentary" data-i18n="commentary.welcome">Welcome to Thunder Downs.</div>
+      <div class="photo-finish hidden" id="photoFinish"><span data-i18n="pf.label">📸 PHOTO FINISH</span></div>
     </section>
 
     <section class="panels">
       <div class="card race-card-wrap">
-        <h2>📋 Race Card <small>tap a runner for form &amp; betting</small></h2>
+        <h2><span data-i18n="card.title">📋 Race Card</span> <small data-i18n="card.hint">tap a runner for form &amp; betting</small></h2>
         <div id="raceCard"></div>
       </div>
 
       <aside class="card bet-slip">
-        <h2>🎫 Bet Slip</h2>
+        <h2 data-i18n="slip.title">🎫 Bet Slip</h2>
         <div id="slipEntries"></div>
 
         <div class="exotic-box hidden" id="exoticBox">
-          <h3>Exotics</h3>
+          <h3 data-i18n="exotic.title">Exotics</h3>
           <div class="exotic-row">
-            <select id="exoticType" aria-label="Exotic bet type">
-              <option value="exacta">Exacta (1st → 2nd exact)</option>
-              <option value="quinella">Quinella (top 2, any order)</option>
+            <select id="exoticType" data-i18n-label="aria.exoticType" aria-label="Exotic bet type">
+              <option value="exacta" data-i18n="exotic.exacta">Exacta (1st → 2nd exact)</option>
+              <option value="quinella" data-i18n="exotic.quinella">Quinella (top 2, any order)</option>
             </select>
           </div>
           <div class="exotic-row">
-            <select id="exoticA" aria-label="First horse"></select>
-            <select id="exoticB" aria-label="Second horse"></select>
+            <select id="exoticA" data-i18n-label="aria.firstHorse" aria-label="First horse"></select>
+            <select id="exoticB" data-i18n-label="aria.secondHorse" aria-label="Second horse"></select>
           </div>
           <div class="exotic-row">
-            <input type="number" inputmode="numeric" id="exoticStake" value="20" min="10" step="5" aria-label="Exotic stake">
+            <input type="number" inputmode="numeric" id="exoticStake" value="20" min="10" step="5" data-i18n-label="aria.exoticStake" aria-label="Exotic stake">
             <span class="exotic-odds" id="exoticOdds">—</span>
-            <button class="btn btn-add" id="exoticAdd">Add</button>
+            <button class="btn btn-add" id="exoticAdd" data-i18n="exotic.add">Add</button>
           </div>
         </div>
 
         <div class="slip-totals" id="slipTotals"></div>
-        <button class="btn btn-primary btn-start" id="startRaceBtn">Start Race</button>
-        <button class="btn btn-danger btn-reset" id="resetBtn">Reset progress</button>
+        <button class="btn btn-primary btn-start" id="startRaceBtn" data-i18n="btn.start">Start Race</button>
+        <button class="btn btn-danger btn-reset" id="resetBtn" data-i18n="btn.reset">Reset progress</button>
       </aside>
     </section>
 
     <details class="card howto">
-      <summary>❓ How to play</summary>
+      <summary data-i18n="howto.title">❓ How to play</summary>
       <ol>
-        <li><b>Read the card.</b> Tap a runner to see speed, stamina, acceleration and consistency, plus its preferred distance, going and weather. Green ✓ badges mean today's conditions suit it.</li>
-        <li><b>Find value.</b> Odds are set by the bookmaker with a margin. A horse whose preferences all line up may be better than its price.</li>
-        <li><b>Bet.</b> Win pays if your horse is 1st; Place covers 1st–2nd; Show covers 1st–3rd. In higher classes, Exacta &amp; Quinella pay big for predicting the top two.</li>
-        <li><b>Watch the race.</b> Front-runners burn early, closers finish fast — stamina decides the home straight. Rain slows the track; wide runs cost ground in the turns.</li>
-        <li><b>Climb the classes.</b> Grow your bank to unlock the Handicap, the Cup and the Championship with bigger fields and bigger limits.</li>
+        <li data-i18n-html="howto.1"><b>Read the card.</b> Tap a runner to see speed, stamina, acceleration and consistency, plus its preferred distance, going and weather. Green ✓ badges mean today's conditions suit it.</li>
+        <li data-i18n-html="howto.2"><b>Find value.</b> Odds are set by the bookmaker with a margin. A horse whose preferences all line up may be better than its price.</li>
+        <li data-i18n-html="howto.3"><b>Bet.</b> Win pays if your horse is 1st; Place covers 1st–2nd; Show covers 1st–3rd. In higher classes, Exacta &amp; Quinella pay big for predicting the top two.</li>
+        <li data-i18n-html="howto.4"><b>Watch the race.</b> Front-runners burn early, closers finish fast — stamina decides the home straight. Rain slows the track; wide runs cost ground in the turns.</li>
+        <li data-i18n-html="howto.5"><b>Climb the classes.</b> Grow your bank to unlock the Handicap, the Cup and the Championship with bigger fields and bigger limits.</li>
       </ol>
     </details>
 
     <section class="card history">
-      <h2>📜 Recent Races <small id="careerStats"></small></h2>
+      <h2><span data-i18n="history.title">📜 Recent Races</span> <small id="careerStats"></small></h2>
       <div id="historyList"></div>
     </section>
 
@@ -117,18 +118,19 @@
         <div class="net-result" id="netResult"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" id="nextRaceBtn">Next Race →</button>
+        <button class="btn btn-primary" id="nextRaceBtn" data-i18n="results.next">Next Race →</button>
       </div>
     </div>
   </div>
 
   <div class="mobile-bar" id="mobileBar">
     <button class="mb-summary" id="mobileSummary">No bets yet</button>
-    <button class="btn btn-primary" id="startRaceBtnM">Start Race</button>
+    <button class="btn btn-primary" id="startRaceBtnM" data-i18n="btn.start">Start Race</button>
   </div>
 
   <div class="toast" id="toast"></div>
 
+  <script src="js/i18n.js"></script>
   <script src="js/engine.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/renderer.js"></script>

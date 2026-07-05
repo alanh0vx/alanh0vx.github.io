@@ -111,9 +111,9 @@
     $('tierTabs').innerHTML = Engine.TIERS.map((t) => {
       const locked = S.maxBalance < t.unlock;
       const cls = ['tier-tab', t.id === S.tierId ? 'active' : '', locked ? 'locked' : ''].join(' ');
-      const sub = locked ? `🔒 $${fmt(t.unlock)}` : `${t.runners} runners`;
-      return `<button class="${cls}" data-tier="${t.id}" ${locked ? 'disabled' : ''} title="${esc(t.name)}">
-        <span class="tt-name">${esc(t.short)}</span><span class="tt-sub">${sub}</span></button>`;
+      const sub = locked ? `🔒 $${fmt(t.unlock)}` : I18N.t('tier.runners', { n: t.runners });
+      return `<button class="${cls}" data-tier="${t.id}" ${locked ? 'disabled' : ''} title="${esc(I18N.d('tierName', t.name))}">
+        <span class="tt-name">${esc(I18N.d('tierShort', t.short))}</span><span class="tt-sub">${sub}</span></button>`;
     }).join('');
     $('tierTabs').querySelectorAll('button[data-tier]').forEach((b) => {
       b.addEventListener('click', () => {
@@ -147,7 +147,9 @@
     updateWallet();
     $('raceClock').classList.add('hidden');
     $('posTower').classList.add('hidden');
-    comment(`${S.race.name} — ${S.race.distance}m, going ${S.race.going.name}. Study the card and place your bets.`);
+    comment(I18N.t('comment.newRace', {
+      name: I18N.race(S.race.name), dist: S.race.distance, going: I18N.d('going', S.race.going.name),
+    }));
 
     clearInterval(S.oddsTimer);
     S.oddsTimer = setInterval(() => {
@@ -167,26 +169,26 @@
 
   function renderRaceStrip() {
     const r = S.race;
-    $('raceName').textContent = `Race ${r.raceNo} — ${r.name}`;
+    $('raceName').textContent = I18N.t('race.title', { no: r.raceNo, name: I18N.race(r.name) });
     $('raceMeta').innerHTML = `
-      <span class="chip">${r.weather.icon} ${esc(r.weather.name)}</span>
+      <span class="chip">${r.weather.icon} ${esc(I18N.d('weather', r.weather.name))}</span>
       <span class="chip">🌡️ ${r.temperature}°C</span>
       <span class="chip">💨 ${r.wind} km/h</span>
-      <span class="chip chip-going">Going: ${esc(r.going.name)}</span>
-      <span class="chip chip-dist">${r.distance}m ${esc(r.distCat === 'sprint' ? 'Sprint' : r.distCat === 'mile' ? 'Mile' : 'Staying')}</span>`;
+      <span class="chip chip-going">${esc(I18N.t('chip.going', { going: I18N.d('going', r.going.name) }))}</span>
+      <span class="chip chip-dist">${esc(I18N.t('chip.dist', { d: r.distance, cat: I18N.d('dist', r.distCat) }))}</span>`;
   }
 
   // ------------------------------------------------------------ race card
   function formDots(form) {
-    return form.map((f) => `<span class="fdot fdot-${f}" title="${{ W: 'Win', P: 'Place', S: 'Show', L: 'Unplaced' }[f]}">${f}</span>`).join('');
+    return form.map((f) => `<span class="fdot fdot-${f}" title="${I18N.t('form.' + f)}">${f}</span>`).join('');
   }
 
   function prefBadges(h) {
     const r = S.race;
     const out = [];
-    if (h.goingPref === r.going.name) out.push('<span class="badge">going ✓</span>');
-    if (h.weatherPref === r.weather.name) out.push('<span class="badge">weather ✓</span>');
-    if (h.distPref === r.distCat) out.push('<span class="badge">distance ✓</span>');
+    if (h.goingPref === r.going.name) out.push(`<span class="badge">${I18N.t('badge.going')}</span>`);
+    if (h.weatherPref === r.weather.name) out.push(`<span class="badge">${I18N.t('badge.weather')}</span>`);
+    if (h.distPref === r.distCat) out.push(`<span class="badge">${I18N.t('badge.dist')}</span>`);
     return out.join('');
   }
 
@@ -206,8 +208,11 @@
         <div class="rc-head" data-toggle="${h.id}">
           <div class="rc-silk" style="${silkStyle(h.silks)}">${h.number}</div>
           <div class="rc-main">
-            <div class="rc-name">${esc(h.name)} ${prefBadges(h)}</div>
-            <div class="rc-sub">${esc(h.jockey.name)} • ${esc(h.style.label)} • ${h.age}yo ${esc(h.breed)} • ${esc(h.coat.name)}</div>
+            <div class="rc-name">${esc(I18N.horse(h.name))} ${prefBadges(h)}</div>
+            <div class="rc-sub">${esc(I18N.t('rc.sub', {
+              jockey: I18N.jockey(h.jockey.name), style: I18N.d('style', h.style.id),
+              age: h.age, breed: I18N.d('breed', h.breed), coat: I18N.d('coat', h.coat.name),
+            }))}</div>
           </div>
           <div class="rc-form">${formDots(h.form)}</div>
           <div class="rc-odds" id="odds-${h.id}">${h.odds.toFixed(1)}</div>
@@ -215,25 +220,27 @@
         </div>
         <div class="rc-expand" ${open ? '' : 'hidden'}>
           <div class="rc-stats">
-            ${statBar('SPD', h.stats.speed)}${statBar('STA', h.stats.stamina)}
-            ${statBar('ACC', h.stats.accel)}${statBar('CON', h.stats.consistency)}
+            ${statBar(I18N.t('stat.spd'), h.stats.speed)}${statBar(I18N.t('stat.sta'), h.stats.stamina)}
+            ${statBar(I18N.t('stat.acc'), h.stats.accel)}${statBar(I18N.t('stat.con'), h.stats.consistency)}
           </div>
           <div class="rc-prefs">
-            Prefers: <b>${esc(h.distPref)}</b> trips • <b>${esc(h.goingPref)}</b> going • <b>${esc(h.weatherPref)}</b> weather
-            • ${h.stats.experience} career starts
+            ${I18N.t('rc.prefs', {
+              dist: esc(I18N.d('dist', h.distPref)), going: esc(I18N.d('going', h.goingPref)),
+              weather: esc(I18N.d('weather', h.weatherPref)), n: h.stats.experience,
+            })}
           </div>
           <div class="rc-bet">
             <div class="bet-types" data-horse="${h.id}">
-              <button class="bt active" data-bt="win">Win <b>${h.odds.toFixed(1)}×</b></button>
-              <button class="bt" data-bt="place">Place <b>${Engine.placeOdds(h.odds).toFixed(1)}×</b></button>
-              <button class="bt" data-bt="show">Show <b>${Engine.showOdds(h.odds).toFixed(1)}×</b></button>
+              <button class="bt active" data-bt="win">${I18N.t('bet.win')} <b>${h.odds.toFixed(1)}×</b></button>
+              <button class="bt" data-bt="place">${I18N.t('bet.place')} <b>${Engine.placeOdds(h.odds).toFixed(1)}×</b></button>
+              <button class="bt" data-bt="show">${I18N.t('bet.show')} <b>${Engine.showOdds(h.odds).toFixed(1)}×</b></button>
             </div>
             <div class="stake-row">
               ${[10, 25, 50, 100].map((v) => `<button class="chip-btn" data-stake="${v}">$${v}</button>`).join('')}
-              <input type="number" inputmode="numeric" class="stake-input" value="50" min="10" step="5" aria-label="Stake">
+              <input type="number" inputmode="numeric" class="stake-input" value="50" min="10" step="5" aria-label="${I18N.t('aria.stake')}">
               <button class="chip-btn" data-stake="max">MAX</button>
             </div>
-            <button class="btn btn-add" data-add="${h.id}">Add bet</button>
+            <button class="btn btn-add" data-add="${h.id}">${I18N.t('btn.addBet')}</button>
           </div>
         </div>
       </div>`;
@@ -278,6 +285,14 @@
   }
 
   // ------------------------------------------------------------ betting
+  function betLabel(b) {
+    if (b.horses.length === 1) {
+      const h = horseById(b.horses[0]);
+      if (h) return `#${h.number} ${I18N.horse(h.name)}`;
+    }
+    return b.label;
+  }
+
   function addBet(horseId, type, stake) {
     const h = horseById(horseId);
     if (!h) return;
@@ -299,7 +314,7 @@
     const type = $('exoticType').value;
     const a = parseInt($('exoticA').value, 10);
     const b = parseInt($('exoticB').value, 10);
-    if (a === b) return showToast('Pick two different horses.');
+    if (a === b) return showToast(I18N.t('toast.twoHorses'));
     const stake = parseInt($('exoticStake').value, 10) || 0;
     const err = validateStake(stake, S.bets);
     if (err) return showToast(err);
@@ -316,9 +331,9 @@
 
   function validateStake(stake, existing) {
     const staked = existing.reduce((s, b) => s + b.stake, 0);
-    if (!stake || stake < 10) return 'Minimum bet is $10.';
-    if (stake > tier().maxBet) return `Max bet in this race class is $${fmt(tier().maxBet)}.`;
-    if (staked + stake > S.balance) return 'Not enough balance for that stake.';
+    if (!stake || stake < 10) return I18N.t('toast.min');
+    if (stake > tier().maxBet) return I18N.t('toast.maxBet', { x: fmt(tier().maxBet) });
+    if (staked + stake > S.balance) return I18N.t('toast.balance');
     return null;
   }
 
@@ -331,17 +346,17 @@
   function renderSlip() {
     const box = $('slipEntries');
     if (!S.bets.length) {
-      box.innerHTML = '<div class="slip-empty">No bets yet.<br>Tap a horse on the race card to bet — or start the race to just watch.</div>';
+      box.innerHTML = `<div class="slip-empty">${I18N.t('slip.empty')}</div>`;
     } else {
       box.innerHTML = S.bets.map((b, i) => `
         <div class="slip-item">
           <div class="slip-info">
-            <b>${esc(b.label)}</b>
-            <span>${b.type.toUpperCase()} • $${fmt(b.stake)} @ ${b.odds.toFixed(1)}×</span>
+            <b>${esc(betLabel(b))}</b>
+            <span>${I18N.t('bet.' + b.type)} • $${fmt(b.stake)} @ ${b.odds.toFixed(1)}×</span>
           </div>
           <div class="slip-right">
             <span class="slip-pay">$${fmt(Math.round(b.stake * b.odds))}</span>
-            <button class="slip-x" data-rm="${i}" aria-label="Remove bet">×</button>
+            <button class="slip-x" data-rm="${i}" aria-label="${I18N.t('aria.removeBet')}">×</button>
           </div>
         </div>`).join('');
       box.querySelectorAll('[data-rm]').forEach((b) =>
@@ -350,15 +365,15 @@
     const staked = totalStaked();
     const maxRet = S.bets.reduce((s, b) => s + Math.round(b.stake * b.odds), 0);
     $('slipTotals').innerHTML = staked
-      ? `<div><span>Total stake</span><b>$${fmt(staked)}</b></div>
-         <div><span>Max return</span><b class="good">$${fmt(maxRet)}</b></div>`
+      ? `<div><span>${I18N.t('slip.totalStake')}</span><b>$${fmt(staked)}</b></div>
+         <div><span>${I18N.t('slip.maxReturn')}</span><b class="good">$${fmt(maxRet)}</b></div>`
       : '';
-    $('startRaceBtn').textContent = staked ? `Start Race — $${fmt(staked)} staked` : 'Start Race (spectate)';
+    $('startRaceBtn').textContent = staked ? I18N.t('btn.start.staked', { x: fmt(staked) }) : I18N.t('btn.start.spectate');
     // mobile action bar mirror
     $('mobileSummary').innerHTML = staked
-      ? `<b>${S.bets.length} bet${S.bets.length > 1 ? 's' : ''} • $${fmt(staked)}</b><span>max return $${fmt(maxRet)}</span>`
-      : '<b>No bets yet</b><span>tap a runner to bet</span>';
-    $('startRaceBtnM').textContent = staked ? `Start • $${fmt(staked)}` : 'Spectate';
+      ? `<b>${I18N.t(S.bets.length > 1 ? 'mobile.betsN' : 'mobile.bet1', { n: S.bets.length, s: fmt(staked) })}</b><span>${I18N.t('mobile.maxReturn', { x: fmt(maxRet) })}</span>`
+      : `<b>${I18N.t('mobile.none')}</b><span>${I18N.t('mobile.tap')}</span>`;
+    $('startRaceBtnM').textContent = staked ? I18N.t('mobile.start', { x: fmt(staked) }) : I18N.t('mobile.spectate');
     updateWallet();
   }
 
@@ -366,7 +381,7 @@
     const boxWrap = $('exoticBox');
     if (!tier().exotics) { boxWrap.classList.add('hidden'); return; }
     boxWrap.classList.remove('hidden');
-    const opts = S.race.horses.map((h) => `<option value="${h.id}">#${h.number} ${esc(h.name)}</option>`).join('');
+    const opts = S.race.horses.map((h) => `<option value="${h.id}">#${h.number} ${esc(I18N.horse(h.name))}</option>`).join('');
     $('exoticA').innerHTML = opts;
     $('exoticB').innerHTML = opts;
     $('exoticB').selectedIndex = 1;
@@ -411,7 +426,7 @@
     $('raceClock').classList.remove('hidden');
     document.querySelector('.stage').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-    comment('🎺 The horses are at the gate…');
+    comment(I18N.t('comment.gate'));
     GameAudio.bugle();
 
     setTimeout(() => {
@@ -429,31 +444,35 @@
         case 'off': {
           const slow = events.filter((x) => x.type === 'slowBreak');
           comment(slow.length
-            ? `And they're off! But ${slow.map((x) => `#${x.horse.number} ${x.horse.name}`).join(' and ')} missed the break!`
-            : 'And they\'re off! A clean start for the field.');
+            ? I18N.t('comment.offSlow', {
+                horses: slow.map((x) => `#${x.horse.number} ${I18N.horse(x.horse.name)}`).join(I18N.t('word.and')),
+              })
+            : I18N.t('comment.offClean'));
           break;
         }
         case 'leader':
-          comment(pickLine([
-            `#${e.horse.number} ${e.horse.name} strides to the front!`,
-            `${e.horse.name} takes over at the head of affairs!`,
-            `Now it's #${e.horse.number} ${e.horse.name} showing the way!`,
-          ]));
+          comment(I18N.pickLine('comment.leader', { n: e.horse.number, name: I18N.horse(e.horse.name) }));
           break;
         case 'half': {
           const st = S.sim.standings();
-          comment(`Halfway home — ${st[0].h.name} leads from ${st[1].h.name}${st[2] ? ` and ${st[2].h.name}` : ''}.`);
+          comment(I18N.t(st[2] ? 'comment.half3' : 'comment.half2', {
+            a: I18N.horse(st[0].h.name), b: I18N.horse(st[1].h.name), c: st[2] ? I18N.horse(st[2].h.name) : '',
+          }));
           break;
         }
         case 'straight':
-          comment('They swing into the home straight — here comes the run to the line!');
+          comment(I18N.t('comment.straight'));
           S.excitement = Math.max(S.excitement, 0.6);
           break;
         case 'finish':
           if (e.place === 1) {
-            comment(`🏆 #${e.runner.h.number} ${e.runner.h.name} WINS the ${S.race.name}!`);
+            comment(I18N.t('comment.win', {
+              n: e.runner.h.number, name: I18N.horse(e.runner.h.name), race: I18N.race(S.race.name),
+            }));
           } else if (e.place === 2 || e.place === 3) {
-            comment(`#${e.runner.h.number} ${e.runner.h.name} takes ${e.place === 2 ? 'second' : 'third'}.`);
+            comment(I18N.t(e.place === 2 ? 'comment.second' : 'comment.third', {
+              n: e.runner.h.number, name: I18N.horse(e.runner.h.name),
+            }));
           }
           break;
         case 'end':
@@ -463,15 +482,13 @@
     }
   }
 
-  function pickLine(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
   function finishRace(photo) {
     GameAudio.stopRaceLoop();
     if (photo) {
       GameAudio.photoFlash();
       const pf = $('photoFinish');
       pf.classList.remove('hidden');
-      comment('📸 PHOTO FINISH! The judges are examining the print…');
+      comment(I18N.t('comment.photo'));
       setTimeout(() => {
         pf.classList.add('hidden');
         settleAndShow(true);
@@ -517,31 +534,31 @@
     const medals = ['🥇', '🥈', '🥉'];
     $('podium').innerHTML = res.slice(0, 3).map((r, i) => {
       const margin = i === 0 ? '' :
-        `<div class="pd-margin">by ${Engine.marginLabel(Engine.marginLengths(res[i - 1], r))}</div>`;
+        `<div class="pd-margin">${esc(I18N.t('results.by', { m: I18N.margin(Engine.marginLabel(Engine.marginLengths(res[i - 1], r))) }))}</div>`;
       return `
         <div class="pd pd-${i}">
           <div class="pd-medal">${medals[i]}</div>
           <div class="rc-silk" style="${silkStyle(r.h.silks)}">${r.h.number}</div>
-          <div class="pd-name">${esc(r.h.name)}</div>
+          <div class="pd-name">${esc(I18N.horse(r.h.name))}</div>
           <div class="pd-time">${r.finishTime.toFixed(2)}s</div>
           ${margin}
         </div>`;
     }).join('');
 
     $('fullOrder').innerHTML = res.slice(3).map((r) =>
-      `<span class="fo-item">${r.place}. #${r.h.number} ${esc(r.h.name)}</span>`).join(' ');
+      `<span class="fo-item">${r.place}. #${r.h.number} ${esc(I18N.horse(r.h.name))}</span>`).join(' ');
 
     $('betResults').innerHTML = settled.length ? settled.map((b) => `
       <div class="br-row ${b.won ? 'won' : 'lost'}">
-        <span>${esc(b.label)} <small>${b.type.toUpperCase()} $${fmt(b.stake)} @ ${b.odds.toFixed(1)}×</small></span>
+        <span>${esc(betLabel(b))} <small>${I18N.t('bet.' + b.type)} $${fmt(b.stake)} @ ${b.odds.toFixed(1)}×</small></span>
         <b>${b.won ? `+$${fmt(b.payout)}` : `−$${fmt(b.stake)}`}</b>
-      </div>`).join('') : '<div class="br-row">You watched this one from the rail — no bets placed.</div>';
+      </div>`).join('') : `<div class="br-row">${I18N.t('results.nobets')}</div>`;
 
     $('netResult').className = net > 0 ? 'good' : net < 0 ? 'bad' : '';
     $('netResult').textContent = settled.length
-      ? `Net: ${net >= 0 ? '+' : '−'}$${fmt(Math.abs(net))}`
+      ? I18N.t('results.net', { v: `${net >= 0 ? '+' : '−'}$${fmt(Math.abs(net))}` })
       : '';
-    $('resultsTitle').textContent = photo ? '📸 Photo Finish — Result' : '🏁 Race Result';
+    $('resultsTitle').textContent = I18N.t(photo ? 'results.title.photo' : 'results.title');
     $('resultsModal').classList.add('show');
   }
 
@@ -564,7 +581,7 @@
       return `<div class="tw-row ${S.bets.some((b) => b.horses.includes(r.h.id)) ? 'tw-bet' : ''}">
         <span class="tw-pos">${initial ? r.lane + 1 : i + 1}</span>
         <span class="tw-silk" style="${silkStyle(r.h.silks)}">${r.h.number}</span>
-        <span class="tw-name">${esc(r.h.name)}</span>
+        <span class="tw-name">${esc(I18N.horse(r.h.name))}</span>
         <span class="tw-gap">${gap}</span>
       </div>`;
     }).join('');
@@ -576,7 +593,7 @@
     const live = sim.runners.filter((r) => !r.finished);
     const lead = live.length ? live.reduce((a, b) => (b.d > a.d ? b : a)) : sim.results[0];
     const remaining = Math.max(0, Math.round(sim.D - lead.d));
-    $('raceClock').textContent = `⏱ ${sim.t.toFixed(1)}s  •  ${remaining}m to go`;
+    $('raceClock').textContent = I18N.t('clock', { t: sim.t.toFixed(1), m: remaining });
   }
 
   function periodicCall() {
@@ -584,33 +601,35 @@
     if (!sim || !sim.started || sim.done || sim.results.length) return;
     const st = sim.standings();
     const gap = (st[0].d - st[1].d) / Engine.LENGTH;
-    const lines = gap > 3
-      ? [`${st[0].h.name} has kicked ${Math.round(gap)} lengths clear!`,
-         `Daylight second — ${st[0].h.name} is running away with it!`]
-      : gap < 0.7
-        ? [`Nothing between ${st[0].h.name} and ${st[1].h.name}!`,
-           `${st[1].h.name} is right on the leader's heels!`]
-        : [`${st[0].h.name} from ${st[1].h.name}, then ${st[2] ? st[2].h.name : 'the pack'}.`,
-           `${st[0].h.name} dictates ahead of ${st[1].h.name}.`];
-    comment(pickLine(lines));
+    const vars = {
+      a: I18N.horse(st[0].h.name), b: I18N.horse(st[1].h.name),
+      c: st[2] ? I18N.horse(st[2].h.name) : I18N.t('call.pack'),
+      gap: Math.round(gap),
+    };
+    comment(I18N.pickLine(gap > 3 ? 'call.clear' : gap < 0.7 ? 'call.close' : 'call.mid', vars));
   }
 
   // ------------------------------------------------------------ history
   function renderHistory() {
     const list = $('historyList');
     if (!S.history.length) {
-      list.innerHTML = '<div class="slip-empty">No races yet.</div>';
+      list.innerHTML = `<div class="slip-empty">${I18N.t('history.empty')}</div>`;
     } else {
+      // winner is stored as "#3 English Name" — re-localize the name part
+      const winnerLabel = (w) => {
+        const m = /^#(\d+) (.+)$/.exec(w);
+        return m ? `#${m[1]} ${I18N.horse(m[2])}` : w;
+      };
       list.innerHTML = [...S.history].reverse().slice(0, 12).map((h) => `
         <div class="hist-row">
-          <span class="hist-race">R${h.raceNo} ${esc(h.tier)} • ${h.dist}m</span>
-          <span class="hist-winner">🏆 ${esc(h.winner)}${h.photo ? ' 📸' : ''}</span>
+          <span class="hist-race">${esc(I18N.t('history.race', { no: h.raceNo, tier: I18N.d('tierShort', h.tier), d: h.dist }))}</span>
+          <span class="hist-winner">🏆 ${esc(winnerLabel(h.winner))}${h.photo ? ' 📸' : ''}</span>
           <span class="hist-net ${h.net > 0 ? 'good' : h.net < 0 ? 'bad' : ''}">${h.staked ? (h.net >= 0 ? '+' : '−') + '$' + fmt(Math.abs(h.net)) : '—'}</span>
         </div>`).join('');
     }
     const st = S.stats;
     $('careerStats').textContent = st.betsPlaced
-      ? `${st.racesBet} races bet • ${st.betsWon}/${st.betsPlaced} bets won • biggest win +$${fmt(st.biggestWin)}`
+      ? I18N.t('career.stats', { a: st.racesBet, b: st.betsWon, c: st.betsPlaced, d: fmt(st.biggestWin) })
       : '';
   }
 
@@ -693,14 +712,14 @@
       S.sponsorships++;
       S.balance += 500;
       GameAudio.cashRegister();
-      comment('A generous sponsor tops up your account with $500. Spend it wisely!');
+      comment(I18N.t('comment.sponsor'));
       save();
       updateWallet();
       renderSlip();
     });
 
     $('resetBtn').addEventListener('click', () => {
-      if (!confirm('Reset all progress? Balance returns to $1,000 and history is cleared.')) return;
+      if (!confirm(I18N.t('confirm.reset'))) return;
       Object.assign(S, {
         balance: 1000, totalWinnings: 0, maxBalance: 1000, sponsorships: 0,
         raceCounter: 1, tierId: 0, history: [],
@@ -714,6 +733,24 @@
     ['exoticType', 'exoticA', 'exoticB'].forEach((id) =>
       $(id).addEventListener('change', renderExoticOdds));
     $('exoticAdd').addEventListener('click', addExotic);
+
+    // language switch: re-render everything that holds localized text
+    window.addEventListener('langchange', () => {
+      GameAudio.click();
+      renderTierTabs();
+      if (S.race) {
+        renderRaceStrip();
+        renderRaceCard();
+        renderTower(S.mode === 'lobby');
+        if (S.mode === 'lobby') {
+          comment(I18N.t('comment.newRace', {
+            name: I18N.race(S.race.name), dist: S.race.distance, going: I18N.d('going', S.race.going.name),
+          }));
+        }
+      }
+      renderSlip();
+      renderHistory();
+    });
 
     // first user gesture unlocks audio
     document.addEventListener('pointerdown', () => GameAudio.ensure(), { once: true });

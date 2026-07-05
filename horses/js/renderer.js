@@ -260,13 +260,22 @@ function Renderer(canvas) {
     ctx.strokeStyle = '#ff6b35';
     ctx.lineWidth = 0.7;
     ctx.strokeRect(bx - bw / 2, by - bh / 2, bw, bh);
+    const i18n = typeof I18N !== 'undefined' ? I18N : null;
     ctx.fillStyle = '#ff6b35';
     ctx.textAlign = 'center';
     ctx.font = '700 7px system-ui, sans-serif';
-    ctx.fillText('THUNDER DOWNS', bx, by - 1.5);
+    ctx.fillText(i18n ? i18n.t('board.brand') : 'THUNDER DOWNS', bx, by - 1.5);
     ctx.fillStyle = '#dfe6ea';
-    ctx.font = '600 4.6px system-ui, sans-serif';
-    if (race) ctx.fillText(`R${race.raceNo} • ${race.name} • ${race.distance}m • ${race.going.name}`, bx, by + 5.5);
+    // CJK glyphs need a slightly larger size to stay legible on the board
+    ctx.font = `600 ${i18n && i18n.lang === 'zh' ? 5.4 : 4.6}px system-ui, sans-serif`;
+    if (race) {
+      ctx.fillText(i18n
+        ? i18n.t('board.race', {
+            no: race.raceNo, name: i18n.race(race.name),
+            dist: race.distance, going: i18n.d('going', race.going.name),
+          })
+        : `R${race.raceNo} • ${race.name} • ${race.distance}m • ${race.going.name}`, bx, by + 5.5);
+    }
     // legs
     ctx.strokeStyle = '#182126';
     ctx.lineWidth = 1.4;
