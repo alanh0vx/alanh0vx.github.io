@@ -1,0 +1,211 @@
+/* desktop.css — everything scoped to body[data-layout="desktop"].
+ * Theme differences come from variables set in themes.css; the handful of
+ * [data-layout][data-theme] rules below are deliberate structural exceptions.
+ */
+
+/* ---- frame ---- */
+body[data-layout="desktop"] { max-width: none; box-shadow: none; }
+body[data-layout="desktop"] #app {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 18px 24px 80px;
+  min-height: calc(100vh - 160px);
+}
+body[data-layout="desktop"] #bottomnav,
+body[data-layout="desktop"] .pd-bar,
+body[data-layout="desktop"] .cart-foot,
+body[data-layout="desktop"] .back { display: none; }
+body[data-layout="desktop"] #toast { bottom: 40px; }
+body[data-layout="desktop"] .crumb { display: flex; }
+body[data-layout="desktop"] .sec-title { font-size: 20px; }
+body[data-layout="desktop"][data-theme="amazon"] { background: #fff; }
+body[data-layout="desktop"][data-theme="amazon"] #app { background: transparent; }
+
+/* ---- desktop header ---- */
+body[data-layout="desktop"] #topbar { height: auto; background: var(--dheader-bg); }
+.dt-bar { display: flex; align-items: center; gap: 16px; max-width: var(--container); margin: 0 auto; padding: 10px 24px; }
+.dt-bar .logo { font-size: 24px; color: var(--dheader-ink); }
+.dt-search { flex: 1; display: flex; min-width: 0; border: 2px solid var(--dsearch-border); border-radius: 8px; overflow: hidden; background: #fff; height: 40px; }
+.dt-search select {
+  border: 0; outline-offset: -2px; background: #f3f3f3; color: #555; font-size: 12px;
+  padding: 0 6px; max-width: 130px; border-right: 1px solid var(--line); cursor: pointer;
+}
+body[data-layout="desktop"] #search-input { font-size: 14px; padding: 0 12px; }
+.dt-search-btn { border: 0; background: var(--dsearch-btn-bg); color: var(--dsearch-btn-ink); font-size: 16px; padding: 0 18px; cursor: pointer; }
+.dt-tools { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; color: var(--dheader-ink); }
+.dt-tools .lang-btn, .dt-tools .icon-btn { color: var(--dheader-ink); }
+.dt-tools .icon-btn { background: rgba(128, 128, 128, .18); }
+.dt-link { display: flex; flex-direction: column; justify-content: center; color: var(--dheader-ink); font-size: 11px; line-height: 1.25; padding: 4px 8px; border-radius: 6px; }
+.dt-link b { font-size: 13px; white-space: nowrap; }
+.dt-cart { position: relative; display: flex; align-items: center; gap: 6px; color: var(--dheader-ink); font-weight: 700; font-size: 13px; padding: 4px 10px 4px 6px; border-radius: 6px; }
+.dt-cart-ico { font-size: 24px; position: relative; }
+.dt-cart .badge { top: -4px; right: -8px; }
+
+/* account dropdown */
+.dt-account { position: relative; }
+.dt-menu {
+  display: none; position: absolute; top: 100%; right: 0; z-index: 80;
+  background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .16); min-width: 200px; padding: 6px 0;
+}
+.dt-account:hover .dt-menu, .dt-account:focus-within .dt-menu { display: block; }
+.dt-menu a, .dt-menu button { display: block; width: 100%; text-align: left; border: 0; background: none; font: inherit; font-size: 13px; padding: 9px 14px; cursor: pointer; }
+.dt-menu a:hover, .dt-menu button:hover { background: #f5f5f5; }
+.dt-menu .dt-menu-head { padding: 9px 14px; font-weight: 800; border-bottom: 1px solid var(--line); margin-bottom: 4px; white-space: nowrap; }
+
+/* category nav strip */
+.dt-navstrip { background: var(--navstrip-bg); color: var(--navstrip-ink); border-bottom: 1px solid var(--navstrip-line); }
+.dt-navstrip-inner { display: flex; align-items: center; gap: 4px; max-width: var(--container); margin: 0 auto; padding: 0 24px; height: 38px; font-size: 13px; }
+.dt-navstrip a, .dt-alldept { color: var(--navstrip-ink); padding: 0 10px; height: 100%; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.dt-alldept { position: relative; cursor: pointer; font-weight: 700; }
+.dt-alldept:hover .dt-menu, .dt-alldept:focus-within .dt-menu { display: block; }
+.dt-alldept .dt-menu { left: 0; right: auto; top: 100%; min-width: 230px; }
+.dt-alldept .dt-menu a { display: flex; align-items: center; gap: 10px; height: auto; padding: 9px 14px; color: var(--ink); }
+.dt-navstrip-spacer { flex: 1; }
+
+/* ---- hero ---- */
+body[data-layout="desktop"] .hero { padding: 0; height: 240px; border-radius: 12px; }
+body[data-layout="desktop"] .hero-slide { padding: 0 56px; height: 100%; }
+body[data-layout="desktop"] .hero-slide:first-child { display: flex; flex-direction: column; justify-content: center; }
+body[data-layout="desktop"] .hero-title { font-size: 40px; }
+body[data-layout="desktop"] .hero-sub { font-size: 18px; margin-top: 8px; }
+/* HKTV desktop: pure-CSS cross-fade carousel over the 3 slides */
+body[data-layout="desktop"][data-theme="hktv"] .hero-slide {
+  display: flex; flex-direction: column; justify-content: center;
+  position: absolute; inset: 0; opacity: 0;
+  animation: heroFade 12s infinite;
+}
+body[data-layout="desktop"][data-theme="hktv"] .hero-slide:nth-child(2) { animation-delay: 4s; }
+body[data-layout="desktop"][data-theme="hktv"] .hero-slide:nth-child(3) { animation-delay: 8s; }
+@keyframes heroFade {
+  0% { opacity: 1; }
+  33% { opacity: 1; }
+  41% { opacity: 0; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-layout="desktop"][data-theme="hktv"] .hero-slide { animation: none; position: static; opacity: 1; display: none; }
+  body[data-layout="desktop"][data-theme="hktv"] .hero-slide:first-child { display: flex; }
+}
+
+/* ---- category chips → tile band ---- */
+body[data-layout="desktop"] .chips { display: grid; grid-template-columns: repeat(8, 1fr); overflow: visible; padding: 2px 0 12px; }
+body[data-layout="desktop"] .chip { padding: 14px 8px; font-size: 13px; }
+body[data-layout="desktop"] .chip-ico { font-size: 28px; }
+
+/* ---- deals + mini strips ---- */
+body[data-layout="desktop"] .strip, body[data-layout="desktop"] .pd-strip { padding: 16px; }
+body[data-layout="desktop"] .deal { width: 140px; }
+body[data-layout="desktop"] .deal-thumb { width: 140px; height: 140px; }
+body[data-layout="desktop"] .mini { width: 150px; }
+body[data-layout="desktop"] .mini-thumb { width: 150px; height: 150px; }
+body[data-layout="desktop"] .mini-title { font-size: 12px; height: 31px; }
+body[data-layout="desktop"] .deal-row::-webkit-scrollbar, body[data-layout="desktop"] .mini-row::-webkit-scrollbar { display: block; height: 8px; }
+body[data-layout="desktop"] .deal-row::-webkit-scrollbar-thumb, body[data-layout="desktop"] .mini-row::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .2); border-radius: 4px; }
+body[data-layout="desktop"] .deal-row, body[data-layout="desktop"] .mini-row { padding-bottom: 8px; }
+
+/* ---- grids ---- */
+body[data-layout="desktop"] .grid { grid-template-columns: var(--grid-cols-d); gap: 14px; }
+body[data-layout="desktop"] .home .grid { grid-template-columns: var(--grid-cols-home); }
+body[data-layout="desktop"] .card-title { font-size: 14px; height: 37px; }
+body[data-layout="desktop"] .cat-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+body[data-layout="desktop"] .cat-card { padding: 34px 0; }
+
+/* Amazon desktop: home grid becomes 4-col vertical cards (listing pages keep rows) */
+body[data-layout="desktop"][data-theme="amazon"] .home .grid { background: transparent; overflow: visible; gap: 14px; }
+body[data-layout="desktop"][data-theme="amazon"] .home .card { flex-direction: column; border: 1px solid var(--line); border-radius: 8px; padding: 0; gap: 0; }
+body[data-layout="desktop"][data-theme="amazon"] .home .card .thumb { width: 100%; flex: initial; border-radius: 0; }
+body[data-layout="desktop"][data-theme="amazon"] .home .card-body { padding: 10px; }
+body[data-layout="desktop"][data-theme="amazon"] .home .card-title { -webkit-line-clamp: 2; height: 37px; }
+/* Amazon desktop listing rows: bigger thumbs, contained width */
+body[data-layout="desktop"][data-theme="amazon"] .listing .grid { gap: 0; border: 1px solid var(--line); }
+body[data-layout="desktop"][data-theme="amazon"] .listing .card .thumb { width: 180px; flex: 0 0 180px; }
+
+/* ---- listing pages: filter sidebar + main column ---- */
+body[data-layout="desktop"] .listing { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 24px; align-items: start; }
+body[data-layout="desktop"] .filters {
+  display: block; position: sticky; top: 112px;
+  background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px;
+}
+.filters .f-heading { font-size: 15px; font-weight: 800; margin: 0 0 10px; }
+.filters .f-group { border-top: 1px solid var(--line); padding: 10px 0; }
+.filters .f-title { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+.filters label { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 0; cursor: pointer; }
+.filters input { accent-color: var(--accent); }
+.filters .link-btn { color: var(--accent); font-size: 13px; padding: 6px 0 0; }
+body[data-layout="desktop"] .listing-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+body[data-layout="desktop"] .listing-head .sortbar { margin: 0; }
+
+/* ---- product page ---- */
+body[data-layout="desktop"] .pd-main {
+  display: grid; gap: 24px; align-items: start;
+  grid-template-areas: "media core buy";
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr) 300px;
+  background: #fff; border-radius: 12px; padding: 24px;
+}
+body[data-layout="desktop"] .pd-media { grid-area: media; }
+body[data-layout="desktop"] .pd-info { grid-area: core; padding: 0; border-radius: 0; border-bottom: 0; }
+body[data-layout="desktop"] .pd-buybox { grid-area: buy; }
+body[data-layout="desktop"] .pd-thumb { width: 100%; max-width: 420px; margin: 0; border-radius: 8px; border: 1px solid var(--line); }
+body[data-layout="desktop"] .pd-title { font-size: 22px; }
+body[data-layout="desktop"] .pd-price .price { font-size: 28px; }
+/* HKTV + Taobao: 2 columns, buy panel below the info in the right column */
+body[data-layout="desktop"][data-theme="hktv"] .pd-main,
+body[data-layout="desktop"][data-theme="taobao"] .pd-main {
+  grid-template-areas: "media core" "media buy";
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+}
+body[data-layout="desktop"] .pd-buybox {
+  display: block; border: 1px solid var(--line); border-radius: 10px; padding: 16px;
+  background: #fff;
+}
+body[data-layout="desktop"][data-theme="hktv"] .pd-buybox,
+body[data-layout="desktop"][data-theme="taobao"] .pd-buybox { background: #fafafa; }
+.pd-buybox .bb-price { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+.pd-buybox .bb-ship { font-size: 13px; color: #007185; margin-bottom: 4px; }
+.pd-buybox .bb-stock { font-size: 15px; font-weight: 700; color: #067d62; margin: 6px 0 10px; }
+.pd-buybox .bb-qty { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; }
+.pd-buybox .bb-qty select { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; background: #f0f2f2; font-size: 13px; cursor: pointer; }
+.pd-buybox .btn { width: 100%; margin-bottom: 8px; height: 40px; }
+.pd-buybox .bb-note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.pd-buybox .bb-seller { font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; margin-top: 8px; }
+
+/* ---- cart ---- */
+body[data-layout="desktop"] .cart-page { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+body[data-layout="desktop"] .cart-summary {
+  display: block; position: sticky; top: 112px;
+  background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 16px;
+}
+.cart-summary .cs-sub { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; margin-bottom: 8px; }
+.cart-summary .cs-sub b { color: var(--price); font-size: 22px; }
+.cart-summary .cs-note { font-size: 12px; color: #067d62; margin-bottom: 12px; }
+body[data-layout="desktop"] .crow { padding: 14px; }
+body[data-layout="desktop"] .crow-thumb { width: 110px; height: 110px; flex: 0 0 110px; }
+body[data-layout="desktop"] .crow-title { font-size: 14px; }
+body[data-layout="desktop"] .crow-line { display: block; margin-left: auto; font-weight: 800; color: var(--ink); align-self: center; padding-left: 16px; white-space: nowrap; }
+
+/* ---- checkout ---- */
+body[data-layout="desktop"] .co-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+body[data-layout="desktop"] .co-side { position: sticky; top: 112px; }
+body[data-layout="desktop"] .co-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+body[data-layout="desktop"] .co-fields .co-field--wide { grid-column: 1 / -1; }
+
+/* ---- narrow pages (orders / me / settings) ---- */
+body[data-layout="desktop"] .narrow { max-width: 720px; margin: 0 auto; }
+body[data-layout="desktop"] .save-bar { position: static; box-shadow: none; border: 1px solid var(--line); }
+body[data-layout="desktop"] .ord-items { display: block; }
+
+/* ---- hover states (mouse only) ---- */
+@media (hover: hover) {
+  body[data-layout="desktop"] .card { transition: box-shadow .15s, transform .15s; }
+  body[data-layout="desktop"] .card:hover { box-shadow: 0 6px 18px rgba(0, 0, 0, .12); transform: translateY(-2px); }
+  body[data-layout="desktop"][data-theme="amazon"] .listing .card:hover { transform: none; box-shadow: none; background: #f7fafa; }
+  body[data-layout="desktop"][data-theme="amazon"] .card:hover .card-title { color: #c7511f; }
+  body[data-layout="desktop"] .btn:hover, body[data-layout="desktop"] .dt-search-btn:hover { filter: brightness(.94); }
+  body[data-layout="desktop"] .dt-navstrip a:hover, body[data-layout="desktop"] .dt-alldept:hover { background: rgba(128, 128, 128, .18); }
+  body[data-layout="desktop"] .chip:hover, body[data-layout="desktop"] .cat-card:hover { box-shadow: 0 4px 14px rgba(0, 0, 0, .12); }
+  body[data-layout="desktop"] .row-link:hover { background: #f5f5f5; }
+  body[data-layout="desktop"] .deal:hover .deal-thumb, body[data-layout="desktop"] .mini:hover .mini-thumb { box-shadow: 0 4px 14px rgba(0, 0, 0, .14); }
+  body[data-layout="desktop"] .dt-link:hover, body[data-layout="desktop"] .dt-cart:hover { background: rgba(128, 128, 128, .18); }
+}

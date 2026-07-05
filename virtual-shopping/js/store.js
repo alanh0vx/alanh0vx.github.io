@@ -125,6 +125,19 @@
       return order;
     },
 
+    // ---- recently viewed (per user, most recent first, max 12) ----
+    recent() { try { return JSON.parse(localStorage.getItem(this.ns('recent')) || '[]'); } catch (e) { return []; } },
+    pushRecent(id) {
+      if (!window.getProduct(id)) return;
+      const r = this.recent().filter((x) => x !== id);
+      r.unshift(id);
+      localStorage.setItem(this.ns('recent'), JSON.stringify(r.slice(0, 12)));
+    },
+
+    // ---- shipping address (cosmetic, per user) ----
+    getAddr() { try { return JSON.parse(localStorage.getItem(this.ns('addr')) || '{}'); } catch (e) { return {}; } },
+    saveAddr(a) { localStorage.setItem(this.ns('addr'), JSON.stringify(a)); },
+
     // ---- auth (cosmetic) ----
     login(name) { this.user = name; localStorage.setItem('vs:user', name); },
     logout() { this.user = null; localStorage.removeItem('vs:user'); },

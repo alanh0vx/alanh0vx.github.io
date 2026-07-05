@@ -272,5 +272,68 @@
     save:         { en: 'Save', zh: '儲存' },
     savedMsg:     { en: 'Settings saved', zh: '設定已儲存' },
     saveHint:     { en: 'Changes apply after you save', zh: '儲存後才會套用' },
+
+    /* desktop chrome */
+    deptAll:      { en: 'All', zh: '全部' },
+    allDepartments:{ en: 'All Categories', zh: '所有分類' },
+    helloSignIn:  { en: 'Hello, sign in', zh: '你好，請登入' },
+    account:      { en: 'Account', zh: '帳戶' },
+    exitShop:     { en: 'Exit CoolShop', zh: '離開爽購' },
+    searchBtn:    { en: 'Search', zh: '搜尋' },
+
+    /* hero slides */
+    heroDeals:    { en: 'Flash deals — up to 60% off', zh: '限時優惠 — 低至4折' },
+    heroDealsSub: { en: 'New bargains dropping all day', zh: '全日不停上新優惠' },
+    heroFree:     { en: 'Checkout is always free', zh: '結帳永遠免費' },
+    heroFreeSub:  { en: 'Fill your cart, keep your money', zh: '裝滿購物車，荷包零負擔' },
+
+    /* filters */
+    filters:      { en: 'Filters', zh: '篩選' },
+    priceRange:   { en: 'Price', zh: '價格' },
+    priceAll:     { en: 'All prices', zh: '全部價格' },
+    priceUnder100:{ en: 'Under HK$100', zh: 'HK$100 以下' },
+    price100to500:{ en: 'HK$100 – 500', zh: 'HK$100 – 500' },
+    priceOver500: { en: 'Over HK$500', zh: 'HK$500 以上' },
+    rating:       { en: 'Rating', zh: '評分' },
+    ratingUp:     { en: '4★ & up', zh: '4★ 或以上' },
+    dealsOnly:    { en: 'Deals only', zh: '只顯示優惠' },
+    clearFilters: { en: 'Clear filters', zh: '清除篩選' },
+
+    /* product page realism */
+    inStock:      { en: 'In Stock', zh: '有現貨' },
+    freeDelivery: { en: 'FREE delivery to Hong Kong', zh: '免費送貨（香港）' },
+    alsoBought:   { en: 'Customers also bought', zh: '顧客也買了' },
+    recentlyViewed:{ en: 'Recently viewed', zh: '最近瀏覽' },
+    shipAmazon:   { en: '✓ CoolShip · FREE Delivery', zh: '✓ CoolShip · 免費送貨' },
+    shipHktv:     { en: 'Free Shipping', zh: '免運費' },
+    shipTaobao:   { en: 'Free Ship', zh: '包郵' },
+
+    /* cart + checkout */
+    orderSummary: { en: 'Order Summary', zh: '訂單摘要' },
+    proceedCheckout:{ en: 'Proceed to Checkout', zh: '前往結帳' },
+    shippingAddress:{ en: 'Shipping Address', zh: '送貨地址' },
+    fullName:     { en: 'Full name', zh: '姓名' },
+    addressLine:  { en: 'Address', zh: '地址' },
+    district:     { en: 'District', zh: '地區' },
+    paymentMethod:{ en: 'Payment Method', zh: '付款方式' },
+    payCool:      { en: 'CoolPay balance (HK$∞)', zh: '爽購餘額 (HK$∞)' },
+    payCard:      { en: 'Credit card •••• 4242', zh: '信用卡 •••• 4242' },
+    payFps:       { en: 'FPS instant transfer', zh: '轉數快 FPS' },
   };
+
+  /* HK districts for the (cosmetic) checkout address form */
+  window.DISTRICTS = [
+    { en: 'Central & Western', zh: '中西區' },
+    { en: 'Wan Chai', zh: '灣仔區' },
+    { en: 'Eastern', zh: '東區' },
+    { en: 'Southern', zh: '南區' },
+    { en: 'Yau Tsim Mong', zh: '油尖旺區' },
+    { en: 'Sham Shui Po', zh: '深水埗區' },
+    { en: 'Kowloon City', zh: '九龍城區' },
+    { en: 'Kwun Tong', zh: '觀塘區' },
+    { en: 'Sha Tin', zh: '沙田區' },
+    { en: 'Tsuen Wan', zh: '荃灣區' },
+    { en: 'Yuen Long', zh: '元朗區' },
+    { en: 'Islands', zh: '離島區' },
+  ];
 })();

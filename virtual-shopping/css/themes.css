@@ -1,0 +1,147 @@
+/* themes.css — the three store themes (colour variables + structural overrides).
+ * Desktop-only variables (--container, --grid-cols-d, --dheader-*, --navstrip-*)
+ * are consumed by desktop.css.
+ */
+
+/* default theme = Taobao (orange/red) */
+:root {
+  --brand: #ff5000;
+  --brand-2: #ff7a00;
+  --accent: #ff5000;
+  --price: #ff4400;
+  --header-grad: linear-gradient(90deg, #ff5000, #ff7a00);
+  --header-ink: #fff;
+  --hero-grad: linear-gradient(120deg, #ff5000, #ff7a00);
+  --btn-buy-bg: #ff5000;
+  --btn-buy-ink: #fff;
+  --btn-cart-bg: #ff7a00;
+  --btn-cart-ink: #fff;
+  --tag-bg: #fff2ec;
+  --radius: 10px;
+  --grid-cols: 1fr 1fr;
+  --grid-gap: 9px;
+
+  /* desktop (Taobao: white search-centric header, dense 5-col grid) */
+  --container: 1240px;
+  --grid-cols-d: repeat(5, 1fr);
+  --grid-cols-home: repeat(5, 1fr);
+  --dheader-bg: #fff;
+  --dheader-ink: #ff5000;
+  --dsearch-border: #ff5000;
+  --dsearch-btn-bg: linear-gradient(90deg, #ff5000, #ff7a00);
+  --dsearch-btn-ink: #fff;
+  --navstrip-bg: #fff;
+  --navstrip-ink: #333;
+  --navstrip-line: #f0f0f0;
+}
+
+/* ---- Amazon theme: dark navy header, yellow/orange buttons ---- */
+body[data-theme="amazon"] {
+  --brand: #232f3e;
+  --brand-2: #37475a;
+  --accent: #007185;
+  --price: #b12704;
+  --bg: #eaeded;
+  --header-grad: linear-gradient(90deg, #131921, #232f3e);
+  --header-ink: #fff;
+  --hero-grad: linear-gradient(120deg, #131921, #37475a);
+  --btn-buy-bg: #ffa41c;   /* Buy Now — orange */
+  --btn-buy-ink: #0f1111;
+  --btn-cart-bg: #ffd814;  /* Add to Cart — yellow */
+  --btn-cart-ink: #0f1111;
+  --tag-bg: #eef3f3;
+  --radius: 4px;
+  --grid-cols: 1fr;        /* single-column list rows */
+  --grid-gap: 0;
+
+  /* desktop */
+  --container: 1400px;
+  --grid-cols-d: 1fr;      /* listing pages stay Amazon-style rows */
+  --grid-cols-home: repeat(5, 1fr); /* keeps thumbs ≤ ~256px (sprite cell size) */
+  --dheader-bg: #131921;
+  --dheader-ink: #fff;
+  --dsearch-border: transparent;
+  --dsearch-btn-bg: #febd69;
+  --dsearch-btn-ink: #0f1111;
+  --navstrip-bg: #232f3e;
+  --navstrip-ink: #fff;
+  --navstrip-line: transparent;
+}
+
+/* ---- HKTVmall theme: green ---- */
+body[data-theme="hktv"] {
+  --brand: #84bd00;
+  --brand-2: #6fa800;
+  --accent: #5c8a00;
+  --price: #e2231a;
+  --header-grad: linear-gradient(90deg, #84bd00, #6fa800);
+  --header-ink: #fff;
+  --hero-grad: linear-gradient(120deg, #84bd00, #5c8a00);
+  --btn-buy-bg: #84bd00;
+  --btn-buy-ink: #fff;
+  --btn-cart-bg: #5c8a00;
+  --btn-cart-ink: #fff;
+  --tag-bg: #eef6e0;
+  --radius: 8px;
+  --grid-cols: 1fr 1fr;
+  --grid-gap: 8px;
+
+  /* desktop */
+  --container: 1220px;
+  --grid-cols-d: repeat(4, 1fr);
+  --grid-cols-home: repeat(4, 1fr);
+  --dheader-bg: linear-gradient(90deg, #84bd00, #6fa800);
+  --dheader-ink: #fff;
+  --dsearch-border: transparent;
+  --dsearch-btn-bg: #5c8a00;
+  --dsearch-btn-ink: #fff;
+  --navstrip-bg: #4c7300;
+  --navstrip-ink: #fff;
+  --navstrip-line: transparent;
+}
+
+/* ============================================================
+   THEME LAYOUT OVERRIDES (structure, not just colour)
+   ============================================================ */
+
+/* ---- Amazon: single-column list rows, thumb left, roomy ---- */
+body[data-theme="amazon"] #app { background: #fff; }
+body[data-theme="amazon"] .grid { background: #fff; border-radius: 8px; overflow: hidden; }
+body[data-theme="amazon"] .card { flex-direction: row; gap: 12px; padding: 14px 12px; border-radius: 0; border-bottom: 1px solid var(--line); background: #fff; align-items: flex-start; }
+body[data-theme="amazon"] .card:last-child { border-bottom: 0; }
+body[data-theme="amazon"] .card .thumb { width: 116px; flex: 0 0 116px; border-radius: 6px; }
+body[data-theme="amazon"] .card-body { padding: 0; flex: 1; }
+body[data-theme="amazon"] .card-title { height: auto; -webkit-line-clamp: 3; font-size: 14px; color: #0066c0; }
+body[data-theme="amazon"] .card-seller { display: block; }
+body[data-theme="amazon"] .card-badge { display: none; }
+body[data-theme="amazon"] .price { font-size: 18px; }
+body[data-theme="amazon"] .strip-title { color: var(--ink); }
+/* Amazon product detail: breadcrumb shown, contained image, title-first order */
+body[data-theme="amazon"] .crumb { display: flex; }
+body[data-theme="amazon"] .pd-thumb { width: 100%; margin: 8px 0 0; border: 1px solid var(--line); border-radius: 6px; }
+body[data-theme="amazon"] .pd-info { display: flex; flex-direction: column; padding: 12px 0; border-radius: 0; border-bottom: 1px solid var(--line); }
+body[data-theme="amazon"] .pd-title { order: 1; font-size: 19px; font-weight: 500; }
+body[data-theme="amazon"] .pd-rating { order: 2; }
+body[data-theme="amazon"] .pd-price { order: 3; margin-top: 6px; }
+body[data-theme="amazon"] .pd-seller { order: 4; }
+body[data-theme="amazon"] .card-ship { order: 5; }
+
+/* ---- HKTVmall: 2-col, bordered cards, prominent badge, merchant chips ---- */
+body[data-theme="hktv"] .card { border: 1px solid var(--line); }
+body[data-theme="hktv"] .card-seller { display: block; }
+body[data-theme="hktv"] .card-badge { border-radius: 0 0 8px 0; top: 0; left: 0; }
+/* HKTVmall product detail: title-first, merchant chips shown */
+body[data-theme="hktv"] .pd-info { display: flex; flex-direction: column; }
+body[data-theme="hktv"] .pd-title { order: 1; }
+body[data-theme="hktv"] .pd-price { order: 2; margin-top: 4px; }
+body[data-theme="hktv"] .pd-rating { order: 3; margin-top: 4px; }
+body[data-theme="hktv"] .pd-seller { order: 4; }
+body[data-theme="hktv"] .merch-chips { display: flex; order: 5; }
+body[data-theme="hktv"] .card-ship { order: 6; }
+/* merch chips already include 免運費 — avoid the duplicate pill on the detail page */
+body[data-theme="hktv"] .pd-info .card-ship { display: none; }
+
+/* ---- shipping labels: one per theme ---- */
+body[data-theme="amazon"] .ship-amazon { display: inline; color: #007185; }
+body[data-theme="hktv"] .ship-hktv { display: inline-block; color: #2e7d00; background: #eef6e0; border-radius: 4px; padding: 1px 6px; font-weight: 600; }
+body[data-theme="taobao"] .ship-taobao { display: inline-block; color: #ff5000; border: 1px solid #ffb599; border-radius: 3px; padding: 0 4px; font-size: 10px; }
