@@ -172,3 +172,104 @@ button:focus-visible { outline: 3px solid #d5a744; outline-offset: 3px; }
 @keyframes take-stack-north { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 -25px; } }
 @keyframes take-stack-west { from { opacity: 0; translate: 25px 0; } to { opacity: 1; translate: -45px 0; } }
 .sound-toggle { display: inline-block; margin-right: 12px; padding: 5px 10px; border: 1px solid #8e9b8d; border-radius: 5px; background: #fffdf7; color: #17322a; font: inherit; cursor: pointer; }
+/* The live table is a viewport-sized workspace, including Safari's dynamic bars. */
+.playing-shell { height: 100dvh; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.playing-shell .topbar { flex: 0 0 56px; height: 56px; position: relative; padding-inline: 20px; }
+.playing-shell .game-page { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-bottom: 0; }
+.playing-shell .game-status { flex: 0 0 44px; height: 44px; padding-inline: 14px; }
+.playing-shell .mobile-balance { flex: 0 0 auto; padding: 3px 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; }
+.playing-shell .sound-toggle { min-height: 32px; margin: 0; padding: 3px 8px; }
+.playing-shell .table-wrap { flex: 1; min-height: 0; grid-template-columns: minmax(0,1fr) 240px; padding: 8px max(12px,calc((100vw - 1240px)/2)); gap: 12px; }
+.playing-shell .mahjong-table { height: 100%; min-height: 0; border-width: 8px; }
+.playing-shell .coach { padding: 12px; max-height: 100%; overflow: auto; }
+.playing-shell .coach p { font-size: 13px; margin-block: 8px; }
+.playing-shell .hand-dock { position: static; flex: 0 0 auto; padding: 5px 12px 8px; min-height: 0; }
+.playing-shell .hand-row { display: grid; grid-template-columns: repeat(14,minmax(0,1fr)); gap: 4px; width: min(100%,780px); margin: 0 auto; overflow: visible; padding: 8px 3px 4px; }
+.playing-shell .hand-row .tile { width: 100%; min-width: 0; height: clamp(44px,8dvh,66px); min-height: 44px; padding: 2px 1px; }
+.playing-shell .tile-drawn { margin-left: 0; outline-offset: 0; border-color: #be8b21; }
+.playing-shell .tile-active { transform: translateY(-5px); }
+.playing-shell .turn-message { margin-bottom: 3px; font-size: 13px; }
+.playing-shell .flower-racks { gap: 4px 12px; padding-bottom: 3px; }
+.playing-shell .flower-racks .tile { width: 17px; height: 23px; min-height: 23px; flex-basis: 17px; border-bottom-width: 2px; }
+.playing-shell .flower-notice { margin-bottom: 3px; padding: 2px; font-size: 12px; }
+.playing-shell .flower-notice .tile { width: 17px; height: 23px; min-height: 23px; }
+.playing-shell .meld-row { margin: 2px 0; gap: 8px; }
+.playing-shell .meld-group .tile { width: 20px; height: 28px; min-height: 28px; flex-basis: 20px; border-bottom-width: 3px; }
+.playing-shell .action-row { margin-top: 3px; min-height: 44px; flex-wrap: nowrap; }
+.playing-shell .action-row>div { align-items: center; }
+.discard-button { background: #0e4938; color: #fffdf1; min-width: 88px; }
+.discard-button:disabled { opacity: .45; }
+.selected-preview { width: 32px; height: 42px; background: #fff3cc; border: 1px solid #bd8b2d; border-radius: 3px; padding: 2px; }
+.playing-shell .claim-choice { gap: 6px; padding: 4px; margin-bottom: 4px; }
+.playing-shell .claim-choice strong { font-size: 12px; }
+.playing-shell .wall-north { top: 52px; }
+.playing-shell .wall-west,.playing-shell .wall-east { display: none; }
+.playing-shell .north { top: 8px; }
+.playing-shell .west,.playing-shell .east { top: 35%; }
+.playing-shell .table-center { top: 42%; width: 58px; height: 58px; }
+.playing-shell .table-center span,.playing-shell .table-center b { font-size: 22px; }
+.playing-shell .table-center small { font-size: 10px; }
+.playing-shell .discard-pool { bottom: 8px; width: 420px; max-width: 74%; gap: 3px; }
+.playing-shell .discard-pool .tile { width: 23px; height: 31px; min-height: 31px; flex-basis: 23px; border-bottom-width: 3px; }
+.playing-shell .last-play { top: 40%; padding: 5px 10px; gap: 3px; }
+.playing-shell .last-play .tile { height: 50px; min-height: 50px; width: 36px; }
+.playing-shell .hand-result { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 60; width: min(520px,calc(100% - 24px)); max-height: calc(100dvh - 40px); overflow: auto; margin: 0; box-shadow: 0 12px 80px #0008; }
+@media(max-width:900px) {
+ .playing-shell { padding-bottom: calc(44px + env(safe-area-inset-bottom)); }
+ .playing-shell .topbar { flex-basis: 44px; height: 44px; padding-inline: 10px; }
+ .playing-shell .brand { font-size: 16px; gap: 6px; }
+ .playing-shell .brand small { display: none; }
+ .playing-shell .brand-mark,.playing-shell .profile-chip .avatar { width: 30px; height: 30px; font-size: 19px; }
+ .playing-shell .main-nav { height: calc(44px + env(safe-area-inset-bottom)); }
+ .playing-shell .main-nav button { padding: 3px 12px; gap: 0; }
+ .playing-shell .main-nav svg { height: 17px; }
+ .playing-shell .game-status { flex-basis: 40px; height: 40px; padding-inline: 7px; }
+ .playing-shell .game-status button { min-height: 34px; height: 34px; }
+ .playing-shell .table-wrap { position: relative; grid-template-columns: minmax(0,1fr); padding: 4px 6px; }
+ .playing-shell .coach { position: absolute; right: 14px; top: 8px; z-index: 4; padding: 0; border: 0; background: none; overflow: visible; }
+ .playing-shell .coach>p,.playing-shell .coach-head,.playing-shell .ukeire { display: none; }
+ .playing-shell .fan-button { margin: 0; min-height: 30px; height: 30px; width: 32px; padding: 5px; overflow: hidden; font-size: 0; gap: 0; color: #fff0cd; background: #124b3c; border-color: #8daa92; }
+ .playing-shell .fan-button svg { width: 18px; flex-shrink: 0; }
+ .playing-shell .hand-dock { padding: 4px 6px; }
+ .playing-shell .hand-row { gap: 2px; padding-inline: 1px; }
+ .playing-shell .hand-row .tile { height: clamp(44px,7.5dvh,60px); border-bottom-width: 4px; border-radius: 3px; }
+ .playing-shell .mobile-balance { font-size: 11px; padding-inline: 6px; gap: 4px; white-space: nowrap; }
+ .playing-shell .sound-toggle { font-size: 11px; padding-inline: 4px; min-height: 30px; }
+ .playing-shell .action-row { font-size: 12px; }
+ .playing-shell .discard-pool { max-width: 82%; }
+ .playing-shell .discard-pool .tile { width: 20px; flex-basis: 20px; height: 27px; min-height: 27px; }
+ .playing-shell .opponent .avatar { width: 26px; height: 26px; font-size: 16px; }
+ .playing-shell .opponent span { font-size: 12px; }
+ .playing-shell .wall-north { top: 45px; }
+ .playing-shell .opening-heading { min-height: 42px; }
+ .playing-shell .opening-heading h2 { font-size: 18px; }
+ .playing-shell .opening-board { min-height: 50px; }
+ .playing-shell .dealt-counts { font-size: 10px; }
+ .playing-shell .opening-actions button { min-height: 34px; padding: 4px 12px; }
+}
+@media(max-height:600px) {
+ .playing-shell .flower-racks { gap: 2px 8px; }
+ .playing-shell .wall-north { display: none; }
+ .playing-shell .hand-row .tile { height: 44px; }
+ .playing-shell .table-center { width: 42px; height: 42px; top: 43%; }
+ .playing-shell .table-center small { display: none; }
+ .playing-shell .discard-pool .tile { width: 17px; flex-basis: 17px; height: 23px; min-height: 23px; }
+ .playing-shell .last-play .tile { height: 38px; min-height: 38px; width: 27px; }
+ .playing-shell .last-play>span { font-size: 11px; }
+}
+@media(max-height:500px) and (orientation:landscape) {
+ .playing-shell .topbar { display: none; }
+ .playing-shell .mobile-balance { position: absolute; top: 1px; left: 35%; width: 35%; background: transparent; z-index: 5; }
+ .playing-shell .game-status>div:first-child { font-size: 12px; }
+ .playing-shell .game-page { display: grid; grid-template-columns: minmax(0,1fr) minmax(280px,.85fr); grid-template-rows: 40px minmax(0,1fr); }
+ .playing-shell .game-status { grid-column: 1/-1; }
+ .playing-shell .table-wrap { grid-column: 1; grid-row: 2; }
+ .playing-shell .hand-dock { grid-column: 2; grid-row: 2; align-self: center; }
+ .playing-shell .hand-row { gap: 1px; }
+ .playing-shell .main-nav { justify-content: center; }
+ .playing-shell .opening-heading p { font-size: 11px; }
+}
+@media(max-height:500px) and (orientation:landscape) {
+ .playing-shell .topbar { display: block; position: absolute; inset: auto 0 0; height: 0; padding: 0; }
+ .playing-shell .topbar>.brand,.playing-shell .topbar>.profile-chip { display: none; }
+}

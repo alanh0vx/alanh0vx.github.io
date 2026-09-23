@@ -31,7 +31,7 @@ Published HK rule tables differ; background references include [Sloperama's HK o
 
 Current game, settings, pending choices, exposed melds, names, balances and results automatically save to `hkmj.game.v1` in localStorage. Refresh resumes the pending AI phase or decision without re-dealing or paying twice. Manual Save asks for confirmation. The opaque leave-table dialog supports confirmed save-and-leave or cancel; discarding requires a second explicit confirmation. AI turns and the opening pause while a confirmation is open. Saves are local to this browser and origin; storage failures show a warning. Previous 136-tile saves continue unchanged until the next new hand; the next hand uses 144 tiles. Older saves receive default table settings.
 
-Phone/tablet layout includes safe-area padding, touch targets, a horizontally scrolling hand and a calculator that scrolls within short screens. Chrome emulation covers narrow portrait and landscape layouts; this is not physical iOS/Android testing.
+The live table uses the dynamic viewport height on phones and desktops. All 13–14 concealed tiles fit in one row without horizontal scrolling; tapping a tile selects it with an enlarged preview, and the 出牌 button confirms the discard. Landscape phones show table and hand side by side. Safe-area padding, compact flower racks and an accessible calculator dialog keep controls in view. Chrome emulation covers narrow portrait and landscape layouts; this is not physical iOS/Android testing.
 
 ## Remaining prototype limitations
 
