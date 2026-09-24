@@ -16,3 +16,7 @@ test('exposed chows score as sequences and cannot be upgraded to kongs',()=>{
  const chow=tiles(['萬1','萬2','萬3']);const hand=tiles(['萬1','筒2','筒3','筒4','索4','索5','索6','索7','索8','索9','萬1']);
  const score=scoreHand(hand,[chow]);assert(score);assert(score.patterns.some(p=>p.name==='平糊'));assert(!score.patterns.some(p=>p.name==='對對糊'));assert.equal(kongChoices(tiles(['萬1']),[chow],20).length,0);
 });
+test('full discard payment changes the payer, not total winnings; self draw is unchanged',()=>{
+ assert.deepEqual(settle(0,1,3,100,'full'),[3200,-3200,0,0]);assert.deepEqual(settle(0,1,3,100,'half'),[3200,-1600,-800,-800]);
+ for(const mode of ['full','half'] as const){assert.deepEqual(settle(0,null,3,100,mode),[4800,-1600,-1600,-1600]);for(let winner=0;winner<4;winner++)for(let source=0;source<4;source++)if(winner!==source){const changes=settle(winner,source,0,25,mode);assert.equal(changes.reduce((a,b)=>a+b),0);assert.equal(changes[winner],100);if(mode==='full')assert.equal(changes[source],-100);}}
+});

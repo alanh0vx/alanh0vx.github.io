@@ -38,9 +38,9 @@ export function scoreHand(hand:Tile[],melds:Tile[][]=[],selfDrawn=false,seat='�
 }
 export function eligible(score:HandScore|null,chicken:boolean){return !!score&&(score.handFan??score.fan)>=(chicken?0:3);}
 /** House table: full doubling to eight fan; discard pays double, others single. Cents only. */
-export function settle(winner:number,discarder:number|null,fan:number,baseCents:number){
+export function settle(winner:number,discarder:number|null,fan:number,baseCents:number,paymentMode:'full'|'half'='half'){
  const unit=baseCents*2**Math.min(fan,8),changes=[0,0,0,0];
- for(let i=0;i<4;i++)if(i!==winner){const amount=unit*(discarder===null||i===discarder?2:1);changes[i]-=amount;changes[winner]+=amount;}
+ for(let i=0;i<4;i++)if(i!==winner){const amount=unit*(discarder===null?2:paymentMode==='full'?(i===discarder?4:0):i===discarder?2:1);changes[i]-=amount;changes[winner]+=amount;}
  return changes;
 }
 export function kongChoices(hand:Tile[],melds:Tile[][],wallSize:number){
@@ -51,8 +51,8 @@ export function kongChoices(hand:Tile[],melds:Tile[][],wallSize:number){
  if(meldIndex>=0||hand.filter(t=>tileIndex(t)===tileIndex(tile)).length===4)choices.push({tile,meldIndex});}
  return choices;
 }
-export type TableSettings=DealerState & {personalities:Personality[];banter:boolean;chicken:boolean;baseCents:number;initialCents:number;balances:number[];names:string[];result:TableResult|null;ownPassed:boolean};
-export function defaultTable():TableSettings{return {...initialDealer(),personalities:pickPersonalities(),banter:true,chicken:false,baseCents:100,initialCents:100000,balances:[100000,100000,100000,100000],names:NAME_POOL.slice(0,3),result:null,ownPassed:false};}
+export type TableSettings=DealerState & {paymentMode:'full'|'half';personalities:Personality[];banter:boolean;chicken:boolean;baseCents:number;initialCents:number;balances:number[];names:string[];result:TableResult|null;ownPassed:boolean};
+export function defaultTable():TableSettings{return {...initialDealer(),paymentMode:'half',personalities:pickPersonalities(),banter:true,chicken:false,baseCents:100,initialCents:100000,balances:[100000,100000,100000,100000],names:NAME_POOL.slice(0,3),result:null,ownPassed:false};}
 /** Flowers add settlement fan only; they do not bypass the chosen minimum hand fan. */
 export function scoreWithFlowers(hand:Tile[],melds:Tile[][]=[],selfDrawn=false,seat='東',flowers:Tile[]=[],round='東'):HandScore|null{
  const score=scoreHand(hand,melds,selfDrawn,seat,round);if(!score)return null;
