@@ -1,3 +1,5 @@
+import { initialDealer, type DealerState } from './dealer.ts';
+import { pickPersonalities, type Personality } from './personality.ts';
 import { isChow, validMeld } from './claims.ts';
 import { isWinningShape, tileIndex, type Tile } from './engine.ts';
 export const NAME_POOL=['醒目娟','十三么','阿叔','旺角明','深水埗芬姐','大埔強','荃灣珍','沙田豪','屯門輝','油麻地蓮姐','西環昌','北角玲','觀塘發','元朗琪','將軍澳樂','筲箕灣成','九龍城蘭','長洲波','太子敏','跑馬地健'];
@@ -49,11 +51,11 @@ export function kongChoices(hand:Tile[],melds:Tile[][],wallSize:number){
  if(meldIndex>=0||hand.filter(t=>tileIndex(t)===tileIndex(tile)).length===4)choices.push({tile,meldIndex});}
  return choices;
 }
-export type TableSettings={chicken:boolean;baseCents:number;initialCents:number;balances:number[];names:string[];result:TableResult|null;ownPassed:boolean};
-export function defaultTable():TableSettings{return {chicken:false,baseCents:100,initialCents:100000,balances:[100000,100000,100000,100000],names:NAME_POOL.slice(0,3),result:null,ownPassed:false};}
+export type TableSettings=DealerState & {personalities:Personality[];banter:boolean;chicken:boolean;baseCents:number;initialCents:number;balances:number[];names:string[];result:TableResult|null;ownPassed:boolean};
+export function defaultTable():TableSettings{return {...initialDealer(),personalities:pickPersonalities(),banter:true,chicken:false,baseCents:100,initialCents:100000,balances:[100000,100000,100000,100000],names:NAME_POOL.slice(0,3),result:null,ownPassed:false};}
 /** Flowers add settlement fan only; they do not bypass the chosen minimum hand fan. */
-export function scoreWithFlowers(hand:Tile[],melds:Tile[][]=[],selfDrawn=false,seat='東',flowers:Tile[]=[]):HandScore|null{
- const score=scoreHand(hand,melds,selfDrawn,seat);if(!score)return null;
+export function scoreWithFlowers(hand:Tile[],melds:Tile[][]=[],selfDrawn=false,seat='東',flowers:Tile[]=[],round='東'):HandScore|null{
+ const score=scoreHand(hand,melds,selfDrawn,seat,round);if(!score)return null;
  const matching=flowers.filter(t=>t.flower!==undefined&&t.flower%4==='東南西北'.indexOf(seat));
  return {...score,handFan:score.fan,fan:score.fan+matching.length,patterns:[...score.patterns,...matching.map(t=>({name:`正花 ${['梅','蘭','菊','竹','春','夏','秋','冬'][t.flower!]}`,fan:1}))]};
 }

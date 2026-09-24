@@ -1,3 +1,5 @@
+import { seatWind } from './dealer.ts';
+import { PERSONALITIES } from './personality.ts';
 import { chowChoices, validMeld, type Flow } from './claims.ts';
 import { flowerTiles, type OpeningState } from './opening.ts';
 import { defaultTable, eligible, scoreHand, type TableSettings } from './table-rules.ts';
@@ -26,6 +28,8 @@ export function parseSave(raw: string|null): GameSave|null {
   }
   s.table??=defaultTable();
   const t=s.table;
+  t.dealer??=0;t.roundIndex??=0;t.handIndex??=0;t.repeats??=0;t.personalities??=[...PERSONALITIES];t.banter??=true;
+  if(![t.dealer,t.handIndex].every(n=>Number.isInteger(n)&&n>=0&&n<4)||!Number.isInteger(t.roundIndex)||t.roundIndex<0||t.roundIndex>3||!Number.isInteger(t.repeats)||t.repeats<0||typeof t.banter!=='boolean'||!Array.isArray(t.personalities)||t.personalities.length!==3||!t.personalities.every(p=>PERSONALITIES.includes(p)))return null;
   if(typeof t.chicken!=='boolean'||typeof t.ownPassed!=='boolean'||![25,50,100,200,500].includes(t.baseCents)||![10000,50000,100000,500000].includes(t.initialCents))return null;
   if(!Array.isArray(t.balances)||t.balances.length!==4||!t.balances.every(Number.isSafeInteger)||t.balances.reduce((a,b)=>a+b,0)!==t.initialCents*4)return null;
   if(!Array.isArray(t.names)||t.names.length!==3||new Set(t.names).size!==3||!t.names.every(n=>typeof n==='string'&&n.length>0&&n.length<30))return null;
@@ -47,7 +51,7 @@ export function parseSave(raw: string|null): GameSave|null {
    if(s.claimPending){
     if(!s.busy||!s.lastPlay||t.result)return null;
     const canPung=s.melds.length<4&&s.hand.filter(tile=>tile.suit===s.lastPlay!.tile.suit&&tile.n===s.lastPlay!.tile.n&&tile.honor===s.lastPlay!.tile.honor).length>=2;
-    if(!canPung&&!chowChoices(s.hand,s.lastPlay.tile,0,s.lastPlay.ai+1).length&&!eligible(scoreHand([...s.hand,s.lastPlay.tile],s.melds,false,s.seat),t.chicken))return null;
+    if(!canPung&&!chowChoices(s.hand,s.lastPlay.tile,0,s.lastPlay.ai+1).length&&!eligible(scoreHand([...s.hand,s.lastPlay.tile],s.melds,false,seatWind(0,t.dealer),'東南西北'[t.roundIndex]),t.chicken))return null;
    }
    if(!s.aiHands.every((h,i)=>t.result?[13-s.aiMelds[i].length*3,14-s.aiMelds[i].length*3].includes(h.length):h.length===((s.busy&&s.flow?.player===i+1&&['discard','rob'].includes(s.flow.phase))?14:13)-s.aiMelds[i].length*3))return null;
    if(!s.busy&&(s.activeAI!==null||s.lastPlay!==null))return null;

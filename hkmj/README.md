@@ -23,7 +23,7 @@ The setup page shows the entire payout table before starting. Provisional stake 
 
 Full doubling to an eight-fan payment cap: base Ã— 2^fan; discarder pays two shares, other losers one each; on self-draw all three pay two shares. Amounts are integer cents. Kong has no separate payment. Negative virtual balances are allowed. There is no real-money transaction.
 
-Implemented fan: self-draw, all chows, dragon pungs and matching seat/round-wind pungs (1 each); mixed one suit, all pungs, mixed terminals (3); little three dragons (5); pure one suit (7); all honors, pure terminals, big three dragons and little four winds (10); big four winds and thirteen orphans (13). The highest supported decomposition is used; higher fan hands pay at the cap. There is no flowerless/closed-hand bonus and no seven-pairs special hand in this version. The current round wind remains East.
+Implemented fan: self-draw, all chows, dragon pungs and matching seat/round-wind pungs (1 each); mixed one suit, all pungs, mixed terminals (3); little three dragons (5); pure one suit (7); all honors, pure terminals, big three dragons and little four winds (10); big four winds and thirteen orphans (13). The highest supported decomposition is used; higher fan hands pay at the cap. There is no flowerless/closed-hand bonus and no seven-pairs special hand in this version. Seat and prevailing winds follow dealer rotation.
 
 Published HK rule tables differ; background references include [Sloperama's HK overview](https://sloperama.com/mjfaq/mjfaq17.html) and [Old Hong Kong table rules](https://c.tabletopia.com/games/old-hong-kong-mahjong/rules/mahjong-rules/en). The visible in-game table is authoritative for this prototype.
 
@@ -35,8 +35,12 @@ The live table uses the dynamic viewport height on phones and desktops. All 13â€
 
 ## Remaining prototype limitations
 
-Full dealer/seat/round progression is not implemented; Next hand repeats the current round configuration. History, rankings and profile statistics remain example data. The manual fan calculator is a limited helper, separate from automatic settlement. Advanced AI strength has not been validated.
+History, rankings and profile statistics remain example data. The manual fan calculator is a limited helper, separate from automatic settlement. Advanced AI strength has not been validated.
 
 Optional synthesized sound effects cover shuffling, stacking, dice, dealing, drawing/discarding, flowers, pung/kong and wins. The setup switch and in-game mute button share a saved preference. Muting, opening a confirmation, skipping the opening, or hiding the page stops scheduled sounds. One reusable Web Audio context unlocks on a click/tap; unsupported or blocked audio never blocks gameplay. No sound downloads are required.
 
 Opponent bubbles show brief Cantonese reactions to thinking, melds, wins and dealing in. Exposed AI melds appear beside their seats. The compact flower summary opens a dialog with enlarged, named flower tiles grouped by player.
+
+Dealer progression: the selected human seat determines the initial East player. The dealer receives fourteen tiles and discards first. Dealer wins and drawn hands retain dealership and increment the repeat counter; a non-dealer win passes East to the next player and resets repeats. Four dealer changes advance the prevailing wind; the selected East / East-South / four-round match ends after its last rotation. Dealer repeats do not add payments or fan. Dealer state, personality assignments and the banter switch are saved.
+
+Each table includes a polite, impatient and cheeky opponent. Reactions vary by personality and event. While waiting for a human discard, idle comments occur at 20, 50 and 90 seconds, expire after 6.5 seconds, and never force a discard. Dialogs and hidden tabs suspend the idle counter. Banter can be disabled independently of sound.
