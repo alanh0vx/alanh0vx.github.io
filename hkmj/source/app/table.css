@@ -2,7 +2,7 @@
    participate in bounded grid areas; gameplay never changes the table height. */
 .playing-shell { height: 100dvh; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 .playing-shell .topbar { position: relative; height: 56px; flex-shrink: 0; padding-inline: 20px; }
-.playing-shell .game-page { flex: 1; min-height: 0; min-width: 0; padding-bottom: 0; display: grid; grid-template-rows: 44px 40px minmax(0,1fr) 242px; }
+.playing-shell .game-page { flex: 1; min-height: 0; min-width: 0; padding-bottom: 0; display: grid; grid-template-rows: 44px 40px minmax(0,1fr) 262px; }
 .game-status { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 44px; padding: 0 14px; background: #fffdf8; border-bottom: 1px solid var(--line); }
 .game-status > div:first-child { min-width: 0; }
 .game-status .save-actions { flex-shrink: 0; flex-wrap: nowrap; }
@@ -67,11 +67,11 @@
 .river-tile { display: flex; width: 100%; min-width: 0; aspect-ratio: 5 / 7; overflow: hidden; background: #fff6d9; border-radius: 2px; border-bottom: 2px solid #bdac79; }
 .river-tile svg { display: block; width: 100%; height: 100%; min-height: 0; }
 .river-latest { outline: 2px solid #dfac43; outline-offset: -2px; background: #ffdf87; }
-.hand-dock { width: min(1240px,calc(100% - 24px)); margin: 0 auto 6px; background: #0d4032; border: 8px solid #603f29; border-top: 0; border-radius: 0 0 18px 18px; padding: 6px 12px; min-width: 0; min-height: 0; color: #fff4d5; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 32px 20px 44px 60px 44px; gap: 3px 8px; }
+.hand-dock { width: min(1240px,calc(100% - 24px)); margin: 0 auto 6px; background: #0d4032; border: 8px solid #603f29; border-top: 0; border-radius: 0 0 18px 18px; padding: 6px 12px; min-width: 0; min-height: 0; color: #fff4d5; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 32px 20px 44px 80px 44px; gap: 3px 8px; }
 .hand-dock .turn-message, .hand-dock .action-row, .hand-dock .meld-group > span { color: #fff4d5; }
 .hand-dock > .seat-flowers { flex-direction: row; flex-wrap: wrap; justify-content: center; width: fit-content; margin: 0 auto; min-height: 0; grid-column: 1; grid-row: 1; padding: 1px 4px; }
-.hand-row { grid-column: 1 / -1; grid-row: 4; display: grid; grid-template-columns: repeat(14,minmax(0,1fr)); gap: 4px; width: min(100%,780px); margin: 0 auto; padding: 5px 3px; }
-.hand-row .tile { width: 100%; min-width: 0; height: 50px; min-height: 44px; padding: 2px 1px; }
+.hand-row { --hand-tile-height: 70px; grid-column: 1 / -1; grid-row: 4; display: grid; grid-template-columns: repeat(14,minmax(0,calc(var(--hand-tile-height)*5/7))); justify-content: center; align-items: start; gap: 4px; width: min(100%,780px); margin: 0 auto; padding: 5px 3px; }
+.hand-row .tile { width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 5 / 7; padding: 2px 1px; }
 .hand-row .tile-drawn { margin-left: 0; outline-offset: 0; }
 .hand-row[aria-busy=true] .tile { cursor: wait; }
 .hand-dock .action-row { grid-column: 1 / -1; grid-row: 5; width: min(100%,780px); margin: 0 auto; flex-wrap: wrap; gap: 4px; }
@@ -103,8 +103,8 @@
  .table-wrap { padding: 4px 6px 0; overflow-y: auto; }
  .playing-shell .game-page { grid-template-rows: 52px 50px minmax(0,1fr) 270px; }
  .hand-dock { grid-template-rows: 28px 20px 44px 96px 44px; }
- .hand-row { grid-template-columns: repeat(7,minmax(0,1fr)); padding: 2px; gap: 4px; width: min(100%,420px); }
- .hand-row .tile { height: 44px; }
+ .hand-row { grid-template-columns: repeat(7,minmax(0,calc(var(--hand-tile-height)*5/7))); padding: 2px; gap: 4px; width: min(100%,420px); }
+ .hand-row { --hand-tile-height: 44px; }
  .hand-dock { width: calc(100% - 12px); }
  .mahjong-table { flex: none; height: 540px; grid-template-columns: minmax(70px,1fr) minmax(0,2.4fr) minmax(70px,1fr); gap: 10px; padding: 12px 8px; }
  .opponent .avatar { width: 30px; height: 30px; font-size: 18px; }
@@ -147,8 +147,8 @@
  .hand-dock { grid-column: 2; grid-row: 3; width: 100%; margin: 34px 6px 6px 0; border: 8px solid #603f29; border-left: 0; border-radius: 0 18px 18px 0; padding: 6px; grid-template-columns: 1fr; grid-template-rows: 32px 32px minmax(44px,1fr) 112px 44px; }
  .hand-dock > .seat-flowers { grid-column: 1; }
  .hand-dock .meld-row { grid-column: 1; grid-row: 3; align-self: start; }
- .hand-row { grid-template-columns: repeat(7,minmax(0,1fr)); gap: 3px; padding: 4px 0; }
- .hand-row .tile { height: 48px; }
+ .hand-row { grid-template-columns: repeat(7,minmax(0,calc(var(--hand-tile-height)*5/7))); gap: 3px; padding: 4px 0; }
+ .hand-row { --hand-tile-height: 48px; }
  .hand-dock .action-row > span { display: none; }
  .hand-dock .turn-message { font-size: 12px; text-align: center; }
 }
@@ -166,7 +166,7 @@
  .hand-dock { margin-top: 4px; padding: 4px; border-width: 6px; border-left: 0; grid-template-rows: 24px 20px 40px 92px 40px; gap: 2px; }
  .hand-dock > .seat-flowers .flower-mini { width: 13px; height: 18px; flex-basis: 13px; }
  .hand-dock .seat-flowers { min-height: 24px; }
- .hand-dock .hand-row .tile { height: 42px; min-height: 42px; }
+ .hand-dock .hand-row { --hand-tile-height: 42px; }
  .hand-dock .action-row { min-height: 40px; }
  .hand-dock .discard-button { min-height: 40px; height: 40px; }
 }

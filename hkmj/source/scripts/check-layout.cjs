@@ -36,6 +36,7 @@ const {parseSave}=require('../lib/mahjong/save.ts');
  const wrap=document.querySelector('.table-wrap');if(innerWidth>900&&wrap.scrollHeight>wrap.clientHeight+1)issues.push('desktop table scroll');
  const outer=[...document.querySelectorAll('.game-status,.mobile-balance,.table-wrap,.hand-dock')];for(let i=0;i<outer.length;i++)for(const c of outer.slice(i+1))if(hit(outer[i],c))issues.push('outer sections overlap');
  const hand=document.querySelector('.hand-row');if(hand.scrollWidth>hand.clientWidth+1)issues.push('hand overflow');
+ for(const tile of hand.querySelectorAll('.tile')){const r=rect(tile);if(Math.abs(r.width/r.height-5/7)>.015)issues.push('hand tile lost portrait proportions');}
  const action=rect(document.querySelector('.action-row')),dock=rect(document.querySelector('.hand-dock'));if(action.bottom>dock.bottom+1)issues.push('clipped action');
  return issues;});assert.deepEqual(issues,[],label);assert.deepEqual(errors,[],label);
  }
