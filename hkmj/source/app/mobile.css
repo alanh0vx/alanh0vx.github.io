@@ -326,3 +326,7 @@ button:focus-visible { outline: 3px solid #d5a744; outline-offset: 3px; }
 /* Reserve a bounded center region below the round marker, and scale to fit it. */
 .playing-shell .discard-pool.river-grid{top:39%;transform:translateX(-50%);height:auto;max-height:57%;max-width:54%;bottom:auto}.river-tiles{--river-tile-width:min(32px,2.2vw,calc((48cqh - 24px)/var(--river-row-count,1)*5/7));grid-template-columns:repeat(var(--river-columns,12),var(--river-tile-width));grid-auto-rows:calc(var(--river-tile-width)*7/5)}
 @media(max-width:900px){.opponent.west .seat-public,.opponent.east .seat-public{max-width:78px}.opponent.west .seat-public .ai-melds,.opponent.east .seat-public .ai-melds{max-width:78px;gap:2px}.playing-shell .wall-west{left:26%}.playing-shell .wall-east{right:26%}.playing-shell .discard-pool.river-grid{top:49%;max-height:47%}.river-tiles{--river-tile-width:min(calc((43vw - 20px)/12),calc((40cqh - 24px)/var(--river-row-count,1)*5/7))}}
+/* Fit against actual seat/marker bounds, including wrapped melds and flowers. */
+.playing-shell .discard-pool.river-grid{max-height:none;transform:translateX(-50%)}
+.river-grid .river-tiles{--river-tile-width:var(--fitted-river-tile,18px)}
+@media(max-width:900px){.opponent.north .seat-public{top:0}.playing-shell .wall-north{top:58px}.opponent.west .seat-public,.opponent.east .seat-public,.opponent.west .seat-public .ai-melds,.opponent.east .seat-public .ai-melds{max-width:60px}}
