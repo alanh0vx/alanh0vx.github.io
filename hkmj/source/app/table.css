@@ -1,0 +1,104 @@
+/* Single source of truth for the live table. Seats, chat and tile racks all
+   participate in normal flow; no position depends on the viewport height. */
+.playing-shell { min-height: 100dvh; display: flex; flex-direction: column; }
+.playing-shell .topbar { position: relative; height: 56px; flex-shrink: 0; padding-inline: 20px; }
+.playing-shell .game-page { flex: 1; min-width: 0; padding-bottom: 0; }
+.game-status { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 44px; padding: 6px 14px; background: #fffdf8; border-bottom: 1px solid var(--line); }
+.game-status > div { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.game-status .scores { gap: 18px; }
+.mobile-balance { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 6px 12px; font-size: 12px; color: #173c30; background: #eee6d4; }
+.table-wrap { display: flex; flex-direction: column; gap: 6px; width: min(100%,1264px); margin-inline: auto; padding: 8px 12px; }
+.coach-toggle { align-self: flex-end; order: -1; gap: 5px; background: #fff9e8; color: #173d30; border-color: #c6b77d; font-size: 12px; }
+.coach-toggle svg { width: 17px; height: 17px; }
+.mahjong-table {
+ --meld-width: 20px;
+ display: grid; grid-template-columns: minmax(130px,1fr) minmax(0,3fr) minmax(130px,1fr);
+ grid-template-areas: 'north north north' 'west marker east' 'west played east' 'west river east';
+ grid-template-rows: auto auto auto 1fr;
+ align-items: start; gap: 12px 24px; min-width: 0; min-height: 420px; padding: 16px;
+ position: relative; border: 8px solid #603f29; border-radius: 18px;
+ background: radial-gradient(circle,#17604b,#0a3c2e 72%);
+ box-shadow: inset 0 0 0 2px #e9cb8b,0 15px 40px #13251c40;
+}
+.opponent { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; color: white; text-align: center; }
+.opponent > span { max-width: 100%; font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+.opponent small { display: block; color: #d3dfd9; font-weight: 400; }
+.opponent .avatar { flex-shrink: 0; width: 40px; height: 40px; font-size: 24px; }
+.north { grid-area: north; justify-self: center; width: min(100%,640px); display: grid; grid-template-columns: 40px minmax(70px,1fr) minmax(0,2fr); text-align: left; }
+.north > .avatar { grid-column: 1; grid-row: 1; }
+.north > span:not(.ai-bubble):not(.avatar) { grid-column: 2; grid-row: 1; }
+.north .seat-public { grid-column: 3; grid-row: 1; }
+.north .ai-bubble { grid-column: 1 / -1; grid-row: 2; justify-self: center; }
+.north .wall { grid-column: 1 / -1; grid-row: 3; }
+.west { grid-area: west; }
+.east { grid-area: east; }
+.seat-public { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; min-width: 0; }
+.ai-melds { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; width: 100%; min-width: 0; }
+.ai-melds > span { display: flex; gap: 1px; }
+.ai-melds .tile.tile-sm { flex: 0 0 var(--meld-width); width: var(--meld-width); height: calc(var(--meld-width) * 1.4); min-width: 0; min-height: 0; padding: 1px; border-bottom-width: 2px; transform: none; }
+.seat-flowers { display: flex; flex-direction: column; align-items: center; gap: 4px; max-width: 100%; padding: 5px 7px; background: #fff9e8; border: 1px solid #ccb778; border-radius: 7px; color: #173d30; cursor: pointer; }
+.seat-flower-label { font-size: 12px; line-height: 1.3; font-weight: 600; overflow-wrap: anywhere; }
+.seat-flower-tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; max-width: 100%; }
+.flower-mini { display: inline-flex; flex: 0 0 22px; width: 22px; height: 31px; padding: 1px; border: 1px solid #baa96d; border-bottom: 3px solid #c9b983; border-radius: 3px; background: #fff9dd; }
+.flower-mini svg { width: 100%; height: 100%; }
+.flower-enlarge { font-size: 10px; color: #705c29; }
+.north .seat-flowers { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+.opponent .ai-bubble { max-width: 100%; padding: 6px 9px; border-radius: 12px; background: #fff9e8; color: #173d30; font-size: 12px; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; box-shadow: 0 2px 8px #0003; }
+.wall { display: flex; justify-content: center; gap: 2px; width: 100%; min-width: 0; pointer-events: none; }
+.wall i { display: block; flex: 0 1 26px; min-width: 0; height: 16px; border-radius: 3px; background: #f7efce; border-bottom: 4px solid #58a28e; }
+.wall-west, .wall-east { flex-direction: column; align-items: center; }
+.wall-west i, .wall-east i { flex: none; width: 13px; height: 18px; border-bottom: 0; border-right: 3px solid #58a28e; }
+.table-center { grid-area: marker; justify-self: center; display: grid; place-items: center; grid-template-columns: 1fr 1fr; width: 48px; height: 48px; background: #ecd596; border: 3px solid #ba9440; box-shadow: inset 0 0 0 3px #f5e8bc; }
+.table-center span { font: bold 18px Georgia; color: var(--red); }
+.table-center b { font: 700 18px Georgia; }
+.table-center small { grid-column: 1 / 3; font-size: 9px; }
+.last-play { grid-area: played; justify-self: center; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; max-width: 100%; padding: 5px 10px; border-radius: 8px; background: #09392ef2; color: #fff0bd; text-align: center; }
+.last-play > span { font-size: 12px; font-weight: 700; }
+.last-play .tile { width: 32px; height: 45px; min-height: 0; }
+.discard-pool.river-grid { grid-area: river; justify-self: center; display: flex; flex-direction: column; align-items: center; gap: 5px; width: min(100%,410px); min-width: 0; min-height: 0; padding: 6px; border: 1px solid #ebdda02b; border-radius: 8px; background: #092e2429; color: #f5e9c6; cursor: pointer; }
+.river-caption { font-size: 12px; line-height: 1.4; }
+.river-tiles { display: grid; grid-template-columns: repeat(var(--river-columns,12),minmax(0,32px)); justify-content: center; gap: 1px; width: 100%; }
+.river-tile { display: flex; width: 100%; min-width: 0; aspect-ratio: 5 / 7; overflow: hidden; background: #fff6d9; border-radius: 2px; border-bottom: 2px solid #bdac79; }
+.river-tile svg { display: block; width: 100%; height: 100%; min-height: 0; }
+.river-latest { outline: 2px solid #dfac43; outline-offset: -2px; background: #ffdf87; }
+.hand-dock { background: #fffdf8; border-top: 1px solid var(--line); padding: 8px 12px 12px; min-width: 0; }
+.hand-dock > .seat-flowers { flex-direction: row; flex-wrap: wrap; justify-content: center; width: fit-content; margin: 0 auto 6px; }
+.hand-row { display: grid; grid-template-columns: repeat(14,minmax(0,1fr)); gap: 4px; width: min(100%,780px); margin: 0 auto; padding: 8px 3px; }
+.hand-row .tile { width: 100%; min-width: 0; height: clamp(44px,8vw,66px); min-height: 44px; padding: 2px 1px; }
+.hand-row .tile-drawn { margin-left: 0; outline-offset: 0; }
+.hand-row[aria-busy=true] .tile { cursor: wait; }
+.hand-dock .action-row { flex-wrap: wrap; gap: 8px; }
+.hand-dock .action-row > div { margin-left: auto; }
+@media (max-width: 900px) {
+ .playing-shell { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+ .playing-shell .topbar { padding-inline: 10px; }
+ .game-status .scores { display: none; }
+ .table-wrap { padding: 6px; }
+ .mahjong-table { grid-template-columns: minmax(70px,1fr) minmax(0,2.4fr) minmax(70px,1fr); gap: 10px; padding: 12px 8px; }
+ .opponent .avatar { width: 30px; height: 30px; font-size: 18px; }
+ .north { grid-template-columns: 30px minmax(64px,1fr) minmax(0,2fr); }
+ .wall-west, .wall-east { flex-direction: row; flex-wrap: wrap; }
+ .wall-west i, .wall-east i { flex: 0 1 10px; width: 10px; height: 14px; border-right: 0; border-bottom: 3px solid #58a28e; }
+}
+@media (max-width: 600px) {
+ .playing-shell .topbar { height: 48px; }
+ .playing-shell .brand { font-size: 16px; }
+ .playing-shell .brand small { display: none; }
+ .playing-shell .brand-mark { width: 30px; height: 30px; }
+ .game-status { padding-inline: 6px; }
+ .game-status > div { gap: 4px; }
+ .game-status button { padding-inline: 8px; }
+ .save-actions svg { display: none; }
+ .mahjong-table { --meld-width: 13px; grid-template-columns: minmax(58px,1fr) minmax(0,2.4fr) minmax(58px,1fr); gap: 8px 6px; border-width: 6px; padding: 10px 6px; min-height: 320px; }
+ .opponent { gap: 6px; }
+ .opponent > span, .seat-flower-label, .opponent .ai-bubble { font-size: 11px; }
+ .opponent .ai-bubble { padding: 4px; }
+ .seat-flowers { padding: 4px 2px; }
+ .flower-mini { flex-basis: 16px; width: 16px; height: 23px; }
+ .opponent .flower-enlarge { display: none; }
+ .river-caption { font-size: 10px; }
+ .discard-pool.river-grid { padding: 3px; }
+ .river-tile { border-bottom-width: 1px; }
+ .hand-dock { padding-inline: 6px; }
+ .hand-row { gap: 2px; }
+}

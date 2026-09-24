@@ -46,3 +46,20 @@ Dealer progression: the selected human seat determines the initial East player. 
 Each table includes a polite, impatient and cheeky opponent. Reactions vary by personality and event. While waiting for a human discard, idle comments occur at 20, 50 and 90 seconds, expire after 6.5 seconds, and never force a discard. Dialogs and hidden tabs suspend the idle counter. Banter can be disabled independently of sound.
 
 Before starting, choose 全銃 (discarder pays all four units) or 半銃 (discarder pays two units, other losers one each). Self-draw remains two units per loser in both modes. Half payment is the existing/default behavior and the migration default for older saves. The selected mode updates the payout table and persists for the match.
+
+## Responsive layout regression checks
+
+The live table layout is defined in `source/app/table.css`. Each opponent owns
+its chat, exposed racks and concealed tiles in normal flow. Keep table geometry
+out of `globals.css` and `mobile.css`; short screens scroll instead of clipping
+controls. Do not reintroduce absolute seat/rack coordinates or viewport-height
+river fitting.
+
+`scripts/check-layout.cjs` in `source/` checks 13 viewport sizes (320–1920px),
+including portrait, landscape and both sides of the 900px breakpoint. It loads
+validated early, crowded, eight-flower and winning-decision saves, then checks
+pairwise collisions and overflow with simultaneous long chat and last-discard
+content. It also exercises the detail dialogs, passing, selecting and discarding.
+Run with a separate installed Playwright package via `PLAYWRIGHT_MODULE`, and
+set `LAYOUT_URL` to a running preview (defaults to `http://127.0.0.1:4175/`).
+These checks use Chrome emulation, not physical iOS Safari.
