@@ -299,3 +299,17 @@ button:focus-visible { outline: 3px solid #d5a744; outline-offset: 3px; }
 /* Keep the top player's public tiles clear of the concealed row. */
 .opponent.north .seat-public{right:calc(100% + 160px)}
 @media(max-width:900px){.opponent.north .seat-public{right:calc(100% + 7px)}.playing-shell .wall-north{top:94px}}
+/* Discards keep the same portrait proportions as physical tiles. */
+.river-tiles{justify-items:center;align-items:start}.river-tile{width:100%;max-width:27px;aspect-ratio:5 / 7;height:auto;max-height:100%;align-self:start;overflow:hidden}.river-tile svg{display:block;flex:none;width:100%;height:100%;aspect-ratio:5 / 7}
+@media(max-width:600px){.river-tile{max-width:18px}}
+.river-tiles{container-type:size}.river-tile{width:min(27px,calc((100cqw - 22px)/12),calc((100cqh / var(--river-rows) - 2px)*5/7));max-height:none}
+/* Pack each row tightly instead of distributing tiles across the river width. */
+.river-tiles{--river-tile-width:min(27px,calc((100cqw - 11px)/12),calc((100cqh / var(--river-rows) - 1px)*5/7));grid-template-columns:repeat(12,var(--river-tile-width));grid-template-rows:none!important;grid-auto-rows:calc(var(--river-tile-width)*7/5);justify-content:start;align-content:start;justify-items:stretch;gap:1px}.river-tile{width:var(--river-tile-width);max-width:none}
+.playing-shell .discard-pool.river-grid{container-type:size}.river-tiles{container-type:normal;--river-tile-width:min(27px,calc((100cqw - 11px)/12),calc(((100cqh - 24px) / var(--river-rows) - 1px)*5/7))}
+/* Fill the river width with contiguous portrait tiles; add columns as it fills. */
+.river-tiles{--river-tile-width:min(calc((100cqw - 11px)/12),calc(((100cqh - 24px) / var(--river-rows) - 1px)*5/7));grid-template-columns:repeat(auto-fill,var(--river-tile-width));justify-content:start}.river-tile{max-width:none}
+/* Anchor north flowers in their own corner, outside the central river bounds. */
+.opponent.north .seat-public{position:fixed;position:absolute;right:auto;left:calc(50% - 42cqw);top:0;transform:none;max-width:120px;align-items:flex-start}
+.mahjong-table{container-type:size}
+@media(max-width:900px){.opponent.north .seat-public{left:calc(50% - 42cqw);right:auto;max-width:90px}.opponent.north .seat-public .seat-flower-tiles{max-width:76px}}
+.river-tiles{--river-tile-width:calc((100cqw - (var(--river-columns,12) - 1)*1px)/var(--river-columns,12));grid-template-columns:repeat(var(--river-columns,12),minmax(0,1fr));grid-auto-rows:calc(var(--river-tile-width)*7/5);width:100%}.river-tile{width:100%}
