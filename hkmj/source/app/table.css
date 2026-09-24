@@ -16,7 +16,7 @@
  --meld-width: 16px;
  display: grid; grid-template-columns: minmax(130px,1fr) minmax(0,3fr) minmax(130px,1fr);
  grid-template-areas: 'north north north' 'west marker east' 'west played east' 'west river east';
- grid-template-rows: 136px 32px 44px minmax(0,1fr);
+ grid-template-rows: 136px 68px 44px minmax(0,1fr);
  align-items: start; gap: 6px 18px; min-width: 0; flex: 1; height: auto; min-height: 0; padding: 10px;
  position: relative; border: 8px solid #603f29; border-radius: 18px 18px 0 0; border-bottom: 2px solid #e9cb8b;
  background: radial-gradient(circle,#17604b,#0a3c2e 72%);
@@ -54,10 +54,10 @@
 .wall i { display: block; flex: 0 1 26px; min-width: 0; height: 16px; border-radius: 3px; background: #f7efce; border-bottom: 4px solid #58a28e; }
 .wall-west, .wall-east { flex: 1; min-height: 18px; max-height: 180px; flex-direction: column; align-items: center; }
 .wall-west i, .wall-east i { flex: 0 1 18px; min-height: 0; width: 13px; height: 18px; border-bottom: 0; border-right: 3px solid #58a28e; }
-.table-center { grid-area: marker; justify-self: center; display: grid; place-items: center; grid-template-columns: 1fr 1fr; width: 36px; height: 32px; background: #ecd596; border: 3px solid #ba9440; box-shadow: inset 0 0 0 3px #f5e8bc; }
-.table-center span { font: bold 14px Georgia; color: var(--red); }
-.table-center b { font: 700 14px Georgia; }
-.table-center small { grid-column: 1 / 3; font-size: 9px; }
+.table-center { grid-area: marker; justify-self: center; display: grid; place-items: center; grid-template-columns: 1fr 1fr; grid-template-rows: minmax(0,1fr) 16px; width: 76px; height: 68px; padding: 6px; background: #ecd596; border: 3px solid #ba9440; box-shadow: inset 0 0 0 3px #f5e8bc; }
+.table-center span { font: bold 28px/1 Georgia; color: var(--red); }
+.table-center b { font: 700 28px/1 Georgia; }
+.table-center small { grid-column: 1 / 3; font-size: 12px; line-height: 16px; white-space: nowrap; }
 .last-play { grid-area: played; justify-self: center; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; max-width: 100%; padding: 3px 6px; border-radius: 8px; background: #09392ef2; color: #fff0bd; text-align: center; }
 .last-play > span { font-size: 12px; font-weight: 700; }
 .last-play .tile { width: 24px; height: 32px; min-height: 0; }
@@ -77,7 +77,10 @@
 .hand-dock .action-row { grid-column: 1 / -1; grid-row: 5; width: min(100%,780px); margin: 0 auto; flex-wrap: wrap; gap: 4px; }
 .hand-dock .turn-message { grid-column: 1 / -1; grid-row: 2; margin: 0; }
 .hand-dock .meld-row { grid-column: 2; grid-row: 1; margin: 0; align-self: center; }
-.hand-dock .claim-choice { grid-column: 1 / -1; grid-row: 3; margin: 0; overflow-y: auto; }
+.hand-dock .claim-choice { grid-column: 1 / -1; grid-row: 3; margin: 0; padding: 1px 6px; color: #17322a; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; overflow-y: hidden; }
+.hand-dock .claim-choice strong { flex-shrink: 0; color: #17322a; }
+.hand-dock .claim-choice button { flex-shrink: 0; height: 40px; min-height: 40px; }
+.hand-dock .claim-choice button:not(.claim-button) { color: #17322a; background: #fffdf1; border: 2px solid #17322a; font-weight: 700; }
 .hand-dock .flower-notice { grid-column: 1 / -1; grid-row: 3; margin: 0; }
 .hand-dock .action-row > div { margin-left: auto; }
 /* Side hands run along the edge, with exposed sets facing their owner. */
@@ -121,7 +124,7 @@
  .game-status > div { gap: 4px; }
  .game-status button { padding-inline: 8px; }
  .save-actions svg { display: none; }
- .mahjong-table { --meld-width: 13px; grid-template-columns: minmax(58px,1fr) minmax(0,2.4fr) minmax(58px,1fr); gap: 8px 6px; border-width: 6px; padding: 10px 6px; height: 540px; min-height: 0; grid-template-rows: 190px 32px 44px minmax(0,1fr); }
+ .mahjong-table { --meld-width: 13px; grid-template-columns: minmax(58px,1fr) minmax(0,2.4fr) minmax(58px,1fr); gap: 8px 6px; border-width: 6px; padding: 10px 6px; height: 540px; min-height: 0; grid-template-rows: 190px 60px 44px minmax(0,1fr); }
  .opponent { gap: 6px; }
  .opponent > span, .seat-flower-label, .opponent .ai-bubble { font-size: 11px; }
  .opponent .ai-bubble { padding: 4px; }
@@ -181,7 +184,9 @@
  .seat-public > .ai-melds, .seat-public > .seat-flowers { display: none; }
  .seat-details-toggle { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 44px; padding: 3px; border: 1px solid #bda96e; border-radius: 5px; background: #fff5d9; color: #173d30; font-size: 11px; }
  .seat-details-toggle small { color: #596950; font-size: 10px; }
- .mahjong-table { height: 360px; min-height: 360px; grid-template-rows: 96px 32px 44px minmax(0,1fr); }
+ .mahjong-table { height: 360px; min-height: 360px; grid-template-rows: 96px 60px 44px minmax(0,1fr); }
+ .table-center { width: 68px; height: 60px; padding: 4px; }
+ .table-center span, .table-center b { font-size: 24px; }
  .opponent .ai-bubble { -webkit-line-clamp: 1; font-size: 10px; line-height: 14px; padding: 2px 4px; }
  .opponent { gap: 3px; }
  .opponent .avatar { width: 24px; height: 24px; }
@@ -191,12 +196,12 @@
  .wall-north i { height: 12px; }
 }
 @media (max-width: 900px) and (max-height: 500px) and (min-aspect-ratio: 3/2) {
- .mahjong-table { height: 100%; min-height: 0; flex: 1; padding: 6px; gap: 4px 8px; grid-template-rows: 80px 24px 36px minmax(0,1fr); }
+ .mahjong-table { height: 100%; min-height: 0; flex: 1; padding: 6px; gap: 4px 8px; grid-template-rows: 80px 36px 36px minmax(0,1fr); }
  .opponent { gap: 2px; }
  .opponent .avatar { width: 16px; height: 16px; font-size: 10px; }
  .opponent > span { font-size: 10px; line-height: 12px; }
  .north { grid-template-columns: 16px minmax(60px,1fr) minmax(0,1fr); }
- .table-center { width: 30px; height: 24px; }
+ .table-center { width: 68px; height: 36px; padding: 2px 4px; grid-template-rows: minmax(0,1fr); }
  .table-center small { display: none; }
  .last-play { padding: 1px 3px; gap: 3px; }
  .last-play .tile { width: 20px; height: 28px; }
@@ -208,3 +213,7 @@
 }
 
 .hand-dock .discard-button { background: #e5c571; color: #17322a; font-weight: 700; }
+
+@media (max-height: 500px) and (min-aspect-ratio: 3/2) {
+ .hand-dock .claim-choice button { height: 36px; min-height: 36px; }
+}
