@@ -217,3 +217,14 @@
 @media (max-height: 500px) and (min-aspect-ratio: 3/2) {
  .hand-dock .claim-choice button { height: 36px; min-height: 36px; }
 }
+
+/* Result cards have a light background, independent of the dark hand dock. */
+.playing-shell .hand-result { color: #17322a; width: min(680px, calc(100% - 24px)); }
+.hand-result .winner-total { font-size: 22px; font-weight: 800; color: #0e4938; margin: 8px 0; }
+.winning-reveal { margin: 12px 0; display: grid; gap: 8px; }
+.winning-tiles, .winning-melds { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; }
+.winning-melds { gap: 12px; }
+.winning-reveal .tile { width: 30px; height: 42px; min-height: 0; padding: 0; flex: none; }
+.winning-tile { outline: 3px solid #b47b1e; border-radius: 4px; }
+.hand-result .result-balances { color: #17322a; }
+@media (max-width: 600px) { .winning-reveal .tile { width: 25px; height: 35px; } }

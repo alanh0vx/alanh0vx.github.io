@@ -46,6 +46,11 @@ export function parseSave(raw: string|null): GameSave|null {
   if(s.started){
    const tiles=groups.flat(),hasFlowers=tiles.some(t=>t.flower!==undefined),canonical=new Map([...makeWall(()=>0),...(hasFlowers?flowerTiles():[])].map(t=>[t.id,t]));
    if(tiles.length!==canonical.size||new Set(tiles.map(t=>t.id)).size!==canonical.size||!tiles.every(t=>{const c=canonical.get(t.id);return c&&c.suit===t.suit&&c.n===t.n&&c.honor===t.honor&&c.flower===t.flower;}))return null;
+   if(t.result?.reveal){const r=t.result.reveal;
+    if(!Array.isArray(r.hand)||!Array.isArray(r.melds)||!r.melds.every(m=>Array.isArray(m)&&validMeld(m))||!Array.isArray(r.flowers))return null;
+    const shown=[...r.hand,...r.melds.flat(),...r.flowers];
+    if(new Set(shown.map(tile=>tile.id)).size!==shown.length||!shown.every(tile=>{const c=canonical.get(tile.id);return c&&c.suit===tile.suit&&c.n===tile.n&&c.honor===tile.honor&&c.flower===tile.flower;})||!scoreHand(r.hand,r.melds)||!(r.winningTileId===null||r.hand.some(tile=>tile.id===r.winningTileId)))return null;
+   }
    if([...s.hand,...s.aiHands.flat(),...s.melds.flat(),...s.discarded].some(t=>t.flower!==undefined))return null;
    const waiting=13-s.melds.length*3,playing=waiting+1;
    if((!t.result&&s.hand.length!==(s.busy?waiting:s.wall.length?playing:s.hand.length))||![waiting,playing].includes(s.hand.length))return null;

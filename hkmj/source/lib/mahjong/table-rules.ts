@@ -5,7 +5,7 @@ import { isWinningShape, tileIndex, type Tile } from './engine.ts';
 export const NAME_POOL=['醒目娟','十三么','阿叔','旺角明','深水埗芬姐','大埔強','荃灣珍','沙田豪','屯門輝','油麻地蓮姐','西環昌','北角玲','觀塘發','元朗琪','將軍澳樂','筲箕灣成','九龍城蘭','長洲波','太子敏','跑馬地健'];
 export function pickNames(random:()=>number=Math.random){const pool=[...NAME_POOL];return Array.from({length:3},()=>pool.splice(Math.floor(random()*pool.length),1)[0]);}
 export type HandScore={fan:number;handFan?:number;patterns:{name:string;fan:number}[]};
-export type TableResult={winner:number|null;selfDrawn:boolean;score:HandScore;changes:number[];description:string};
+export type TableResult={winner:number|null;selfDrawn:boolean;score:HandScore;changes:number[];description:string;reveal?:{hand:Tile[];melds:Tile[][];flowers:Tile[];winningTileId:string|null}};
 export function scoreHand(hand:Tile[],melds:Tile[][]=[],selfDrawn=false,seat='東',round='東'):HandScore|null {
  if(!melds.every(validMeld)||!isWinningShape(hand,melds.length))return null;
  const counts=Array<number>(34).fill(0);hand.forEach(t=>counts[tileIndex(t)]++);

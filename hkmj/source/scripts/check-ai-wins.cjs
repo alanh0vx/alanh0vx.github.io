@@ -28,9 +28,18 @@ module.exports=async function checkAIWins(page,base){
   assert.deepEqual(result.changes,settle(winner,mode==='self'?null:source,result.score.fan,s.table.baseCents,s.table.paymentMode));
   assert.equal(result.changes.reduce((a,b)=>a+b,0),0);
   assert.equal(saved.flow,null);assert.equal(saved.busy,false);
+  assert.equal(result.reveal.hand.length,14);assert.equal(result.reveal.winningTileId,tile.id);
+  assert.deepEqual(result.reveal.hand.map(t=>t.id).sort(),[...winning,tile].map(t=>t.id).sort());
+  assert.equal(await page.locator('.winning-reveal .tile').count(),14);
+  assert.equal(await page.locator('.winning-tile').count(),1);
+  assert.match(await page.locator('.winner-total').innerText(),/贏得/);
+  assert.equal(await page.locator('.hand-result').evaluate(e=>getComputedStyle(e).color),'rgb(23, 50, 42)');
+  assert(parseSave(JSON.stringify(saved)),'result with revealed tiles survives save validation');
   const balances=saved.table.balances;
   await page.reload();await page.locator('.hand-result').waitFor();
   assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('hkmj.game.v1')).table.balances),balances,'settlement not repeated on reload');
+  assert.equal(await page.locator('.winning-reveal .tile').count(),14,'reveal survives reload');
+  if(winner===3&&mode==='ai-discard')for(const [width,height] of [[1440,900],[390,844],[844,390]]){await page.setViewportSize({width,height});assert(await page.locator('.hand-result').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'no horizontal result overflow');await page.screenshot({path:`/private/tmp/hkmj-result-${width}.png`});}
   count++;
  }
  console.log(`PASS: ${count} AI wins: every AI seat self-draws, wins a human discard and wins another AI discard; settlement and reload checked.`);
