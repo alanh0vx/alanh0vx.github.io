@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {makeWall} from './engine.ts';
-import {scoreHand,eligible,settle,kongChoices,pickNames} from './table-rules.ts';
+import {scoreHand,scoreWithFlowers,eligible,settle,kongChoices,pickNames} from './table-rules.ts';
 import {parseSave} from './save.ts';
 function tiles(keys:string[]){const pool=makeWall(()=>0);return keys.map(key=>{const i=pool.findIndex(t=>(t.honor??`${t.suit}${t.n}`)===key);assert(i>=0);return pool.splice(i,1)[0];});}
 const chicken=['萬1','萬2','萬3','筒2','筒3','筒4','索4','索5','索6','索8','索8','索8','西','西'];
@@ -19,4 +19,15 @@ test('exposed chows score as sequences and cannot be upgraded to kongs',()=>{
 test('full discard payment changes the payer, not total winnings; self draw is unchanged',()=>{
  assert.deepEqual(settle(0,1,3,100,'full'),[3200,-3200,0,0]);assert.deepEqual(settle(0,1,3,100,'half'),[3200,-1600,-800,-800]);
  for(const mode of ['full','half'] as const){assert.deepEqual(settle(0,null,3,100,mode),[4800,-1600,-1600,-1600]);for(let winner=0;winner<4;winner++)for(let source=0;source<4;source++)if(winner!==source){const changes=settle(winner,source,0,25,mode);assert.equal(changes.reduce((a,b)=>a+b),0);assert.equal(changes[winner],100);if(mode==='full')assert.equal(changes[source],-100);}}
+});
+
+test('screenshot hand with 234 dots completes on 4 bamboo but is below three fan',()=>{
+ const hand=tiles(['萬3','萬4','萬5','索4','索5','索6','索7','索7','索8','索9','筒2','筒3','筒4','索4']);
+ const score=scoreWithFlowers(hand,[],false,'東',[{id:'梅',flower:0},{id:'菊',flower:2}],'東');
+ assert(score);
+ assert.equal(score.handFan,1);
+ assert.equal(score.fan,2);
+ assert.deepEqual(score.patterns.map(p=>p.name),['平糊','正花 梅']);
+ assert.equal(eligible(score,false),false);
+ assert.equal(eligible(score,true),true);
 });

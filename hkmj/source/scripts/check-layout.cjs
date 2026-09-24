@@ -11,12 +11,13 @@ const {parseSave}=require('../lib/mahjong/save.ts');
  await p.goto(process.env.LAYOUT_URL||'http://127.0.0.1:4175/');
  await p.getByRole('button',{name:'埋位開枱'}).click();await p.getByRole('button',{name:'跳過動畫'}).click();
  const base=await p.evaluate(()=>JSON.parse(localStorage.getItem('hkmj.game.v1')));
- function fixture(crowded,allFlowers,decision=false,claim=false){
+ function fixture(crowded,allFlowers,decision=false,claim=false,lowFan=false){
  const pool=makeWall(()=>0);const take=keys=>keys.map(k=>{const i=pool.findIndex(t=>(t.honor??t.suit+t.n)===k);assert(i>=0);return pool.splice(i,1)[0]});
  const groups=crowded?['東','南','西','北','中','發','白','萬1','萬2','萬3','萬4','萬5'].map(k=>take([k,k,k])):[];
  const aiMelds=crowded?[groups.slice(0,4),groups.slice(4,8),groups.slice(8,12)]:[[],[],[]];
- const hand=decision?take(['萬1','萬1','萬1','萬2','萬2','萬2','萬3','萬3','萬3','萬4','萬4','萬4','萬5','萬5']):pool.splice(0,14),aiHands=aiMelds.map(ms=>pool.splice(0,13-ms.length*3)),discarded=pool.splice(0,crowded?78:7),fs=flowerTiles();
+ const hand=lowFan?take(['萬3','萬4','萬5','索4','索5','索6','索7','索7','索8','索9','筒2','筒3','筒4','索4']):decision?take(['萬1','萬1','萬1','萬2','萬2','萬2','萬3','萬3','萬3','萬4','萬4','萬4','萬5','萬5']):pool.splice(0,14),aiHands=aiMelds.map(ms=>pool.splice(0,13-ms.length*3)),discarded=pool.splice(0,crowded?78:7),fs=flowerTiles();
  const s={...base,opening:null,aiMelds,hand,aiHands,discarded,wall:pool,flowers:allFlowers?[[],[],fs,[]]:[fs.slice(0,2),fs.slice(2,4),fs.slice(4,6),fs.slice(6)],melds:[],drawnId:null,lastPlay:null,activeAI:null,claimPending:false,busy:false,flow:null,sound:false,table:{...base.table,result:null,ownPassed:!decision,dealer:2,repeats:12,names:['跑馬地健','西環昌','屯門輝']}};
+ if(lowFan){s.seat='東';s.table.chicken=false;s.flow=null;}
  if(claim){const tile=s.hand.pop();s.discarded.push(tile);s.busy=true;s.claimPending=true;s.activeAI=2;s.lastPlay={tile,ai:2};s.flow={phase:'claims',player:3};}
  assert(parseSave(JSON.stringify(s)),'valid fixture');return s;
  }
@@ -48,9 +49,10 @@ const {parseSave}=require('../lib/mahjong/save.ts');
  let count=0;
  for(const [width,height] of [[320,568],[375,667],[390,844],[430,932],[667,375],[844,390],[768,1024],[900,700],[901,700],[1024,600],[1366,768],[1440,900],[1920,1080]]){
  await p.setViewportSize({width,height});console.log('Checking',width,height);
- for(const [state,s] of [['early',fixture(false)],['crowded',fixture(true)],['flowers',fixture(true,true)],['claim',fixture(false,false,true,true)],['decision',fixture(false,false,true)]]){
+ for(const [state,s] of [['early',fixture(false)],['crowded',fixture(true)],['flowers',fixture(true,true)],['low-own',fixture(false,false,false,false,true)],['low-claim',fixture(false,false,false,true,true)],['claim',fixture(false,false,true,true)],['decision',fixture(false,false,true)]]){
  await p.evaluate(s=>localStorage.setItem('hkmj.game.v1',JSON.stringify(s)),s);await p.reload();await p.locator('.mahjong-table').waitFor();
  if(state==='decision'||state==='claim')await p.locator('.claim-choice').waitFor();
+ if(state.startsWith('low-')){await p.getByRole('button',{name:'未夠番 · 查看原因'}).click();await p.getByRole('heading',{name:'牌型完成，但未夠番食糊'}).waitFor();assert.match(await p.locator('.win-hint-dialog').innerText(),/花牌只加結算番數/);await p.keyboard.press('Escape');assert.equal(await p.getByRole('button',{name:/^(食糊|自摸) ·/}).count(),0);}
  await check(`${width} ${state}`);count++;
  const anchor=await p.evaluate(()=>({height:document.querySelector('.mahjong-table').getBoundingClientRect().height,handTop:document.querySelector('.hand-dock').getBoundingClientRect().top}));
  assert(anchor.height>0,'visible board');
