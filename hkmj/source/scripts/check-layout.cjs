@@ -7,7 +7,7 @@ const {parseSave}=require('../lib/mahjong/save.ts');
 (async()=>{
  const b=await chromium.launch({channel:'chrome',headless:true});
  try {
- const p=await b.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));
+ const p=await b.newPage();p.setDefaultTimeout(10000);const errors=[];p.on('pageerror',e=>errors.push(e.message));
  await p.goto(process.env.LAYOUT_URL||'http://127.0.0.1:4175/');
  await p.getByRole('button',{name:'埋位開枱'}).click();await p.getByRole('button',{name:'跳過動畫'}).click();
  const base=await p.evaluate(()=>JSON.parse(localStorage.getItem('hkmj.game.v1')));
@@ -32,24 +32,35 @@ const {parseSave}=require('../lib/mahjong/save.ts');
  for(const e of board.querySelectorAll('.seat-public,.ai-melds,.seat-flowers,.river-tiles'))if(e.scrollWidth>e.clientWidth+1)issues.push('overflow '+e.className);
  const sections=[...document.querySelectorAll('.hand-dock > .seat-flowers,.turn-message,.claim-choice,.meld-row,.hand-row,.action-row')];for(let i=0;i<sections.length;i++)for(const c of sections.slice(i+1))if(hit(sections[i],c))issues.push('hand sections overlap');
  if(document.documentElement.scrollWidth>innerWidth+1)issues.push('page overflow');
+ if(innerWidth>900&&document.documentElement.scrollHeight>innerHeight+1)issues.push('desktop page scroll');
+ const wrap=document.querySelector('.table-wrap');if(innerWidth>900&&wrap.scrollHeight>wrap.clientHeight+1)issues.push('desktop table scroll');
+ const outer=[...document.querySelectorAll('.game-status,.mobile-balance,.table-wrap,.hand-dock')];for(let i=0;i<outer.length;i++)for(const c of outer.slice(i+1))if(hit(outer[i],c))issues.push('outer sections overlap');
  const hand=document.querySelector('.hand-row');if(hand.scrollWidth>hand.clientWidth+1)issues.push('hand overflow');
  const action=rect(document.querySelector('.action-row')),dock=rect(document.querySelector('.hand-dock'));if(action.bottom>dock.bottom+1)issues.push('clipped action');
  return issues;});assert.deepEqual(issues,[],label);assert.deepEqual(errors,[],label);
  }
  let count=0;
  for(const [width,height] of [[320,568],[375,667],[390,844],[430,932],[667,375],[844,390],[768,1024],[900,700],[901,700],[1024,600],[1366,768],[1440,900],[1920,1080]]){
- await p.setViewportSize({width,height});
+ await p.setViewportSize({width,height});console.log('Checking',width,height);
  for(const [state,s] of [['early',fixture(false)],['crowded',fixture(true)],['flowers',fixture(true,true)],['decision',fixture(false,false,true)]]){
  await p.evaluate(s=>localStorage.setItem('hkmj.game.v1',JSON.stringify(s)),s);await p.reload();await p.locator('.mahjong-table').waitFor();
  if(state==='decision')await p.locator('.claim-choice').waitFor();
  await check(`${width} ${state}`);count++;
+ const anchor=await p.evaluate(()=>({height:document.querySelector('.mahjong-table').getBoundingClientRect().height,handTop:document.querySelector('.hand-dock').getBoundingClientRect().top}));
+ assert(anchor.height>0,'visible board');
+ await p.evaluate(()=>document.querySelectorAll('.wall').forEach(w=>w.append(document.createElement('i'))));
+ const afterDraw=await p.evaluate(()=>({height:document.querySelector('.mahjong-table').getBoundingClientRect().height,handTop:document.querySelector('.hand-dock').getBoundingClientRect().top}));
+ assert.deepEqual(afterDraw,anchor,`${width} ${state}: draws must not move the hand`);
  // Deterministic transient messages use the same DOM as live AI reactions.
  await p.evaluate(()=>document.querySelectorAll('.opponent').forEach(seat=>{const e=document.createElement('span');e.className='ai-bubble';e.textContent='諗清楚先，呢隻牌要小心！我等緊你出牌，唔使急。';seat.insertBefore(e,seat.querySelector('.seat-public'));}));
  await p.evaluate(()=>{const e=document.createElement('div');e.className='last-play';e.innerHTML='<span>西環昌 出牌</span>';e.append(document.querySelector('.hand-row .tile').cloneNode(true));document.querySelector('.mahjong-table').append(e);});
  await check(`${width} ${state} chat/discard`);count++;
+ const afterChat=await p.evaluate(()=>({height:document.querySelector('.mahjong-table').getBoundingClientRect().height,handTop:document.querySelector('.hand-dock').getBoundingClientRect().top}));
+ assert.deepEqual(afterChat,anchor,`${width} ${state}: chat/discard must not move the hand`);
  if(state==='crowded'&&[390,844,1440].includes(width))await p.screenshot({path:`/private/tmp/hkmj-review-${width}.png`,fullPage:true});
  }
  }
+ console.log('Checking interactions');
  await p.getByRole('button',{name:'牌友提示',exact:true}).click();await p.locator('.coach-content').waitFor();await p.keyboard.press('Escape');
  await p.locator('.river-grid').click();await p.locator('.river-detail').waitFor();await p.keyboard.press('Escape');
  await p.locator('.north .seat-flowers').click();await p.locator('.flower-detail').waitFor();await p.keyboard.press('Escape');
@@ -60,13 +71,17 @@ const {parseSave}=require('../lib/mahjong/save.ts');
  for(const [width,height] of [[320,568],[390,844],[844,390]]){
  await p.setViewportSize({width,height});
  await p.evaluate(s=>localStorage.setItem('hkmj.game.v1',JSON.stringify(s)),fixture(false,false,true));await p.reload();
- await p.locator('.claim-choice').waitFor();await p.getByRole('button',{name:'過，繼續出牌'}).click();
+ await p.locator('.claim-choice').waitFor();
+ await p.locator('.north .seat-details-toggle').click();await p.locator('.public-detail').waitFor();await p.keyboard.press('Escape');
+ await p.getByRole('button',{name:'過，繼續出牌'}).click();
  await p.locator('.hand-row .tile').last().click();
  await p.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
  const visible=await p.evaluate(()=>{const a=document.querySelector('.action-row').getBoundingClientRect(),h=document.querySelector('.hand-row').getBoundingClientRect(),n=document.querySelector('.main-nav').getBoundingClientRect();return h.top>=0&&a.bottom<=n.top+1});
  assert(visible,`${width}: hand and discard control can scroll clear of navigation`);
  if(width===390)await p.screenshot({path:'/private/tmp/hkmj-review-controls.png'});
  }
+ console.log('Checking AI wins');
+ await require('./check-ai-wins.cjs')(p,base);
  console.log(`PASS: ${count} viewport/state checks plus coach, river and flower dialogs, decision/pass, tile selection and discard.`);
  }finally{await b.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});

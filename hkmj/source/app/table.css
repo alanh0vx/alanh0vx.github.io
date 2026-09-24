@@ -1,36 +1,42 @@
 /* Single source of truth for the live table. Seats, chat and tile racks all
-   participate in normal flow; no position depends on the viewport height. */
-.playing-shell { min-height: 100dvh; display: flex; flex-direction: column; }
+   participate in bounded grid areas; gameplay never changes the table height. */
+.playing-shell { height: 100dvh; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 .playing-shell .topbar { position: relative; height: 56px; flex-shrink: 0; padding-inline: 20px; }
-.playing-shell .game-page { flex: 1; min-width: 0; padding-bottom: 0; }
-.game-status { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 44px; padding: 6px 14px; background: #fffdf8; border-bottom: 1px solid var(--line); }
+.playing-shell .game-page { flex: 1; min-height: 0; min-width: 0; padding-bottom: 0; display: grid; grid-template-rows: 44px 40px minmax(0,1fr) 242px; }
+.game-status { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 44px; padding: 0 14px; background: #fffdf8; border-bottom: 1px solid var(--line); }
+.game-status > div:first-child { min-width: 0; }
+.game-status .save-actions { flex-shrink: 0; flex-wrap: nowrap; }
 .game-status > div { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .game-status .scores { gap: 18px; }
 .mobile-balance { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; padding: 6px 12px; font-size: 12px; color: #173c30; background: #eee6d4; }
-.table-wrap { display: flex; flex-direction: column; gap: 6px; width: min(100%,1264px); margin-inline: auto; padding: 8px 12px; }
-.coach-toggle { align-self: flex-end; order: -1; gap: 5px; background: #fff9e8; color: #173d30; border-color: #c6b77d; font-size: 12px; }
+.table-wrap { display: flex; flex-direction: column; gap: 4px; min-height: 0; width: min(100%,1264px); margin-inline: auto; padding: 8px 12px 0; }
+.coach-toggle { flex: 0 0 30px; height: 30px; min-height: 30px; align-self: flex-end; order: -1; gap: 5px; background: #fff9e8; color: #173d30; border-color: #c6b77d; font-size: 12px; }
 .coach-toggle svg { width: 17px; height: 17px; }
 .mahjong-table {
- --meld-width: 20px;
+ --meld-width: 16px;
  display: grid; grid-template-columns: minmax(130px,1fr) minmax(0,3fr) minmax(130px,1fr);
  grid-template-areas: 'north north north' 'west marker east' 'west played east' 'west river east';
- grid-template-rows: auto auto auto 1fr;
- align-items: start; gap: 12px 24px; min-width: 0; min-height: 420px; padding: 16px;
- position: relative; border: 8px solid #603f29; border-radius: 18px;
+ grid-template-rows: 136px 32px 44px minmax(0,1fr);
+ align-items: start; gap: 6px 18px; min-width: 0; flex: 1; height: auto; min-height: 0; padding: 10px;
+ position: relative; border: 8px solid #603f29; border-radius: 18px 18px 0 0; border-bottom: 2px solid #e9cb8b;
  background: radial-gradient(circle,#17604b,#0a3c2e 72%);
  box-shadow: inset 0 0 0 2px #e9cb8b,0 15px 40px #13251c40;
 }
-.opponent { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; color: white; text-align: center; }
+.opponent { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; color: white; text-align: center; }
 .opponent > span { max-width: 100%; font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
 .opponent small { display: block; color: #d3dfd9; font-weight: 400; }
-.opponent .avatar { flex-shrink: 0; width: 40px; height: 40px; font-size: 24px; }
-.north { grid-area: north; justify-self: center; width: min(100%,640px); display: grid; grid-template-columns: 40px minmax(70px,1fr) minmax(0,2fr); text-align: left; }
+.opponent .avatar { flex-shrink: 0; width: 28px; height: 28px; font-size: 18px; }
+.north { grid-area: north; justify-self: center; width: min(100%,640px); display: grid; grid-template-columns: 28px minmax(70px,1fr) minmax(0,2fr); text-align: left; }
 .north > .avatar { grid-column: 1; grid-row: 1; }
 .north > span:not(.ai-bubble):not(.avatar) { grid-column: 2; grid-row: 1; }
-.north .seat-public { grid-column: 3; grid-row: 1; }
+.north .opponent .flower-mini { flex-basis: 16px; width: 16px; height: 23px; }
+.opponent .flower-owner, .opponent .flower-enlarge { display: none; }
+.seat-public { grid-column: 3; grid-row: 1; flex-direction: row; flex-wrap: wrap; }
 .north .ai-bubble { grid-column: 1 / -1; grid-row: 2; justify-self: center; }
 .north .wall { grid-column: 1 / -1; grid-row: 3; }
 .west { grid-area: west; }
+.west, .east { height: 100%; min-height: 0; }
+.opponent > :not(.wall) { flex-shrink: 0; }
 .east { grid-area: east; }
 .seat-public { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; min-width: 0; }
 .ai-melds { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; width: 100%; min-width: 0; }
@@ -43,41 +49,67 @@
 .flower-mini svg { width: 100%; height: 100%; }
 .flower-enlarge { font-size: 10px; color: #705c29; }
 .north .seat-flowers { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-.opponent .ai-bubble { max-width: 100%; padding: 6px 9px; border-radius: 12px; background: #fff9e8; color: #173d30; font-size: 12px; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; box-shadow: 0 2px 8px #0003; }
+.opponent .ai-bubble { max-width: 100%; padding: 6px 9px; border-radius: 12px; background: #fff9e8; color: #173d30; font-size: 12px; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; box-shadow: 0 2px 8px #0003; display: block; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
 .wall { display: flex; justify-content: center; gap: 2px; width: 100%; min-width: 0; pointer-events: none; }
 .wall i { display: block; flex: 0 1 26px; min-width: 0; height: 16px; border-radius: 3px; background: #f7efce; border-bottom: 4px solid #58a28e; }
-.wall-west, .wall-east { flex-direction: column; align-items: center; }
-.wall-west i, .wall-east i { flex: none; width: 13px; height: 18px; border-bottom: 0; border-right: 3px solid #58a28e; }
-.table-center { grid-area: marker; justify-self: center; display: grid; place-items: center; grid-template-columns: 1fr 1fr; width: 48px; height: 48px; background: #ecd596; border: 3px solid #ba9440; box-shadow: inset 0 0 0 3px #f5e8bc; }
-.table-center span { font: bold 18px Georgia; color: var(--red); }
-.table-center b { font: 700 18px Georgia; }
+.wall-west, .wall-east { flex: 1; min-height: 18px; max-height: 180px; flex-direction: column; align-items: center; }
+.wall-west i, .wall-east i { flex: 0 1 18px; min-height: 0; width: 13px; height: 18px; border-bottom: 0; border-right: 3px solid #58a28e; }
+.table-center { grid-area: marker; justify-self: center; display: grid; place-items: center; grid-template-columns: 1fr 1fr; width: 36px; height: 32px; background: #ecd596; border: 3px solid #ba9440; box-shadow: inset 0 0 0 3px #f5e8bc; }
+.table-center span { font: bold 14px Georgia; color: var(--red); }
+.table-center b { font: 700 14px Georgia; }
 .table-center small { grid-column: 1 / 3; font-size: 9px; }
-.last-play { grid-area: played; justify-self: center; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; max-width: 100%; padding: 5px 10px; border-radius: 8px; background: #09392ef2; color: #fff0bd; text-align: center; }
+.last-play { grid-area: played; justify-self: center; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; max-width: 100%; padding: 3px 6px; border-radius: 8px; background: #09392ef2; color: #fff0bd; text-align: center; }
 .last-play > span { font-size: 12px; font-weight: 700; }
-.last-play .tile { width: 32px; height: 45px; min-height: 0; }
-.discard-pool.river-grid { grid-area: river; justify-self: center; display: flex; flex-direction: column; align-items: center; gap: 5px; width: min(100%,410px); min-width: 0; min-height: 0; padding: 6px; border: 1px solid #ebdda02b; border-radius: 8px; background: #092e2429; color: #f5e9c6; cursor: pointer; }
+.last-play .tile { width: 24px; height: 32px; min-height: 0; }
+.discard-pool.river-grid { grid-area: river; justify-self: center; display: flex; flex-direction: column; align-items: center; gap: 5px; width: min(100%,410px); min-width: 0; min-height: 0; height: 100%; container-type: size; padding: 6px; border: 1px solid #ebdda02b; border-radius: 8px; background: #092e2429; color: #f5e9c6; cursor: pointer; }
 .river-caption { font-size: 12px; line-height: 1.4; }
-.river-tiles { display: grid; grid-template-columns: repeat(var(--river-columns,12),minmax(0,32px)); justify-content: center; gap: 1px; width: 100%; }
+.river-tiles { display: grid; grid-template-columns: repeat(var(--river-columns,12),minmax(0,min(32px,calc((100cqh - 40px - var(--river-rows,1)*1px)/var(--river-rows,1)*5/7)))); justify-content: center; gap: 1px; width: 100%; }
 .river-tile { display: flex; width: 100%; min-width: 0; aspect-ratio: 5 / 7; overflow: hidden; background: #fff6d9; border-radius: 2px; border-bottom: 2px solid #bdac79; }
 .river-tile svg { display: block; width: 100%; height: 100%; min-height: 0; }
 .river-latest { outline: 2px solid #dfac43; outline-offset: -2px; background: #ffdf87; }
-.hand-dock { background: #fffdf8; border-top: 1px solid var(--line); padding: 8px 12px 12px; min-width: 0; }
-.hand-dock > .seat-flowers { flex-direction: row; flex-wrap: wrap; justify-content: center; width: fit-content; margin: 0 auto 6px; }
-.hand-row { display: grid; grid-template-columns: repeat(14,minmax(0,1fr)); gap: 4px; width: min(100%,780px); margin: 0 auto; padding: 8px 3px; }
-.hand-row .tile { width: 100%; min-width: 0; height: clamp(44px,8vw,66px); min-height: 44px; padding: 2px 1px; }
+.hand-dock { width: min(1240px,calc(100% - 24px)); margin: 0 auto 6px; background: #0d4032; border: 8px solid #603f29; border-top: 0; border-radius: 0 0 18px 18px; padding: 6px 12px; min-width: 0; min-height: 0; color: #fff4d5; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 32px 20px 44px 60px 44px; gap: 3px 8px; }
+.hand-dock .turn-message, .hand-dock .action-row, .hand-dock .meld-group > span { color: #fff4d5; }
+.hand-dock > .seat-flowers { flex-direction: row; flex-wrap: wrap; justify-content: center; width: fit-content; margin: 0 auto; min-height: 0; grid-column: 1; grid-row: 1; padding: 1px 4px; }
+.hand-row { grid-column: 1 / -1; grid-row: 4; display: grid; grid-template-columns: repeat(14,minmax(0,1fr)); gap: 4px; width: min(100%,780px); margin: 0 auto; padding: 5px 3px; }
+.hand-row .tile { width: 100%; min-width: 0; height: 50px; min-height: 44px; padding: 2px 1px; }
 .hand-row .tile-drawn { margin-left: 0; outline-offset: 0; }
 .hand-row[aria-busy=true] .tile { cursor: wait; }
-.hand-dock .action-row { flex-wrap: wrap; gap: 8px; }
+.hand-dock .action-row { grid-column: 1 / -1; grid-row: 5; width: min(100%,780px); margin: 0 auto; flex-wrap: wrap; gap: 4px; }
+.hand-dock .turn-message { grid-column: 1 / -1; grid-row: 2; margin: 0; }
+.hand-dock .meld-row { grid-column: 2; grid-row: 1; margin: 0; align-self: center; }
+.hand-dock .claim-choice { grid-column: 1 / -1; grid-row: 3; margin: 0; overflow-y: auto; }
+.hand-dock .flower-notice { grid-column: 1 / -1; grid-row: 3; margin: 0; }
 .hand-dock .action-row > div { margin-left: auto; }
+/* Side hands run along the edge, with exposed sets facing their owner. */
+@media (min-width: 901px) {
+ .west, .east { display: grid; grid-template-rows: 28px auto auto minmax(0,1fr); justify-items: center; align-content: start; }
+ .west { grid-template-columns: minmax(0,1fr) 18px; grid-template-areas: 'avatar concealed' 'identity concealed' 'chat concealed' 'exposed concealed'; }
+ .east { grid-template-columns: 18px minmax(0,1fr); grid-template-areas: 'concealed avatar' 'concealed identity' 'concealed chat' 'concealed exposed'; }
+ .west > .avatar, .east > .avatar { grid-area: avatar; }
+ .west > span:not(.avatar):not(.ai-bubble), .east > span:not(.avatar):not(.ai-bubble) { grid-area: identity; }
+ .west .ai-bubble, .east .ai-bubble { grid-area: chat; }
+ .west .seat-public, .east .seat-public { grid-area: exposed; align-self: start; }
+ .west .wall, .east .wall { grid-area: concealed; align-self: center; height: 200px; max-height: 100%; justify-content: center; }
+ .west .ai-melds > span, .east .ai-melds > span { flex-direction: column; }
+ .west .ai-melds .tile, .east .ai-melds .tile { display: flex; align-items: center; justify-content: center; width: 22px; height: 16px; flex-basis: 16px; padding: 0; overflow: hidden; }
+ .west .ai-melds .mahjong-face, .east .ai-melds .mahjong-face { flex: none; width: 16px; height: 22px; max-width: none; }
+ .west .ai-melds .mahjong-face { transform: rotate(90deg); }
+ .east .ai-melds .mahjong-face { transform: rotate(-90deg); }
+}
 @media (max-width: 900px) {
- .playing-shell { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+ .playing-shell { padding-bottom: calc(44px + env(safe-area-inset-bottom)); }
  .playing-shell .topbar { padding-inline: 10px; }
  .game-status .scores { display: none; }
- .table-wrap { padding: 6px; }
- .mahjong-table { grid-template-columns: minmax(70px,1fr) minmax(0,2.4fr) minmax(70px,1fr); gap: 10px; padding: 12px 8px; }
+ .table-wrap { padding: 4px 6px 0; overflow-y: auto; }
+ .playing-shell .game-page { grid-template-rows: 52px 50px minmax(0,1fr) 270px; }
+ .hand-dock { grid-template-rows: 28px 20px 44px 96px 44px; }
+ .hand-row { grid-template-columns: repeat(7,minmax(0,1fr)); padding: 2px; gap: 4px; width: min(100%,420px); }
+ .hand-row .tile { height: 44px; }
+ .hand-dock { width: calc(100% - 12px); }
+ .mahjong-table { flex: none; height: 540px; grid-template-columns: minmax(70px,1fr) minmax(0,2.4fr) minmax(70px,1fr); gap: 10px; padding: 12px 8px; }
  .opponent .avatar { width: 30px; height: 30px; font-size: 18px; }
  .north { grid-template-columns: 30px minmax(64px,1fr) minmax(0,2fr); }
- .wall-west, .wall-east { flex-direction: row; flex-wrap: wrap; }
+ .wall-west, .wall-east { flex: none; height: 46px; min-height: 46px; flex-direction: row; flex-wrap: wrap; align-content: start; }
  .wall-west i, .wall-east i { flex: 0 1 10px; width: 10px; height: 14px; border-right: 0; border-bottom: 3px solid #58a28e; }
 }
 @media (max-width: 600px) {
@@ -89,7 +121,7 @@
  .game-status > div { gap: 4px; }
  .game-status button { padding-inline: 8px; }
  .save-actions svg { display: none; }
- .mahjong-table { --meld-width: 13px; grid-template-columns: minmax(58px,1fr) minmax(0,2.4fr) minmax(58px,1fr); gap: 8px 6px; border-width: 6px; padding: 10px 6px; min-height: 320px; }
+ .mahjong-table { --meld-width: 13px; grid-template-columns: minmax(58px,1fr) minmax(0,2.4fr) minmax(58px,1fr); gap: 8px 6px; border-width: 6px; padding: 10px 6px; height: 540px; min-height: 0; grid-template-rows: 190px 32px 44px minmax(0,1fr); }
  .opponent { gap: 6px; }
  .opponent > span, .seat-flower-label, .opponent .ai-bubble { font-size: 11px; }
  .opponent .ai-bubble { padding: 4px; }
@@ -99,6 +131,80 @@
  .river-caption { font-size: 10px; }
  .discard-pool.river-grid { padding: 3px; }
  .river-tile { border-bottom-width: 1px; }
- .hand-dock { padding-inline: 6px; }
+ .hand-dock { padding-inline: 6px; border-width: 6px; border-top: 0; }
  .hand-row { gap: 2px; }
 }
+
+/* Wide, short screens keep the hand alongside the table. */
+@media (min-width: 901px) and (max-height: 780px), (max-height: 700px) and (min-aspect-ratio: 3/2) {
+ .playing-shell .topbar { height: 40px; }
+ .playing-shell .game-page { grid-template-columns: minmax(0,1fr) 300px; grid-template-rows: 44px 36px minmax(0,1fr); }
+ .game-status { grid-column: 1 / -1; }
+ .game-status .scores { display: none; }
+ .mobile-balance { grid-column: 1 / -1; padding-block: 2px; }
+ .table-wrap { grid-column: 1; grid-row: 3; width: 100%; padding: 4px 0 6px 6px; overflow: auto; }
+ .mahjong-table { height: 100%; min-height: 420px; flex: 1; grid-template-columns: minmax(60px,1fr) minmax(0,2.4fr) minmax(60px,1fr); border-radius: 18px 0 0 18px; border-bottom: 8px solid #603f29; }
+ .hand-dock { grid-column: 2; grid-row: 3; width: 100%; margin: 34px 6px 6px 0; border: 8px solid #603f29; border-left: 0; border-radius: 0 18px 18px 0; padding: 6px; grid-template-columns: 1fr; grid-template-rows: 32px 32px minmax(44px,1fr) 112px 44px; }
+ .hand-dock > .seat-flowers { grid-column: 1; }
+ .hand-dock .meld-row { grid-column: 1; grid-row: 3; align-self: start; }
+ .hand-row { grid-template-columns: repeat(7,minmax(0,1fr)); gap: 3px; padding: 4px 0; }
+ .hand-row .tile { height: 48px; }
+ .hand-dock .action-row > span { display: none; }
+ .hand-dock .turn-message { font-size: 12px; text-align: center; }
+}
+@media (max-height: 500px) and (min-aspect-ratio: 3/2) {
+ .playing-shell { padding-bottom: calc(36px + env(safe-area-inset-bottom)); }
+ .playing-shell .topbar { height: 0; padding: 0; }
+ .playing-shell .topbar > .brand, .playing-shell .topbar > .profile-chip { display: none; }
+ .playing-shell .main-nav { height: calc(36px + env(safe-area-inset-bottom)); }
+ .playing-shell .main-nav button { min-height: 0; font-size: 10px; padding-block: 0; }
+ .playing-shell .game-page { grid-template-rows: 34px 30px minmax(0,1fr); }
+ .game-status { min-height: 0; padding-block: 0; }
+ .game-status button { height: 30px; min-height: 30px; }
+ .mobile-balance { flex-wrap: nowrap; font-size: 10px; overflow: hidden; }
+ .playing-shell .sound-toggle { min-height: 24px; padding: 1px 4px; }
+ .hand-dock { margin-top: 4px; padding: 4px; border-width: 6px; border-left: 0; grid-template-rows: 24px 20px 40px 92px 40px; gap: 2px; }
+ .hand-dock > .seat-flowers .flower-mini { width: 13px; height: 18px; flex-basis: 13px; }
+ .hand-dock .seat-flowers { min-height: 24px; }
+ .hand-dock .hand-row .tile { height: 42px; min-height: 42px; }
+ .hand-dock .action-row { min-height: 40px; }
+ .hand-dock .discard-button { min-height: 40px; height: 40px; }
+}
+
+@media (max-width: 900px) and (min-aspect-ratio: 3/2) {
+ .mahjong-table { min-height: 540px; }
+}
+
+.seat-details-toggle { display: none; }
+.public-detail .meld-row { justify-content: flex-start; }
+@media (max-width: 900px) {
+ .seat-public > .ai-melds, .seat-public > .seat-flowers { display: none; }
+ .seat-details-toggle { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 44px; padding: 3px; border: 1px solid #bda96e; border-radius: 5px; background: #fff5d9; color: #173d30; font-size: 11px; }
+ .seat-details-toggle small { color: #596950; font-size: 10px; }
+ .mahjong-table { height: 360px; min-height: 360px; grid-template-rows: 96px 32px 44px minmax(0,1fr); }
+ .opponent .ai-bubble { -webkit-line-clamp: 1; font-size: 10px; line-height: 14px; padding: 2px 4px; }
+ .opponent { gap: 3px; }
+ .opponent .avatar { width: 24px; height: 24px; }
+ .north { grid-template-columns: 24px minmax(64px,1fr) minmax(0,1fr); }
+ .wall-west, .wall-east { height: 32px; min-height: 32px; }
+ .wall-west i, .wall-east i { flex-basis: 8px; width: 8px; height: 10px; }
+ .wall-north i { height: 12px; }
+}
+@media (max-width: 900px) and (max-height: 500px) and (min-aspect-ratio: 3/2) {
+ .mahjong-table { height: 100%; min-height: 0; flex: 1; padding: 6px; gap: 4px 8px; grid-template-rows: 80px 24px 36px minmax(0,1fr); }
+ .opponent { gap: 2px; }
+ .opponent .avatar { width: 16px; height: 16px; font-size: 10px; }
+ .opponent > span { font-size: 10px; line-height: 12px; }
+ .north { grid-template-columns: 16px minmax(60px,1fr) minmax(0,1fr); }
+ .table-center { width: 30px; height: 24px; }
+ .table-center small { display: none; }
+ .last-play { padding: 1px 3px; gap: 3px; }
+ .last-play .tile { width: 20px; height: 28px; }
+ .last-play > span { font-size: 10px; }
+ .wall-west, .wall-east { height: 20px; min-height: 20px; gap: 1px; }
+ .wall-west i, .wall-east i { width: 8px; flex-basis: 8px; height: 8px; border-bottom-width: 2px; }
+ .river-caption { font-size: 9px; }
+ .river-tiles { grid-template-columns: repeat(var(--river-columns,12),minmax(0,min(24px,calc((100cqh - 18px - var(--river-rows,1)*1px)/var(--river-rows,1)*5/7)))); }
+}
+
+.hand-dock .discard-button { background: #e5c571; color: #17322a; font-weight: 700; }

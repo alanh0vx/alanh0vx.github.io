@@ -31,7 +31,7 @@ Published HK rule tables differ; background references include [Sloperama's HK o
 
 Current game, settings, pending choices, exposed melds, names, balances and results automatically save to `hkmj.game.v1` in localStorage. Refresh resumes the pending AI phase or decision without re-dealing or paying twice. Manual Save asks for confirmation. The opaque leave-table dialog supports confirmed save-and-leave or cancel; discarding requires a second explicit confirmation. AI turns and the opening pause while a confirmation is open. Saves are local to this browser and origin; storage failures show a warning. Previous 136-tile saves continue unchanged until the next new hand; the next hand uses 144 tiles. Older saves receive default table settings.
 
-The live table uses the dynamic viewport height on phones and desktops. All 13–14 concealed tiles fit in one row without horizontal scrolling; tapping a tile selects it with an enlarged preview, and the 出牌 button confirms the discard. Landscape phones show table and hand side by side. Safe-area padding, compact flower racks and an accessible calculator dialog keep controls in view. Chrome emulation covers narrow portrait and landscape layouts; this is not physical iOS/Android testing.
+The live table uses stable, viewport-sized areas: drawing, discarding and AI chat do not push the human hand down. Desktop play fits one screen, using a side-by-side table and hand on shorter windows. Phones use two rows of seven touch-sized hand tiles, stationary action controls, and tap-to-enlarge opponent melds/flowers. Portrait keeps the hand below the table; landscape places it alongside. Very short portrait screens can scroll the board independently while keeping the hand accessible. Safe-area padding and detail dialogs preserve access to smaller public tiles. Chrome emulation covers narrow portrait and landscape layouts; this is not physical iOS/Android testing.
 
 ## Remaining prototype limitations
 
@@ -50,16 +50,21 @@ Before starting, choose 全銃 (discarder pays all four units) or 半銃 (discar
 ## Responsive layout regression checks
 
 The live table layout is defined in `source/app/table.css`. Each opponent owns
-its chat, exposed racks and concealed tiles in normal flow. Keep table geometry
-out of `globals.css` and `mobile.css`; short screens scroll instead of clipping
-controls. Do not reintroduce absolute seat/rack coordinates or viewport-height
-river fitting.
+its chat, exposed racks and concealed tiles within bounded grid areas. Keep
+table geometry out of `globals.css` and `mobile.css`. Desktop page and board
+scrolling are regression failures. On phones, only the board may scroll; hand
+controls stay stationary. The discard grid scales within its allocated area.
+Do not reintroduce absolute seat/rack coordinates or content-driven table height.
 
 `scripts/check-layout.cjs` in `source/` checks 13 viewport sizes (320–1920px),
 including portrait, landscape and both sides of the 900px breakpoint. It loads
 validated early, crowded, eight-flower and winning-decision saves, then checks
 pairwise collisions and overflow with simultaneous long chat and last-discard
-content. It also exercises the detail dialogs, passing, selecting and discarding.
+content. It verifies stable board and hand bounds after draws and chat changes,
+checks desktop page/board scrolling, and exercises detail dialogs, passing,
+selecting and discarding. It also calls `scripts/check-ai-wins.cjs`: all three AI
+seats must win by self-draw, human discard and another AI discard (nine live
+rounds), settle correctly and preserve balances after reload.
 Run with a separate installed Playwright package via `PLAYWRIGHT_MODULE`, and
 set `LAYOUT_URL` to a running preview (defaults to `http://127.0.0.1:4175/`).
 These checks use Chrome emulation, not physical iOS Safari.
