@@ -315,6 +315,19 @@
                 setTimeout(() => os.closeWindow(windowId), 100);
             }
         });
+
+        os.registerApp({
+            id: 'hkmj',
+            name: '港雀館',
+            icon: '🀄',
+            category: 'external',
+            isExternal: true,
+            url: 'hkmj/index.html',
+            onLaunch(windowId) {
+                window.open(this.url, '_blank');
+                setTimeout(() => os.closeWindow(windowId), 100);
+            }
+        });
     </script>
 </body>
 </html>
