@@ -11,9 +11,9 @@ Editable source is in `hkmj/source/`. Run `npm ci`, `npm run dev`, `npm test`, o
 - Each new hand opens with animated shuffling, 18 two-tile stacks per side, three interactive dice, a dice-dependent wall break, stack dealing and exposed flower replacements. The opening can be skipped or resumed after refresh without re-dealing.
 - Flowers are exposed separately and replaced from the tail, including repeated flowers and kong replacement draws. Matching-seat flowers add one settlement fan each, but do not satisfy the minimum hand fan; no flower-set or flowerless bonus.
 - Sequential AI turns show the active player and named discard animation.
-- Eligible player 碰 / 明槓 / 食糊 claims pause indefinitely for a decision. Passing resumes the next turn; a win outranks meld claims.
+- Eligible player 上 / 碰 / 明槓 / 食糊 claims pause indefinitely for a decision. Passing resumes the next turn; a win outranks meld claims.
 - Own-turn 自摸 / 暗槓 / 加槓 choices pause until the player chooses or passes. Kongs draw a replacement from the wall's back; added kongs can be robbed by an eligible AI hand.
-- AI can win by self-draw or discard. This table uses one winner per discard, resolved in turn order after the discarder.
+- AI can chow, pung, declare exposed/concealed/added kongs, and win by self-draw or discard. Chow only claims the previous seat; win takes priority over pung/kong, then chow. Added kongs allow a robbing-win response, including a paused human decision. This table uses one winner per discard, resolved in turn order after the discarder.
 - Setup offers a virtual starting balance, stake presets, 雞糊 (zero-fan minimum) or the default three-fan minimum, and twenty possible AI names with a reroll button.
 - Settlement shows scoring patterns, each player's change and balance. Next hand preserves balances and opponents.
 
@@ -35,6 +35,8 @@ The live table uses the dynamic viewport height on phones and desktops. All 13�
 
 ## Remaining prototype limitations
 
-AI chow/pung/kong decisions and player chow are not connected. Full dealer/seat/round progression is not implemented; Next hand repeats the current round configuration. History, rankings and profile statistics remain example data. The manual fan calculator is a limited helper, separate from automatic settlement. Advanced AI strength has not been validated.
+Full dealer/seat/round progression is not implemented; Next hand repeats the current round configuration. History, rankings and profile statistics remain example data. The manual fan calculator is a limited helper, separate from automatic settlement. Advanced AI strength has not been validated.
 
 Optional synthesized sound effects cover shuffling, stacking, dice, dealing, drawing/discarding, flowers, pung/kong and wins. The setup switch and in-game mute button share a saved preference. Muting, opening a confirmation, skipping the opening, or hiding the page stops scheduled sounds. One reusable Web Audio context unlocks on a click/tap; unsupported or blocked audio never blocks gameplay. No sound downloads are required.
+
+Opponent bubbles show brief Cantonese reactions to thinking, melds, wins and dealing in. Exposed AI melds appear beside their seats. The compact flower summary opens a dialog with enlarged, named flower tiles grouped by player.

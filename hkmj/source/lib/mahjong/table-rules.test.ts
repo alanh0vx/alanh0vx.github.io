@@ -11,3 +11,8 @@ test('integer money conserves funds and caps payments at eight fan',()=>{assert.
 test('kong choices need a replacement and preserve distinct options',()=>{const hand=tiles(['東','東','東','東','中']);assert.equal(kongChoices(hand,[],1).length,1);assert.equal(kongChoices(hand,[],0).length,0);assert.equal(kongChoices(tiles(['中']),[tiles(['中','中','中'])],1)[0].meldIndex,0);});
 test('opponent selection has no duplicates even with repeated RNG values',()=>{assert.equal(new Set(pickNames(()=>0)).size,3);assert.equal(new Set(pickNames(()=>.999)).size,3);});
 test('bad saves safely reject without throwing',()=>{assert.equal(parseSave('{'),null);assert.equal(parseSave('{}'),null);});
+
+test('exposed chows score as sequences and cannot be upgraded to kongs',()=>{
+ const chow=tiles(['萬1','萬2','萬3']);const hand=tiles(['萬1','筒2','筒3','筒4','索4','索5','索6','索7','索8','索9','萬1']);
+ const score=scoreHand(hand,[chow]);assert(score);assert(score.patterns.some(p=>p.name==='平糊'));assert(!score.patterns.some(p=>p.name==='對對糊'));assert.equal(kongChoices(tiles(['萬1']),[chow],20).length,0);
+});
