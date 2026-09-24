@@ -60,7 +60,7 @@ export default function Home(){
  const [riverFit,setRiverFit]=useState({top:140,tile:18});
  useEffect(()=>{const board=tableElement.current;if(!board)return;
   const fit=()=>{const rect=board.getBoundingClientRect(),border=board.clientTop;const bounds=(selector:string)=>board.querySelector(selector)?.getBoundingClientRect();
-   const blockers=['.table-center','.north','.north .seat-public','.wall-north'].map(bounds).filter(Boolean) as DOMRect[];
+   const blockers=['.table-center','.north','.north .seat-public','.north .ai-bubble','.wall-north'].map(bounds).filter(Boolean) as DOMRect[];
    const top=Math.max(...blockers.map(r=>r.bottom-rect.top-border),60)+10;
    const west=bounds('.wall-west'),east=bounds('.wall-east');
    const width=Math.min(board.clientWidth*.54,east&&west?east.left-west.right-20:board.clientWidth*.54);
@@ -68,8 +68,8 @@ export default function Home(){
    const height=Math.max(20,board.clientHeight-top-14-28);
    const tile=Math.max(1,Math.min(32,(width-12-columns+1)/columns,(height-rows+1)/rows/1.4));
    setRiverFit(old=>Math.abs(old.top-top)<.5&&Math.abs(old.tile-tile)<.1?old:{top,tile});
-  };const observer=new ResizeObserver(fit);observer.observe(board);board.querySelectorAll('.north,.north .seat-public,.table-center,.wall-north').forEach(el=>observer.observe(el));fit();return ()=>observer.disconnect();
- },[started,view,discarded.length,aiMelds,flowers,hand.length,claimPending,table.result]);
+  };const observer=new ResizeObserver(fit);observer.observe(board);board.querySelectorAll('.north,.north .seat-public,.north .ai-bubble,.table-center,.wall-north').forEach(el=>observer.observe(el));fit();return ()=>observer.disconnect();
+ },[started,view,discarded.length,aiMelds,flowers,hand.length,claimPending,table.result,reactions]);
  const claimLock=useRef(false);
  const [lastPlay,setLastPlay]=useState<{tile:Tile;ai:number}|null>(null);
  const sequence=useRef(0),locked=useRef(false),handRow=useRef<HTMLDivElement>(null);

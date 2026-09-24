@@ -410,3 +410,18 @@ button:focus-visible { outline: 3px solid #d5a744; outline-offset: 3px; }
  .playing-shell .opponent.north .seat-public { grid-column: 3; grid-row: 1; }
  .playing-shell .river-tiles { grid-template-columns: repeat(var(--river-columns,12),minmax(0,32px)); }
 }
+
+/* North speaks beside the avatar; the concealed row below stays unobstructed.
+   Mobile keeps the bubble in its own grid row. */
+@media (min-width: 901px) {
+ .playing-shell .opponent.north .ai-bubble {
+  left: auto;
+  right: calc(100% + 12px);
+  top: 0;
+  bottom: auto;
+  transform: none;
+  max-width: min(190px, calc(50cqw - 130px));
+  overflow-wrap: anywhere;
+  border-radius: 12px 12px 2px 12px;
+ }
+}
