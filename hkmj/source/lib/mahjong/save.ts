@@ -39,7 +39,8 @@ export function parseSave(raw: string|null): GameSave|null {
   if(!Array.isArray(s.melds)||s.melds.length>4||typeof s.claimPending!=='boolean')return null;
   if(!s.melds.every(m=>Array.isArray(m)&&validMeld(m)))return null;
   if(s.version!==1||typeof s.started!=='boolean'||typeof s.busy!=='boolean'||typeof s.hints!=='boolean'||typeof s.sound!=='boolean')return null;
-  if(!['新手','熟手','雀聖'].includes(s.difficulty)||!['東圈','東南圈','一將'].includes(s.rounds)||!['隨機','東','南','西','北'].includes(s.seat))return null;
+  if(s.rounds==='一將')s.rounds='東南西北圈'; // 舊存檔遷移：一將 → 東南西北圈
+  if(!['新手','熟手','雀聖'].includes(s.difficulty)||!['東圈','東南圈','東南西北圈'].includes(s.rounds)||!['隨機','東','南','西','北'].includes(s.seat))return null;
   if(!['avatar','message','aiRead'].every(k=>typeof s[k as keyof GameSave]==='string')||!Number.isInteger(s.turn)||s.turn<1)return null;
   if(![null,0,1,2].includes(s.activeAI)||!Array.isArray(s.aiHands)||s.aiHands.length!==3)return null;
   const groups=[s.wall,s.hand,s.discarded,...s.aiHands,...s.melds,...s.aiMelds.flat(),...s.flowers];if(!groups.every(Array.isArray))return null;
