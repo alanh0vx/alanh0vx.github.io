@@ -61,9 +61,10 @@
 .last-play { grid-area: played; justify-self: center; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; max-width: 100%; padding: 3px 6px; border-radius: 8px; background: #09392ef2; color: #fff0bd; text-align: center; }
 .last-play > span { font-size: 12px; font-weight: 700; }
 .last-play .tile { width: 24px; height: 32px; min-height: 0; }
-.discard-pool.river-grid { grid-area: river; justify-self: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: min(100%,760px); min-width: 0; min-height: 0; height: 100%; container-type: size; padding: 10px 14px; border: 1px solid #ebdda033; border-radius: 12px; background: #092e2433; box-shadow: inset 0 0 40px #04231a55; color: #f5e9c6; cursor: pointer; }
+.discard-pool.river-grid { grid-area: river; justify-self: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: min(100%,900px); min-width: 0; min-height: 0; height: 100%; container-type: inline-size; padding: 10px 14px; border: 1px solid #ebdda033; border-radius: 12px; background: #092e2433; box-shadow: inset 0 0 40px #04231a55; color: #f5e9c6; cursor: pointer; overflow: hidden; }
 .river-caption { font-size: 12px; line-height: 1.4; }
-.river-tiles { display: grid; grid-template-columns: repeat(var(--river-columns,12),minmax(0,min(54px,calc((100cqh - 46px - var(--river-rows,1)*3px)/var(--river-rows,1)*5/7)))); justify-content: center; align-content: center; gap: 3px; width: 100%; }
+/* 依牌河闊度自動排列，牌張固定大小、每行盡量多張，唔會愈打愈細。 */
+.river-tiles { display: grid; grid-template-columns: repeat(auto-fill,clamp(26px,4.6cqi,42px)); justify-content: center; align-content: center; gap: 3px 4px; width: 100%; min-height: 0; }
 .river-tile { display: flex; width: 100%; min-width: 0; aspect-ratio: 5 / 7; overflow: hidden; background: #fff6d9; border-radius: 2px; border-bottom: 2px solid #bdac79; }
 .river-tile svg { display: block; width: 100%; height: 100%; min-height: 0; }
 .river-latest { outline: 2px solid #dfac43; outline-offset: -2px; background: #ffdf87; }
@@ -208,7 +209,7 @@
  .wall-west, .wall-east { height: 20px; min-height: 20px; gap: 1px; }
  .wall-west i, .wall-east i { width: 8px; flex-basis: 8px; height: 8px; border-bottom-width: 2px; }
  .river-caption { font-size: 9px; }
- .river-tiles { grid-template-columns: repeat(var(--river-columns,12),minmax(0,min(24px,calc((100cqh - 18px - var(--river-rows,1)*1px)/var(--river-rows,1)*5/7)))); }
+ .river-tiles { grid-template-columns: repeat(auto-fill,clamp(18px,4cqi,26px)); gap: 2px; }
 }
 
 .hand-dock .discard-button { background: #e5c571; color: #17322a; font-weight: 700; }

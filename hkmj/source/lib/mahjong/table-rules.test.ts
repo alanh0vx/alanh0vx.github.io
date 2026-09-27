@@ -25,9 +25,9 @@ test('screenshot hand with 234 dots completes on 4 bamboo but is below three fan
  const hand=tiles(['萬3','萬4','萬5','索4','索5','索6','索7','索7','索8','索9','筒2','筒3','筒4','索4']);
  const score=scoreWithFlowers(hand,[],false,'東',[{id:'梅',flower:0},{id:'菊',flower:2}],'東');
  assert(score);
- assert.equal(score.handFan,1);
+ assert.equal(score.handFan,2); // 平糊 1 + 正花梅 1，花牌計入起糊
  assert.equal(score.fan,2);
  assert.deepEqual(score.patterns.map(p=>p.name),['平糊','正花 梅']);
- assert.equal(eligible(score,false),false);
+ assert.equal(eligible(score,false),false); // 2 番仍未夠三番
  assert.equal(eligible(score,true),true);
 });

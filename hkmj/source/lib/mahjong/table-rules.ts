@@ -53,9 +53,12 @@ export function kongChoices(hand:Tile[],melds:Tile[][],wallSize:number){
 }
 export type TableSettings=DealerState & {paymentMode:'full'|'half';personalities:Personality[];banter:boolean;chicken:boolean;drawPass:boolean;baseCents:number;initialCents:number;balances:number[];names:string[];result:TableResult|null;ownPassed:boolean};
 export function defaultTable():TableSettings{return {...initialDealer(),paymentMode:'half',personalities:pickPersonalities(),banter:true,chicken:false,drawPass:false,baseCents:100,initialCents:100000,balances:[100000,100000,100000,100000],names:NAME_POOL.slice(0,3),result:null,ownPassed:false};}
-/** Flowers add settlement fan only; they do not bypass the chosen minimum hand fan. */
+/** 正花每張加一番、無花加一番，皆計入起糊番數。 */
 export function scoreWithFlowers(hand:Tile[],melds:Tile[][]=[],selfDrawn=false,seat='東',flowers:Tile[]=[],round='東'):HandScore|null{
  const score=scoreHand(hand,melds,selfDrawn,seat,round);if(!score)return null;
  const matching=flowers.filter(t=>t.flower!==undefined&&t.flower%4==='東南西北'.indexOf(seat));
- return {...score,handFan:score.fan,fan:score.fan+matching.length,patterns:[...score.patterns,...matching.map(t=>({name:`正花 ${['梅','蘭','菊','竹','春','夏','秋','冬'][t.flower!]}`,fan:1}))]};
+ const noFlower=flowers.length===0;
+ const extra=[...matching.map(t=>({name:`正花 ${['梅','蘭','菊','竹','春','夏','秋','冬'][t.flower!]}`,fan:1})),...(noFlower?[{name:'無花',fan:1}]:[])];
+ const total=score.fan+extra.reduce((n,p)=>n+p.fan,0);
+ return {...score,handFan:total,fan:total,patterns:[...score.patterns,...extra]};
 }

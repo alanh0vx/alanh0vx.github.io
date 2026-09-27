@@ -10,6 +10,6 @@ test('opening preserves 144 unique tiles, deals real stacks, resolves all flower
 test('consecutive flowers draw replacements from tail without consuming front tiles',()=>{
  const [first,second]=makeWall(()=>0),flowers=flowerTiles();const result=drawPlayable([flowers[0],first,second,flowers[1]]);assert.deepEqual(result.flowers,[flowers[0],flowers[1]]);assert.equal(result.tile,second);assert.deepEqual(result.wall,[first]);const empty=drawPlayable([flowers[0],flowers[1]],true);assert.equal(empty.tile,undefined);assert.equal(empty.wall.length,0);assert.equal(empty.flowers.length,2);
 });
-test('flower fan does not satisfy minimum and flowers cannot enter winning shapes',()=>{
- const pool=makeWall(()=>0);const keys=['萬1','萬2','萬3','筒2','筒3','筒4','索4','索5','索6','索8','索8','索8','西','西'];const hand=keys.map(k=>pool.splice(pool.findIndex(t=>(t.honor??`${t.suit}${t.n}`)===k),1)[0]);const score=scoreWithFlowers(hand,[],true,'東',[flowerTiles()[0],flowerTiles()[4]]);assert.equal(score?.fan,3);assert.equal(score?.handFan,1);assert(!eligible(score,false));assert(eligible(score,true));assert(!isWinningShape([...hand.slice(0,-1),flowerTiles()[0]]));
+test('flower fan counts toward minimum but flowers cannot enter winning shapes',()=>{
+ const pool=makeWall(()=>0);const keys=['萬1','萬2','萬3','筒2','筒3','筒4','索4','索5','索6','索8','索8','索8','西','西'];const hand=keys.map(k=>pool.splice(pool.findIndex(t=>(t.honor??`${t.suit}${t.n}`)===k),1)[0]);const score=scoreWithFlowers(hand,[],true,'東',[flowerTiles()[0],flowerTiles()[4]]);assert.equal(score?.fan,3);assert.equal(score?.handFan,3);assert(eligible(score,false));assert(eligible(score,true));assert(!isWinningShape([...hand.slice(0,-1),flowerTiles()[0]]));
 });
