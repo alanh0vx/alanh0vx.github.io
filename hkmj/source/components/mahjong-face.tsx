@@ -31,7 +31,6 @@ export function MahjongFace({ tile }: { tile: Face }) {
     drawing = n === 1 ? <g><Dot x={30} y={40} radius={23} color={green}/><Dot x={30} y={40} radius={12} color={red}/>{Array.from({length:12},(_,i)=><path key={i} d="M30 20v5" stroke={green} strokeWidth="2" transform={`rotate(${i*30} 30 40)`}/>)}</g> : positions[n].map(([x,y],i)=><Dot key={i} x={x} y={y} radius={n>=7?6.5:8} color={n===2?green:n===3?[green,red,ink][i]:n===5&&i===2?red:n===6&&i>=2?red:n===7&&i<3?green:n===9?[green,red,ink][Math.floor(i/3)]:ink}/>);
   } else if (tile.suit === '索') {
     if(n===1) drawing=<g stroke={green} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M31 19C12 22 14 49 31 52L22 72 36 59 43 68 38 47C49 34 42 22 31 19Z" fill="none"/><path d="M21 30C8 31 10 40 5 42L20 42M25 31C23 48 32 47 36 36M28 48L34 59M27 54L26 65" fill="none"/><path d="M27 18C27 9 38 8 41 17L48 21 39 23" fill="none"/><circle cx="36" cy="16" r="1.5" fill={ink} stroke="none"/><path d="M27 10Q34 5 40 9M29 33Q29 43 33 45" stroke={red} fill="none"/></g>;
-    else if(n===8) drawing=<g fill="none" stroke={green} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12v23l18-17 18 17V12M12 68V45l18 17 18-17v23"/></g>;
     else {
       const spots = n===3?[[30,17],[16,57],[44,57]]:n===7?[[30,13],[16,36],[30,36],[44,36],[16,62],[30,62],[44,62]]:positions[n];
       drawing=spots.map(([x,y],i)=><Bamboo key={i} x={x} y={y} color={(n===5&&i===2)||(n===7&&i===0)||(n===9&&i%3===1)?red:green}/>);

@@ -19,11 +19,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 type View='play'|'history'|'tutorial'|'ranking'|'profile'; type Suit='萬'|'筒'|'索';
 const suits:Suit[]=['萬','筒','索'], honors=['東','南','西','北','中','發','白'], avatars=['🐯','🦊','🐼','🐲','🦁','🐵','🐰','🦦'];
 function tileKey(t:Tile){return t.honor??`${t.suit}${t.n}`}
-function chooseAIDiscard(cards:Tile[],river:Tile[],level:string,turn:number,behind:boolean){
+function aiTargetSuit(cards:Tile[],melds:Tile[][]=[]){const c:Record<string,number>={'萬':0,'筒':0,'索':0};for(const t of [...cards,...melds.flat()])if(t.suit)c[t.suit]++;return (['萬','筒','索'] as const).reduce((a,b)=>c[b]>c[a]?b:a);}
+function chooseAIDiscard(cards:Tile[],river:Tile[],level:string,turn:number,behind:boolean,melds:Tile[][]=[],chicken=true){
  if(level==='新手')return Math.floor(Math.random()*cards.length);
  const seen=new Map<string,number>();river.forEach(t=>seen.set(tileKey(t),(seen.get(tileKey(t))??0)+1));
  const count=(t:Tile)=>cards.filter(x=>tileKey(x)===tileKey(t)).length;
- const score=cards.map((t,i)=>{let keep=0,danger=0;const same=count(t);if(same>1)keep+=same*3;if(t.honor){keep+=(seen.get(tileKey(t))??0)>1?-3:1}else{for(const d of [-2,-1,1,2])if(cards.some(x=>x.suit===t.suit&&x.n===t.n!+d))keep+=Math.abs(d)===1?2.4:1;const publicCount=river.filter(x=>x.suit===t.suit).length;danger+=(9-publicCount)*.12;if(t.n===1||t.n===9)danger-=.7}if((seen.get(tileKey(t))??0)>0)danger-=2.5;const defence=turn>8||!behind;let discardValue=-keep-(defence?danger*1.4:danger*.45);if(level==='雀聖'){const nextPlayerPressure=river.slice(-9).filter(x=>x.suit===t.suit).length<2; if(nextPlayerPressure&&turn>5)discardValue-=1.8;if(behind)discardValue+=keep<2?.8:0}return {i,v:discardValue}});return score.sort((a,b)=>b.v-a.v)[0].i
+ // 三番起糊：向混一色／清一色埋牌，優先打出唔同門嘅數字牌，留番同門及字牌做夠番。
+ const target=aiTargetSuit(cards,melds);
+ const score=cards.map((t,i)=>{let keep=0,danger=0;const same=count(t);if(same>1)keep+=same*3;if(t.honor){keep+=(seen.get(tileKey(t))??0)>1?-3:1}else{for(const d of [-2,-1,1,2])if(cards.some(x=>x.suit===t.suit&&x.n===t.n!+d))keep+=Math.abs(d)===1?2.4:1;const publicCount=river.filter(x=>x.suit===t.suit).length;danger+=(9-publicCount)*.12;if(t.n===1||t.n===9)danger-=.7}if((seen.get(tileKey(t))??0)>0)danger-=2.5;const defence=turn>8||!behind;let discardValue=-keep-(defence?danger*1.4:danger*.45);if(level==='雀聖'){const nextPlayerPressure=river.slice(-9).filter(x=>x.suit===t.suit).length<2; if(nextPlayerPressure&&turn>5)discardValue-=1.8;if(behind)discardValue+=keep<2?.8:0}
+  if(!chicken){if(t.suit&&t.suit!==target)discardValue+=6;else if(t.suit===target)discardValue-=3;else if(t.honor)discardValue-=same>=2?3:0.8;}
+  return {i,v:discardValue}});return score.sort((a,b)=>b.v-a.v)[0].i
 }
 function TileFace({tile,active,small,drawn,onClick}:{tile:Tile;active?:boolean;small?:boolean;drawn?:boolean;onClick?:()=>void}){return <button onClick={onClick} disabled={!onClick} className={`tile ${small?'tile-sm':''} ${active?'tile-active':''} ${drawn?'tile-drawn':''}`} aria-label={`${tile.flower!==undefined?FLOWER_NAMES[tile.flower]+'（花）':`${tile.n??''}${tile.suit??tile.honor}`}${drawn?'（新摸）':''}`}><MahjongFace tile={tile}/></button>}
 function Avatar({value,size='md'}:{value:string;size?:'sm'|'md'|'lg'}){return <span className={`avatar avatar-${size}`} aria-hidden="true">{value}</span>}
@@ -136,9 +141,10 @@ export default function Home(){
     const source=cursor.player,drop=river.at(-1)!;
     const wins=Array.from({length:3},(_,i)=>(source+i+1)%4).map(player=>({player,score:scoreWithFlowers([...(player===0?nextHand:updated[player-1]),drop],player===0?melds:exposed[player-1],false,player===0?currentSeat:opponents[player-1].seat,flowersRef.current[player])})).filter(w=>eligible(w.score,table.chicken)&&!(w.player===0&&skipHuman));
     if(wins[0]&&wins[0].player!==0){finishWin(wins[0].player,source,wins[0].score!,[...updated[wins[0].player-1],drop],exposed[wins[0].player-1],drop.id);return;}
-    const choices=Array.from({length:3},(_,i)=>(source+i+1)%4).flatMap(player=>{const cards=player===0?nextHand:updated[player-1],ms=player===0?melds:exposed[player-1];if(ms.length>=4)return [];const same=cards.filter(t=>tileKey(t)===tileKey(drop));return [...(same.length>=2?[{player,kind: same.length>=3&&nextWall.length?'kong':'pung',taken:same.slice(0,same.length>=3&&nextWall.length?3:2),priority:1}]:[]),...chowChoices(cards,drop,player,source).map(taken=>({player,kind:'chow',taken,priority:2}))];}).sort((a,b)=>a.priority-b.priority);
+    const choices=Array.from({length:3},(_,i)=>(source+i+1)%4).flatMap(player=>{const cards=player===0?nextHand:updated[player-1],ms=player===0?melds:exposed[player-1];if(ms.length>=4)return [];const same=cards.filter(t=>tileKey(t)===tileKey(drop));let opts=[...(same.length>=2?[{player,kind: same.length>=3&&nextWall.length?'kong':'pung',taken:same.slice(0,same.length>=3&&nextWall.length?3:2),priority:1}]:[]),...chowChoices(cards,drop,player,source).map(taken=>({player,kind:'chow',taken,priority:2}))];if(player!==0&&!table.chicken){const dominant=aiTargetSuit(cards,ms);opts=opts.filter(o=>o.kind==='chow'?drop.suit===dominant:(!!drop.honor||drop.suit===dominant));}return opts;}).sort((a,b)=>a.priority-b.priority);
     const humanChoices=choices.filter(c=>c.player===0),botChoice=choices.find(c=>c.player!==0);
-    if(source!==0&&!skipHuman&&(wins[0]?.player===0||(!wins.length&&humanChoices.some(c=>!botChoice||c.priority<botChoice.priority||(c.priority===botChoice.priority&&(4-source)%4<(botChoice.player-source+4)%4))))){setActiveAI(source-1);setLastPlay({tile:drop,ai:source-1});setClaimPending(true);claimLock.current=false;setMessage(`${opponents[source-1].name} 出牌，等你決定上／碰／槓／食糊或過`);return;}
+    // 玩家對上家打出的同門順子（上）同任何一家嘅碰／槓，永遠有得揀先：只要玩家可以叫牌或食糊，就開叫牌窗，玩家過咗之後電腦先按次序叫。
+    if(source!==0&&!skipHuman&&(wins[0]?.player===0||humanChoices.length>0)){setActiveAI(source-1);setLastPlay({tile:drop,ai:source-1});setClaimPending(true);claimLock.current=false;setMessage(`${opponents[source-1].name} 出牌，等你決定上／碰／槓／食糊或過`);return;}
     skipHuman=false;
     if(botChoice){const {player,kind,taken}=botChoice,ai=player-1,ids=new Set(taken.map(t=>t.id));updated[ai]=updated[ai].filter(t=>!ids.has(t.id));exposed[ai].push(sortHand([...taken,drop]));river.pop();setLastPlay(null);setActiveAI(ai);react(ai,'meld',`${kind==='chow'?'上':kind==='kong'?'槓':'碰'}！ 😏`);setMessage(`${opponents[ai].name} ${kind==='chow'?'上':kind==='kong'?'槓':'碰'}，${kind==='kong'?'補牌後':'唔使摸牌，'}出牌`);if(sound)playSound(kind==='kong'?'kong':'pung');if(kind==='kong'){const tile=takeDraw(player,nextWall,true);if(tile)updated[ai].push(tile);else{commit();endDraw();setBusy(false);return;}}cursor={phase:'discard',player,drawn:kind==='kong'};commit();continue;}
     cursor={phase:'draw',player:(source+1)%4};setLastPlay(null);setActiveAI(null);continue;
@@ -152,7 +158,7 @@ export default function Home(){
    const kong=kongChoices(updated[ai],exposed[ai],nextWall.length)[0];
    if(kong&&kong.meldIndex>=0){cursor={phase:'rob',player,tileId:kong.tile.id};react(ai,'meld','加槓！ ✋');commit();continue;}
    if(kong){cursor={phase:'discard',player,drawn:true};const taken=kong.meldIndex>=0?[kong.tile]:updated[ai].filter(t=>tileKey(t)===tileKey(kong.tile));const ids=new Set(taken.map(t=>t.id));updated[ai]=updated[ai].filter(t=>!ids.has(t.id));if(kong.meldIndex>=0)exposed[ai][kong.meldIndex].push(kong.tile);else exposed[ai].push(taken);const tile=takeDraw(player,nextWall,true);if(tile)updated[ai].push(tile);react(ai,'meld','槓！補隻靚牌先！ 😄');setMessage(`${opponents[ai].name} 槓，從牌尾補牌`);if(sound)playSound('kong');commit();if(!tile){endDraw();setBusy(false);return;}continue;}
-   const idx=chooseAIDiscard(updated[ai],river,difficulty,turn,opponents[ai].score<table.balances[0]),drop=updated[ai].splice(idx,1)[0];river.push(drop);setLastPlay({tile:drop,ai});setMessage(`${opponents[ai].name} 打出 ${drop.n??''}${drop.suit??drop.honor}`);setReactions(r=>({...r,[ai]:''}));if(sound)playSound('tile');cursor={phase:'claims',player};commit();
+   const idx=chooseAIDiscard(updated[ai],river,difficulty,turn,opponents[ai].score<table.balances[0],exposed[ai],table.chicken),drop=updated[ai].splice(idx,1)[0];river.push(drop);setLastPlay({tile:drop,ai});setMessage(`${opponents[ai].name} 打出 ${drop.n??''}${drop.suit??drop.honor}`);setReactions(r=>({...r,[ai]:''}));if(sound)playSound('tile');cursor={phase:'claims',player};commit();
   }
  }
 
@@ -170,7 +176,7 @@ export default function Home(){
  const canIdleChat=ready&&started&&view==='play'&&!opening&&!busy&&!table.result&&!savePrompt&&!leavePrompt&&hand.length===14-melds.length*3&&table.banter;
  useEffect(()=>{if(!canIdleChat)return;let elapsed=0,count=0;const timer=setInterval(()=>{if(document.hidden||document.querySelector('[role="dialog"]'))return;elapsed++;if((elapsed===20||elapsed===50||elapsed===90)&&count<3){react((turn+count)%3,'nudge');count++;}},1000);return ()=>clearInterval(timer);},[canIdleChat,hand.map(t=>t.id).join(','),turn]);
  const robbing=flow?.phase==='rob';
- const chows=lastPlay&&!robbing&&!aiHands.some((h,i)=>i!==lastPlay.ai&&h.filter(t=>tileKey(t)===tileKey(lastPlay.tile)).length>=2)?chowChoices(hand,lastPlay.tile,0,lastPlay.ai+1):[];
+ const chows=lastPlay&&!robbing?chowChoices(hand,lastPlay.tile,0,lastPlay.ai+1):[];
  const matches=lastPlay?hand.filter(t=>tileKey(t)===tileKey(lastPlay.tile)):[];
  function finishWin(winner:number,discarder:number|null,score:HandScore,winningHand:Tile[]=hand,winningMelds:Tile[][]=melds,winningTileId:string|null|undefined=drawnId){
   const reveal={hand:sortHand([...winningHand]),melds:winningMelds.map(m=>[...m]),flowers:[...flowersRef.current[winner]],winningTileId:winningTileId??null};
