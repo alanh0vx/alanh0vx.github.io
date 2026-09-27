@@ -51,8 +51,8 @@ export function kongChoices(hand:Tile[],melds:Tile[][],wallSize:number){
  if(meldIndex>=0||hand.filter(t=>tileIndex(t)===tileIndex(tile)).length===4)choices.push({tile,meldIndex});}
  return choices;
 }
-export type TableSettings=DealerState & {paymentMode:'full'|'half';personalities:Personality[];banter:boolean;chicken:boolean;baseCents:number;initialCents:number;balances:number[];names:string[];result:TableResult|null;ownPassed:boolean};
-export function defaultTable():TableSettings{return {...initialDealer(),paymentMode:'half',personalities:pickPersonalities(),banter:true,chicken:false,baseCents:100,initialCents:100000,balances:[100000,100000,100000,100000],names:NAME_POOL.slice(0,3),result:null,ownPassed:false};}
+export type TableSettings=DealerState & {paymentMode:'full'|'half';personalities:Personality[];banter:boolean;chicken:boolean;drawPass:boolean;baseCents:number;initialCents:number;balances:number[];names:string[];result:TableResult|null;ownPassed:boolean};
+export function defaultTable():TableSettings{return {...initialDealer(),paymentMode:'half',personalities:pickPersonalities(),banter:true,chicken:false,drawPass:false,baseCents:100,initialCents:100000,balances:[100000,100000,100000,100000],names:NAME_POOL.slice(0,3),result:null,ownPassed:false};}
 /** Flowers add settlement fan only; they do not bypass the chosen minimum hand fan. */
 export function scoreWithFlowers(hand:Tile[],melds:Tile[][]=[],selfDrawn=false,seat='東',flowers:Tile[]=[],round='東'):HandScore|null{
  const score=scoreHand(hand,melds,selfDrawn,seat,round);if(!score)return null;

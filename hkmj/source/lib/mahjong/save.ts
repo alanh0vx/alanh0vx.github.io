@@ -29,9 +29,9 @@ export function parseSave(raw: string|null): GameSave|null {
   s.table??=defaultTable();
   const t=s.table;
   t.paymentMode??='half';if(!['full','half'].includes(t.paymentMode))return null;
-  t.dealer??=0;t.roundIndex??=0;t.handIndex??=0;t.repeats??=0;t.personalities??=[...PERSONALITIES];t.banter??=true;
+  t.dealer??=0;t.roundIndex??=0;t.handIndex??=0;t.repeats??=0;t.personalities??=[...PERSONALITIES];t.banter??=true;t.drawPass??=false;
   if(![t.dealer,t.handIndex].every(n=>Number.isInteger(n)&&n>=0&&n<4)||!Number.isInteger(t.roundIndex)||t.roundIndex<0||t.roundIndex>3||!Number.isInteger(t.repeats)||t.repeats<0||typeof t.banter!=='boolean'||!Array.isArray(t.personalities)||t.personalities.length!==3||!t.personalities.every(p=>PERSONALITIES.includes(p)))return null;
-  if(typeof t.chicken!=='boolean'||typeof t.ownPassed!=='boolean'||![25,50,100,200,500].includes(t.baseCents)||![10000,50000,100000,500000].includes(t.initialCents))return null;
+  if(typeof t.chicken!=='boolean'||typeof t.drawPass!=='boolean'||typeof t.ownPassed!=='boolean'||![25,50,100,200,500].includes(t.baseCents)||![10000,50000,100000,500000].includes(t.initialCents))return null;
   if(!Array.isArray(t.balances)||t.balances.length!==4||!t.balances.every(Number.isSafeInteger)||t.balances.reduce((a,b)=>a+b,0)!==t.initialCents*4)return null;
   if(!Array.isArray(t.names)||t.names.length!==3||new Set(t.names).size!==3||!t.names.every(n=>typeof n==='string'&&n.length>0&&n.length<30))return null;
   if(t.result&&(![null,0,1,2,3].includes(t.result.winner)||typeof t.result.selfDrawn!=='boolean'||typeof t.result.description!=='string'||!Array.isArray(t.result.changes)||t.result.changes.length!==4||!t.result.changes.every(Number.isSafeInteger)||t.result.changes.reduce((a,b)=>a+b,0)!==0||!Number.isInteger(t.result.score?.fan)||!Array.isArray(t.result.score?.patterns)))return null;
