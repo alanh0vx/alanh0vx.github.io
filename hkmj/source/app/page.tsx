@@ -5,7 +5,7 @@ import { OpeningSequence } from '@/components/opening-sequence';
 import { drawPlayable, prepareOpening, FLOWER_NAMES, type OpeningState } from '@/lib/mahjong/opening';
 import { MahjongFace } from '@/components/mahjong-face';
 import { parseSave, SAVE_KEY } from '@/lib/mahjong/save';
-import { defaultTable, eligible, kongChoices, pickNames, scoreWithFlowers as evaluateHand, settle, type HandScore } from '@/lib/mahjong/table-rules';
+import { defaultTable, eligible, kongChoices, pickNames, scoreWithFlowers as evaluateHand, settle, type HandScore, type TableResult } from '@/lib/mahjong/table-rules';
 import { chowChoices, isChow, type Flow } from '@/lib/mahjong/claims';
 import { advanceDealer, initialDealer, seatWind, roundLimit } from '@/lib/mahjong/dealer';
 import { personalityLine, pickPersonalities } from '@/lib/mahjong/personality';
@@ -19,6 +19,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 type View='play'|'history'|'tutorial'|'ranking'|'profile'; type Suit='萬'|'筒'|'索';
 const suits:Suit[]=['萬','筒','索'], honors=['東','南','西','北','中','發','白'], avatars=['🐯','🦊','🐼','🐲','🦁','🐵','🐰','🦦'];
 function tileKey(t:Tile){return t.honor??`${t.suit}${t.n}`}
+const HISTORY_KEY='hkmj.history.v1';
+type HistoryEntry={at:number;round:string;winner:string|null;selfDrawn:boolean;discarder:string|null;tile:{suit?:Suit;n?:number;honor?:string}|null;fan:number;yourChange:number};
+function loadHistory():HistoryEntry[]{try{const raw=localStorage.getItem(HISTORY_KEY);const a=raw?JSON.parse(raw):[];return Array.isArray(a)?a.slice(0,40):[];}catch{return [];}}
+function historyTime(at:number){const d=new Date(at),now=new Date();const hm=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return (d.toDateString()===now.toDateString()?'今日':`${d.getMonth()+1}月${d.getDate()}日`)+' '+hm;}
 function aiTargetSuit(cards:Tile[],melds:Tile[][]=[]){const c:Record<string,number>={'萬':0,'筒':0,'索':0};for(const t of [...cards,...melds.flat()])if(t.suit)c[t.suit]++;return (['萬','筒','索'] as const).reduce((a,b)=>c[b]>c[a]?b:a);}
 /** 三番起糊 AI 揀邊條路：對子多就做對對糊，一門集中就做混一色／清一色。已上牌就唔做得對對糊。 */
 function aiPlan(cards:Tile[],melds:Tile[][]=[]):'flush'|'pungs'{
@@ -82,12 +86,23 @@ export default function Home(){
  const [fan,setFan]=useState<Record<string,boolean>>({selfDrawn:true,allChows:false,dragon:false,clean:false});
  const [ready,setReady]=useState(false),[saveError,setSaveError]=useState(false);
  const resume=useRef(false);
+ const [history,setHistory]=useState<HistoryEntry[]>([]);
+ const recordedResult=useRef<TableResult|null>(null);
+ useEffect(()=>{setHistory(loadHistory());},[]);
  useEffect(()=>{
   try {const saved=parseSave(localStorage.getItem(SAVE_KEY));if(saved){
+   recordedResult.current=saved.table.result; // 已存檔嘅結果唔再重複記入戰績
    setAiMelds(saved.aiMelds);setFlow(saved.flow);setFlowers(saved.flowers);flowersRef.current=saved.flowers;setOpening(saved.opening);setTable(saved.table);setMelds(saved.melds);setClaimPending(saved.claimPending);setStarted(saved.started);setWall(saved.wall);setHand(saved.hand);setAiHands(saved.aiHands);setDiscarded(saved.discarded);setTurn(saved.turn);setDrawnId(saved.drawnId);setBusy(saved.busy);setActiveAI(saved.activeAI);setLastPlay(saved.lastPlay);
    setDifficulty(saved.difficulty);setRounds(saved.rounds);setSeat(saved.seat);setHints(saved.hints);setSound(saved.sound);setAvatar(saved.avatar);setMessage(saved.message);setAiRead(saved.aiRead);resume.current=saved.started&&saved.busy&&!saved.claimPending&&!saved.table.result;
   }}catch{setSaveError(true);}setReady(true);
  },[]);
+ useEffect(()=>{
+  const r=table.result;if(!ready||!r||recordedResult.current===r)return;recordedResult.current=r;
+  const nameOf=(p:number|null|undefined)=>p===null||p===undefined?null:p===0?'你':table.names[p-1];
+  const won=r.winner!==null,tile=won&&r.reveal?r.reveal.hand.find(t=>t.id===r.reveal!.winningTileId):null;
+  const entry:HistoryEntry={at:Date.now(),round:roundLabel,winner:nameOf(r.winner),selfDrawn:r.selfDrawn,discarder:r.selfDrawn?null:nameOf(r.discarder),tile:tile?{suit:tile.suit,n:tile.n,honor:tile.honor}:null,fan:r.score.fan,yourChange:r.changes[0]};
+  setHistory(prev=>{const next=[entry,...prev].slice(0,40);try{localStorage.setItem(HISTORY_KEY,JSON.stringify(next));}catch{}return next;});
+ },[ready,table.result]);
  useEffect(()=>{
   if(!ready||preserveSave.current)return;
   saveCurrent();
@@ -192,7 +207,7 @@ export default function Home(){
   const reveal={hand:sortHand([...winningHand]),melds:winningMelds.map(m=>[...m]),flowers:[...flowersRef.current[winner]],winningTileId:winningTileId??null};
   setFlow(null);if(winner>0)react(winner-1,'win');if(discarder!==null&&discarder>0)react(discarder-1,'lose');if(sound)playSound('win');sequence.current++;locked.current=true;setBusy(false);setClaimPending(false);setActiveAI(null);setLastPlay(null);setSavedNotice(false);
   const changes=settle(winner,discarder,score.fan,table.baseCents,table.paymentMode),description=`${winner===0?'你':opponents[winner-1].name}${discarder===null?'自摸':'食糊'} · ${score.fan} 番`;
-  setTable(t=>t.result?t:{...t,balances:t.balances.map((v,i)=>v+changes[i]),result:{winner,selfDrawn:discarder===null,score,changes,description,reveal}});setMessage(description);
+  setTable(t=>t.result?t:{...t,balances:t.balances.map((v,i)=>v+changes[i]),result:{winner,selfDrawn:discarder===null,discarder,score,changes,description,reveal}});setMessage(description);
  }
  function decideClaim(kind:'chow'|'pung'|'kong'|'win'|'pass',chowIndex=0){
   if(opening||dialogPaused.current||!claimPending||!lastPlay||claimLock.current)return;
@@ -245,7 +260,8 @@ export default function Home(){
  {blockedHint&&!claimPending&&!ownDecision&&<div className="claim-choice" role="group" aria-label="食糊提示">{blockedHint}</div>}
  {table.result&&<div className="hand-result" role="status"><h2>{table.result.description}</h2>{table.result.winner!==null&&<p className="winner-total">贏得 {money(table.result.changes[table.result.winner])}</p>}{table.result.reveal&&<section className="winning-reveal" aria-label="食糊牌攤開"><b>食糊手牌 · 金框為{table.result.selfDrawn?'自摸':'食糊'}牌</b><div className="winning-tiles">{table.result.reveal.hand.map(tile=><span key={tile.id} className={tile.id===table.result!.reveal!.winningTileId?'winning-tile':''}><TileFace tile={tile} small/></span>)}</div>{table.result.reveal.melds.length>0&&<><b>已上／碰／槓</b><div className="winning-melds">{table.result.reveal.melds.map((group,i)=><div className="winning-tiles" key={i}>{group.map(tile=><TileFace key={tile.id} tile={tile} small/>)}</div>)}</div></>}{table.result.reveal.flowers.length>0&&<><b>花牌</b><div className="winning-tiles">{table.result.reveal.flowers.map(tile=><TileFace key={tile.id} tile={tile} small/>)}</div></>}</section>}<p>{table.result.score.patterns.map(p=>`${p.name} ${p.fan}番`).join(' · ')}</p><div className="result-balances">{['你',...table.names].map((name,i)=><div key={name}><b>{name}</b><span>{table.result!.changes[i]>=0?'+':''}{money(table.result!.changes[i])}</span><strong>餘額 {money(table.balances[i])}</strong></div>)}</div><p className="dealer-next">{matchOver?'本場完結':nextDealer.dealer===table.dealer?`${dealerName}冧莊 · 連莊 ${nextDealer.repeats}`:`輪莊：${nextDealer.dealer===0?'你':table.names[nextDealer.dealer-1]}做莊`}</p><Button className="claim-button" onClick={()=>startGame(true)}>{matchOver?'再開一場 · 保留本錢':'下一局 · 保留本錢'}</Button></div>}
  {melds.length>0&&<div className="meld-row" aria-label="已叫牌">{melds.map((group,i)=><div className="meld-group" key={i}><span>{group.length===4?'槓':isChow(group)?'上':'碰'}</span>{group.map(tile=><TileFace key={tile.id} tile={tile} small/>)}</div>)}</div>}<div className={`hand-row ${opening?'dealing-hand':''}`} ref={handRow} aria-busy={busy}>{hand.map((tile,i)=><TileFace key={tile.id} tile={tile} active={!busy&&(selectedTile===tile.id||(!selectedTile&&hints&&i===bestDiscard))} drawn={tile.id===drawnId} onClick={!opening&&!busy&&!table.result&&!ownDecision&&hand.length===14-melds.length*3?()=>setSelectedTile(tile.id):undefined}/>)}</div><div className="action-row"><span>{table.result?'本局已完結':claimPending||ownDecision?'等你決定叫牌或過':busy?'等候牌友出牌…':selectedTile?'已選牌，確認後打出':'點牌選取，再按出牌'}</span><div>{selectedTile&&hand.find(t=>t.id===selectedTile)&&<span className="selected-preview"><MahjongFace tile={hand.find(t=>t.id===selectedTile)!}/></span>}<Button className="discard-button" disabled={busy||!!opening||!!table.result||ownDecision||!hand.some(t=>t.id===selectedTile)} onClick={()=>{const index=hand.findIndex(t=>t.id===selectedTile);if(index>=0)void discard(index);}}>出牌</Button></div></div></div></section>}
- {view==='history'&&<SimplePage icon={<History/>} title="對局戰績" subtitle="近十場 · 6 勝 4 負"><div className="stat-grid"><Stat n="+186" label="總分"/><Stat n="32%" label="自摸率"/><Stat n="4.8" label="平均番數"/></div><div className="list-card">{[['今日 21:18','東南圈','第 1 名','+48'],['昨日 23:04','東圈','第 3 名','-12'],['9月21日 20:46','東南圈','第 2 名','+8']].map(r=><div className="history-row" key={r[0]}><span><b>{r[0]}</b><small>{r[1]} · 熟手</small></span><span>{r[2]}</span><strong className={r[3].startsWith('+')?'win':''}>{r[3]}</strong><ChevronRight/></div>)}</div></SimplePage>}
+ {view==='history'&&(()=>{const myWins=history.filter(h=>h.winner==='你'),myLosses=history.filter(h=>h.winner!==null&&h.winner!=='你'),net=history.reduce((s,h)=>s+h.yourChange,0),selfRate=myWins.length?Math.round(myWins.filter(h=>h.selfDrawn).length/myWins.length*100):0,avgFan=myWins.length?myWins.reduce((s,h)=>s+h.fan,0)/myWins.length:0,signed=(c:number)=>`${c>=0?'+':'−'}${money(Math.abs(c))}`;
+  return <SimplePage icon={<History/>} title="對局戰績" subtitle={history.length?`近 ${history.length} 局 · ${myWins.length} 勝 ${myLosses.length} 負`:'開枱贏一鋪，戰績就會記低'}><div className="stat-grid"><Stat n={signed(net)} label="總盈虧"/><Stat n={`${selfRate}%`} label="自摸率"/><Stat n={myWins.length?avgFan.toFixed(1):'—'} label="平均番數"/></div><div className="list-card">{history.length===0?<div className="history-empty">仲未有對局紀錄，去對局打返鋪先！</div>:history.map((h,i)=><div className="history-row" key={`${h.at}-${i}`}><span><b>{historyTime(h.at)}</b><small>{h.round} · {h.winner===null?'流局':`${h.winner}${h.selfDrawn?'自摸':'食糊'}`}</small></span><span className="history-win-tile">{h.tile?<><span className="tile tile-sm"><MahjongFace tile={h.tile}/></span><small>{h.selfDrawn?'自摸':`銃：${h.discarder??'—'}`}</small></>:<small className="muted">流局</small>}</span><span className="history-fan">{h.winner===null?'—':`${h.fan} 番`}</span><strong className={h.yourChange>=0?'win':''}>{signed(h.yourChange)}</strong></div>)}</div></SimplePage>;})()}
  {view==='tutorial'&&<SimplePage icon={<BookOpen/>} title="港雀學堂" subtitle="由開門到計番，逐步學識香港麻雀"><div className="lesson-grid">{[['01','認牌與執位','萬、筒、索同番子'],['02','食碰槓規則','幾時可以叫牌'],['03','食糊入門','四組一對，三番起糊'],['04','攻守判斷','睇牌河、避銃牌']].map((x,i)=><button className="lesson" key={x[0]}><span>{x[0]}</span><div><b>{x[1]}</b><small>{x[2]}</small></div><em>{i===0?'已完成':i===1?'學到一半':'未開始'}</em><ChevronRight/></button>)}</div></SimplePage>}
  {view==='ranking'&&<SimplePage icon={<ChartNoAxesColumn/>} title="本週排名" subtitle="銀雀組 · 週一重置"><div className="podium"><div><Avatar value="🦊" size="lg"/><b>2</b><strong>醒目娟</strong><small>1,462</small></div><div className="first"><Avatar value="🐲" size="lg"/><b>1</b><strong>十三么</strong><small>1,588</small></div><div><Avatar value={avatar} size="lg"/><b>3</b><strong>麻雀仔</strong><small>1,284</small></div></div><div className="rank-note"><Medal/>你距離第二名仲差 <b>178 分</b></div></SimplePage>}
  {view==='profile'&&<SimplePage icon={<UserRound/>} title="玩家檔案" subtitle="麻雀仔 · 加入第 128 日"><div className="profile-panel"><div className="avatar-picker"><Avatar value={avatar} size="lg"/><div><h3>揀個頭像</h3><p>每局都可以轉新形象。</p></div></div><div className="avatar-options">{avatars.map(a=><button key={a} className={avatar===a?'chosen':''} onClick={()=>setAvatar(a)}><Avatar value={a}/></button>)}<button onClick={()=>setAvatar(avatars[Math.floor(Math.random()*avatars.length)])}><RotateCcw/>隨機</button></div><div className="profile-stats"><Stat n="186" label="完成對局"/><Stat n="42" label="食糊次數"/><Stat n="8" label="最高連勝"/></div></div></SimplePage>}</main>}
